@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 function Page() {
   const router = useRouter();
   const { data: session, status } = useSession({
@@ -15,6 +16,21 @@ function Page() {
     const checkSession = async () => {
       if (status === "loading") {
         return;
+      }
+
+      if (status === "authenticated") {
+        try {
+          const response = await axios.post("/api/user/add", {
+            email: session?.user?.email,
+            name: session?.user?.name,
+          });
+
+          const data = response.data;
+
+          console.log(data);
+        } catch (err) {
+          console.error(err);
+        }
       }
     };
 
