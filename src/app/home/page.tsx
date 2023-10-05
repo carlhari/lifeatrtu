@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -20,10 +20,14 @@ function Page() {
 
       if (status === "authenticated") {
         try {
-          const response = await axios.post("/api/user/add", {
-            email: session?.user?.email,
-            name: session?.user?.name,
-          });
+          const response = await axios.post(
+            "/api/user/add",
+            {
+              email: session?.user?.email,
+              name: session?.user?.name,
+            },
+            { withCredentials: true }
+          );
 
           const data = response.data;
 
@@ -38,19 +42,25 @@ function Page() {
   }, [session, status, router]);
 
   return (
-    <div className="flex w-full items-center justify-between px-12 py-6">
-      <div className="cursor-default">
-        Hello, {session?.user ? `${session.user.name}` : "Loading.."}
-      </div>
+    <>
+      {session ? (
+        <div className="flex w-full items-center justify-between px-12 py-6">
+          <div className="cursor-default">
+            Hello, {session?.user ? `${session.user.name}` : "Loading.."}
+          </div>
 
-      <div className="flex items-center gap-5">
-        <button type="button">Add Post</button>
+          <div className="flex items-center gap-5">
+            <button type="button">Add Post</button>
 
-        <button type="button" onClick={() => signOut({ callbackUrl: "/" })}>
-          Logout
-        </button>
-      </div>
-    </div>
+            <button type="button" onClick={() => signOut({ callbackUrl: "/" })}>
+              Logout
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>Loading</div>
+      )}
+    </>
   );
 }
 
