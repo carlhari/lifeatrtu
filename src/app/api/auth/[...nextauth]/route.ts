@@ -1,7 +1,7 @@
 import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 
-export const handler = NextAuth({
+const handler = NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_ID ?? "",
@@ -20,3 +20,5 @@ export const handler = NextAuth({
     maxAge: 60 * 60 * 24,
   },
 });
+
+export { handler as GET, handler as POST };
