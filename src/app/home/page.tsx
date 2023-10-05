@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import Navigation from "../components/Navigation";
+
 function Page() {
   const router = useRouter();
   const { data: session, status } = useSession({
@@ -44,19 +46,7 @@ function Page() {
   return (
     <>
       {session ? (
-        <div className="flex w-full items-center justify-between px-12 py-6">
-          <div className="cursor-default">
-            Hello, {session?.user ? `${session.user.name}` : "Loading.."}
-          </div>
-
-          <div className="flex items-center gap-5">
-            <button type="button">Add Post</button>
-
-            <button type="button" onClick={() => signOut({ callbackUrl: "/" })}>
-              Logout
-            </button>
-          </div>
-        </div>
+        <Navigation name={session.user?.name ?? null} />
       ) : (
         <div>Loading</div>
       )}

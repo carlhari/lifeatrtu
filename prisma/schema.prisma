@@ -16,7 +16,7 @@ model User {
 }
 
 model Post {
-  id        String       @id @default(uuid()) @map("_id") @db.ObjectId
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   
   user      User      @relation(fields: [userId], references: [id])
   content   String
@@ -30,7 +30,7 @@ model Post {
 }
 
 model Comment {
-  id      String       @id @default(uuid()) @map("_id") @db.ObjectId
+  id      String       @id @default(auto()) @map("_id") @db.ObjectId
   content String
   postId  String  @db.ObjectId
   post    Post     @relation(fields: [postId], references: [id])
@@ -39,7 +39,7 @@ model Comment {
 }
 
 model Like {
-  id      String       @id @default(uuid()) @map("_id") @db.ObjectId
+  id      String       @id @default(auto()) @map("_id") @db.ObjectId
   postId  String  @db.ObjectId
   post    Post     @relation(fields: [postId], references: [id])
   userId  String
