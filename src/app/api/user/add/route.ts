@@ -1,38 +1,44 @@
-import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/prismaConfig";
 import { UserData } from "@/types";
 
-export async function POST(request: NextRequest) {
-  const { email, name }: UserData = await request.json();
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method === "POST") {
+    try {
+      const { email, name }: UserData = req.body;
 
-  try {
-    const existing = await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
-
-    if (!existing) {
-      await prisma.user.create({
-        data: {
+      const existing = await prisma.user.findUnique({
+        where: {
           email: email,
-          name: name,
         },
       });
 
-      return NextResponse.json({
-        success: true,
-        message: "Added Successfully in database",
-      });
-    } else {
-      return NextResponse.json({
-        success: false,
-        message: "User with this email already exists",
-      });
+      if (!existing) {
+        await prisma.user.create({
+          data: {
+            email: email,
+            name: name,
+          },
+        });
+
+        res.json({
+          success: true,
+          message: "Added Successfully in the database",
+        });
+      } else {
+        res.json({
+          success: false,
+          message: "User with this email already exists",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: "An error occurred" });
     }
-  } catch (err) {
-    console.error(err);
-    throw new Error("Error Occured");
+  } else {
+    res.status(405).json({ success: false, message: "Method not allowed" });
   }
 }
