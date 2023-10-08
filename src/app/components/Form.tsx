@@ -2,7 +2,7 @@ import { FormProps, DataForm } from "@/types";
 import axios from "axios";
 import React, { ChangeEvent, useState, useRef } from "react";
 
-const Form: React.FC<FormProps> = ({ mode, initialData, setOpen }) => {
+const Form: React.FC<FormProps> = ({ mode, initialData }) => {
   const [formData, setFormData] = useState<DataForm>(initialData);
 
   //const [currentImg, setImg] = useState<string | null>(formData.image ?? null);
@@ -79,74 +79,85 @@ const Form: React.FC<FormProps> = ({ mode, initialData, setOpen }) => {
   };
 
   const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (mode === "add") {
       const response = await axios.post("/api/post/add", { formData });
       const data = response.data;
-
-      console.log(data);
-
-      if (data.success) {
-        setOpen(false);
-      }
     }
+
+    if (mode === "edit") {
+      const response = await axios.post("/api/post/edit", {
+        formData: formData,
+        email: formData.user.email,
+      });
+
+      const data = response.data;
+    }
+
+    setFormData(initialData);
+    RemovePhoto();
   };
 
-  console.log(formData);
   return (
-    <div className="w-full h-screen flex items-center justify-center fixed top-0 left-0 z-50 bg-slate-500/80">
-      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-        {imgError && <p className="text-red-500">{imgError}</p>}
-        <p>{mode === "add" ? "Add FeedBack" : "Edit Post"}</p>
-        <button type="button" onClick={() => setOpen(false)}>
-          Close
-        </button>
+    <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+      {imgError && <p className="text-red-500">{imgError}</p>}
+      <p>{mode === "add" ? "Add FeedBack" : "Edit Post"}</p>
 
+      <input
+        type="text"
+        name="title"
+        value={formData.title}
+        placeholder="title"
+        onChange={handleChange}
+        required
+      />
+
+      <textarea
+        placeholder="Let your voice be heard."
+        name="content"
+        value={formData.content}
+        onChange={handleChange}
+        required
+      />
+
+      <select
+        onChange={handleChange}
+        value={formData.concern}
+        name="concern"
+        required
+      >
+        <option value="">Please Select</option>
+        <option value="facility">Facility</option>
+        <option value="student">Student</option>
+        <option value="professor">Professor</option>
+        <option value="etc">ETC</option>
+      </select>
+
+      <div>
+        <p>Post as Anonymous? </p>
         <input
-          type="text"
-          name="title"
-          placeholder="title"
-          onChange={handleChange}
-          required
+          type="checkbox"
+          name="postAs"
+          defaultChecked={formData.postAs}
+          onChange={checkboxChange}
         />
+      </div>
 
-        <textarea
-          placeholder="Let your voice be heard."
-          name="content"
-          onChange={handleChange}
-          required
+      <div>
+        <input
+          type="file"
+          name="image"
+          accept="image/*"
+          onChange={handleImageChange}
+          ref={inputFileRef}
         />
-
-        <select onChange={handleChange} name="concern" required>
-          <option value="">Please Select</option>
-          <option value="facility">Facility</option>
-          <option value="student">Student</option>
-          <option value="professor">Professor</option>
-          <option value="etc">ETC</option>
-        </select>
-
-        <div>
-          <p>Post as Anonymous? </p>
-          <input type="checkbox" name="postAs" onChange={checkboxChange} />
-        </div>
-
-        <div>
-          <input
-            type="file"
-            name="image"
-            accept="image/*"
-            onChange={handleImageChange}
-            ref={inputFileRef}
-          />
-          <button type="button" onClick={RemovePhoto}>
-            X
-          </button>
-        </div>
-
-        <button type="submit">
-          {mode === "add" ? "Add Post" : "Edit Post"}
+        <button type="button" onClick={RemovePhoto}>
+          X
         </button>
-      </form>
-    </div>
+      </div>
+
+      <button type="submit">{mode === "add" ? "Add Post" : "Edit Post"}</button>
+    </form>
   );
 };
 

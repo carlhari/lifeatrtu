@@ -1,23 +1,23 @@
 import { Dispatch } from "react";
 
 export interface DataForm {
-  email: string | null;
+  id: string;
   title: string;
   content: string;
   postAs: boolean;
   concern: string;
   image?: string | null;
+  user: UserData;
 }
 
 export interface FormProps {
   mode: "add" | "edit";
   initialData: DataForm;
-  setOpen: (data: boolean) => void;
 }
 
 export interface UserData {
-  email: string;
-  name: string;
+  email: string | null;
+  name: string | null;
 }
 
 export interface NavData {
