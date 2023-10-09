@@ -41,12 +41,11 @@ function Navigation({ name }: NavData) {
       </div>
       {isOpen && (
         <div>
-          <div className="w-full h-screen flex items-center justify-center fixed top-0 left-0 z-50 bg-slate-500/80">
-            <button type="button" onClick={() => setOpen(false)}>
-              Cancel
-            </button>
-            <Form mode={`add`} initialData={formData} />
-          </div>
+          <Form
+            mode={`add`}
+            initialData={formData}
+            onCancel={() => setOpen(false)}
+          />
         </div>
       )}
     </div>

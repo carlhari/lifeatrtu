@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ posts });
+    return NextResponse.json({ posts, success: true });
   } catch (err) {
     return NextResponse.json({ success: false });
   }

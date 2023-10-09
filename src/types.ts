@@ -13,6 +13,7 @@ export interface DataForm {
 export interface FormProps {
   mode: "add" | "edit";
   initialData: DataForm;
+  onCancel: () => void;
 }
 
 export interface UserData {

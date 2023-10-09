@@ -10,7 +10,13 @@ import Form from "../components/Form";
 
 function Page() {
   const router = useRouter();
-  const [isOpen, setOpen] = useState<{ [postId: string]: boolean }>({});
+  const [edit, setEdit] = useState<{ [postId: string]: boolean }>({});
+
+  const [closeForm, setCloseForm] = useState<boolean>(false);
+
+  const handleCloseForm = () => {
+    setCloseForm(true);
+  };
 
   const { data: session, status } = useSession({
     required: true,
@@ -73,7 +79,7 @@ function Page() {
                   {item.user.email === session?.user?.email && (
                     <button
                       type="button"
-                      onClick={() => setOpen({ ...isOpen, [item.id]: true })}
+                      onClick={() => setEdit({ ...setEdit, [item.id]: true })}
                     >
                       Edit This Post
                     </button>
@@ -85,27 +91,20 @@ function Page() {
                     <p>Post UserId Who Post: {item.user.email}</p>
                   </div>
 
-                  {isOpen[item.id] && (
-                    <div className="w-full h-screen flex items-center justify-center fixed top-0 left-0 z-50 bg-slate-500/80">
-                      <button
-                        type="button"
-                        onClick={() => setOpen({ ...isOpen, [item.id]: false })}
-                      >
-                        Cancel
-                      </button>
-                      <Form
-                        mode={`edit`}
-                        initialData={{
-                          id: item.id,
-                          user: item.user,
-                          title: item.title,
-                          content: item.content,
-                          postAs: item.postAs,
-                          concern: item.concern,
-                          image: item.image ?? null,
-                        }}
-                      />
-                    </div>
+                  {edit[item.id] && (
+                    <Form
+                      mode={`edit`}
+                      initialData={{
+                        id: item.id,
+                        user: item.user,
+                        title: item.title,
+                        content: item.content,
+                        postAs: item.postAs,
+                        concern: item.concern,
+                        image: item.image ?? null,
+                      }}
+                      onCancel={() => setEdit({ ...edit, [item.id]: false })}
+                    />
                   )}
                 </div>
               ))
