@@ -4,7 +4,7 @@ export interface DataForm {
   id: string;
   title: string;
   content: string;
-  postAs: boolean;
+  isChecked: boolean;
   concern: string;
   image?: string | null;
   user: UserData;

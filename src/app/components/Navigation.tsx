@@ -19,7 +19,7 @@ function Navigation({ name }: NavData) {
     id: "",
     title: "",
     content: "",
-    postAs: false,
+    isChecked: false,
     concern: "",
     image: "",
     user: User,

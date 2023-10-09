@@ -6,9 +6,9 @@ export async function POST(request: NextRequest) {
   const { formData } = await request.json();
 
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
-        email: formData.email,
+        email: await formData.email,
       },
     });
 
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
         data: {
           content: formData.content,
           concern: formData.concern,
-          isChecked: formData.postAs,
+          isChecked: formData.isChecked,
           title: formData.title,
           userId: user.id,
           image: formData.image,

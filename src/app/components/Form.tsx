@@ -3,6 +3,12 @@ import axios from "axios";
 import React, { ChangeEvent, useState, useRef } from "react";
 
 const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
+  //form button disabled
+  const [disabledBtn, setDisabled] = useState<boolean>(true);
+
+  //form button ref
+  const formBtnRef = useRef<HTMLButtonElement | null>(null);
+
   //form data
   const [formData, setFormData] = useState<DataForm>(initialData);
 
@@ -26,6 +32,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
     if (mode === "edit") {
       if (e) {
         setEvent(true);
+        setDisabled(false);
       }
     }
     const { name, value } = e.target;
@@ -39,6 +46,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
     if (mode === "edit") {
       if (e) {
         setEvent(true);
+        setDisabled(false);
       }
     }
     const { name, checked } = e.target;
@@ -52,6 +60,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
     if (mode === "edit") {
       if (e) {
         setEvent(true);
+        setDisabled(false);
       }
     }
     const file = e.target.files?.[0];
@@ -112,6 +121,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
       const response = await axios.post("/api/post/add", { formData });
       const data = response.data;
 
+      console.log("add success : ", data);
       if (data.success) {
         setNotif("Post Added Successfully");
       } else {
@@ -127,7 +137,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
       });
 
       const data = response.data;
-
+      console.log("edit success : ", data);
       if (data.success) {
         setNotif("Successfully Edited the Post");
       } else {
@@ -144,8 +154,11 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
         setNotif("");
         setErrorNotif("");
         setError(false);
+        setEvent(false);
+        setImageError("");
+        setDisabled(false);
         onCancel();
-      }, 1500);
+      }, 1000);
     }
   };
 
@@ -197,7 +210,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
           <input
             type="checkbox"
             name="postAs"
-            defaultChecked={formData.postAs}
+            defaultChecked={formData.isChecked}
             onChange={checkboxChange}
           />
         </div>
@@ -219,10 +232,17 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
 
         <button
           type="submit"
-          disabled={mode === "edit" && !event}
-          style={{ cursor: event ? "pointer" : "not-allowed" }}
+          disabled={mode === "add" ? false : disabledBtn ? true : false}
+          style={{
+            cursor:
+              mode === "add"
+                ? "pointer"
+                : disabledBtn
+                ? "not-allowed"
+                : "pointer",
+          }}
         >
-          {mode === "add" ? "Add Post" : "Edit Post"}
+          {mode === "add" ? "Add Post" : "Save Post"}
         </button>
       </form>
     </div>
