@@ -28,7 +28,7 @@ function Navigation({ name }: NavData) {
   return (
     <div className="flex w-full items-center justify-between px-12 py-6">
       <div className="cursor-default">
-        Hello, {name ? `${name}` : "Loading.."}
+        Hello, {name ? `${name.split(" ")[0]}` : "Loading.."}
       </div>
       <div className="flex items-center gap-5">
         <button type="button" onClick={() => setOpen(true)}>
@@ -40,13 +40,11 @@ function Navigation({ name }: NavData) {
         </button>
       </div>
       {isOpen && (
-        <div>
-          <Form
-            mode={`add`}
-            initialData={formData}
-            onCancel={() => setOpen(false)}
-          />
-        </div>
+        <Form
+          mode={`add`}
+          initialData={formData}
+          onCancel={() => setOpen(false)}
+        />
       )}
     </div>
   );

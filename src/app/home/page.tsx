@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useEffect, useState, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import useSwr from "swr";
@@ -9,6 +9,12 @@ import { DataForm } from "@/types";
 import Form from "../components/Form";
 
 function Page() {
+  //delete Ref
+  const deleteRef = useRef<HTMLButtonElement | null>(null);
+
+  //deleteLoad
+  const [deleteLoad, setDeleteLoad] = useState<boolean>(false);
+
   //routing the page
   const router = useRouter();
 
@@ -45,8 +51,6 @@ function Page() {
           );
 
           const data = response.data;
-
-          console.log(data);
         } catch (err) {
           console.error(err);
         }
@@ -58,22 +62,33 @@ function Page() {
 
   const fetcher = (url: string) => axios.post(url).then((res) => res.data);
   const { data, error, isLoading } = useSwr("/api/post/data", fetcher, {
-    refreshInterval: 1500,
+    refreshInterval: 1100,
   });
 
-  console.log(data);
-
-  console.log(session);
-
   const DeletePost = async (postId: string) => {
-    const response = await axios.post("/api/post/delete", { postId: postId });
-    const data = response.data;
+    setDeleteLoad(true);
+    if (deleteRef.current) {
+      deleteRef.current.disabled = true;
+    }
 
-    if (data.success) {
-      setDeleteNotif("Successfully Deleted");
-    } else {
+    try {
+      console.log("delete clicked ");
+      const response = await axios.post("/api/post/delete", { postId: postId });
+      const data = response.data;
+
+      if (data.success) {
+        setDeleteNotif("Successfully Deleted");
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
       setDeleteNotif("Error: Failed To Delete");
     }
+
+    if (deleteRef.current) {
+      deleteRef.current.disabled = false;
+      setDeleteLoad(false);
+    }
+
     setTimeout(() => {
       setDeleteNotif("");
     }, 800);
@@ -85,7 +100,11 @@ function Page() {
         <>
           <Navigation name={session.user?.name ?? null} />
           <div className="flex gap-3 flex-wrap w-full items-center justify-center">
-            {deleteNotif && <p>{deleteNotif}</p>}
+            {deleteNotif && (
+              <p className="fixed w-full h-full top-0 left-0 flex items-center justify-center bg-slate-600/80 z-50">
+                {deleteNotif}
+              </p>
+            )}
             {isLoading ? (
               <div>Getting Data...</div>
             ) : (
@@ -107,7 +126,11 @@ function Page() {
                       <button
                         type="button"
                         onClick={() => DeletePost(item.id)}
+                        ref={deleteRef}
                         className="bg-red-500 text-white"
+                        style={{
+                          cursor: deleteLoad ? "not-allowed" : "pointer",
+                        }}
                       >
                         Delete
                       </button>
@@ -127,7 +150,7 @@ function Page() {
                       <img
                         src={item.image}
                         alt="Image Post"
-                        className="w-1/2 h-96 object-contain"
+                        className="w-1/2 h-96 object-contain max-w-full"
                       />
                     )}
                   </div>

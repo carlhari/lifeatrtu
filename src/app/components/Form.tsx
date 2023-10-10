@@ -3,6 +3,9 @@ import axios from "axios";
 import React, { ChangeEvent, useState, useRef } from "react";
 
 const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
+  //loading handler
+  const [loading, setLoading] = useState<boolean>(false);
+
   //form button disabled
   const [disabledBtn, setDisabled] = useState<boolean>(true);
 
@@ -117,6 +120,13 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
 
   const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (formBtnRef.current) {
+      formBtnRef.current.disabled = true;
+    }
+
+    setLoading(true);
+
+    console.log(formData);
     if (mode === "add") {
       const response = await axios.post("/api/post/add", { formData });
       const data = response.data;
@@ -124,9 +134,11 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
       console.log("add success : ", data);
       if (data.success) {
         setNotif("Post Added Successfully");
+        setDisabled(false);
       } else {
         setErrorNotif("Error: Failed To Add the Post");
         setError(true);
+        setDisabled(false);
       }
     }
 
@@ -140,9 +152,11 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
       console.log("edit success : ", data);
       if (data.success) {
         setNotif("Successfully Edited the Post");
+        setDisabled(false);
       } else {
         setErrorNotif("Error: Failed to Edit the Post");
         setError(true);
+        setDisabled(false);
       }
     }
 
@@ -157,14 +171,26 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
         setEvent(false);
         setImageError("");
         setDisabled(false);
+        if (formBtnRef.current) {
+          formBtnRef.current.disabled = false;
+          setLoading(false);
+        }
         onCancel();
-      }, 1000);
+      }, 1200);
     }
   };
 
   return (
-    <div className="w-full h-screen flex items-center justify-center fixed top-0 left-0 z-50 bg-slate-500/80">
-      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+    <div className="w-full h-screen flex items-center justify-center fixed top-0 left-0 z-40 bg-slate-500/80">
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-blue-500/80 z-50">
+          {mode === "add" ? "Adding Post" : "Updating Post"}
+        </div>
+      )}
+      <form
+        className="flex relative top-0 left-0 flex-col gap-5 bg-white"
+        onSubmit={handleSubmit}
+      >
         {imgError && <p className="text-red-500">{imgError}</p>}
         {notif && <p className="text-green-500">{notif}</p>}
         {error && <p className="text-red-500">{errorNotif}</p>}
@@ -233,6 +259,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
         <button
           type="submit"
           disabled={mode === "add" ? false : disabledBtn ? true : false}
+          ref={formBtnRef}
           style={{
             cursor:
               mode === "add"
@@ -242,7 +269,13 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
                 : "pointer",
           }}
         >
-          {mode === "add" ? "Add Post" : "Save Post"}
+          {mode === "add"
+            ? "Add Post"
+            : mode === "edit"
+            ? "Save Post"
+            : formBtnRef.current?.click
+            ? "Loading"
+            : ""}
         </button>
       </form>
     </div>
