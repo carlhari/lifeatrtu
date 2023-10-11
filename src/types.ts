@@ -1,8 +1,7 @@
-import { Dispatch } from "react";
-
 export interface DataForm {
   id: string;
   title: string;
+  userId: string;
   content: string;
   isChecked: boolean;
   concern: string;
@@ -17,10 +16,16 @@ export interface FormProps {
 }
 
 export interface UserData {
+  id: string;
   email: string | null;
   name: string | null;
 }
 
 export interface NavData {
   name: string | null;
+}
+
+export interface DetailsForm {
+  formData: DataForm;
+  onCancel: () => void;
 }

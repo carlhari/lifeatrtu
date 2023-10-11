@@ -4,17 +4,7 @@ import { prisma } from "@/prismaConfig";
 
 export async function POST(request: NextRequest) {
   try {
-    const posts = await prisma.post.findMany({
-      include: {
-        user: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    });
-
-    return NextResponse.json({ posts, success: true });
+    return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ success: false });
   }

@@ -7,8 +7,13 @@ import useSwr from "swr";
 import Navigation from "../components/Navigation";
 import { DataForm } from "@/types";
 import Form from "../components/Form";
+import DetailsForm from "../components/DetailsForm";
+import { AiOutlineStar } from "react-icons/ai";
 
 function Page() {
+  //open details btn
+  const [details, setDetails] = useState<{ [postId: string]: boolean }>({});
+
   //delete Ref
   const deleteRef = useRef<HTMLButtonElement | null>(null);
 
@@ -113,7 +118,7 @@ function Page() {
                   key={key}
                   className="flex h-full items-center justify-center flex-col border-2 border-solid- border-black p-2 max-w-2xl max-h-96"
                 >
-                  {item.user.email === session?.user?.email && (
+                  {item.userId === item.user.id && (
                     <div className="flex items-center justify-end w-full gap-2">
                       <button
                         type="button"
@@ -153,13 +158,50 @@ function Page() {
                         className="w-1/2 h-96 object-contain max-w-full"
                       />
                     )}
+
+                    <div className="flex items-center justify-between">
+                      <button type="button" className="text-2xl">
+                        <AiOutlineStar />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="border-2 border-solid border-black hover:scale-110 hover:transition-all"
+                        onClick={() =>
+                          setDetails({ ...details, [item.id]: true })
+                        }
+                      >
+                        Details
+                      </button>
+                    </div>
+
+                    {/* details form component */}
+                    {details[item.id] && (
+                      <DetailsForm
+                        formData={{
+                          id: item.id,
+                          userId: item.userId,
+                          user: item.user,
+                          title: item.title,
+                          content: item.content,
+                          isChecked: item.isChecked,
+                          concern: item.concern,
+                          image: item.image ?? null,
+                        }}
+                        onCancel={() =>
+                          setDetails({ ...details, [item.id]: false })
+                        }
+                      />
+                    )}
                   </div>
 
                   {edit[item.id] && (
+                    //form component
                     <Form
                       mode={`edit`}
                       initialData={{
                         id: item.id,
+                        userId: item.id,
                         user: item.user,
                         title: item.title,
                         content: item.content,
