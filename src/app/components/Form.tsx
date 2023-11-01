@@ -197,7 +197,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
         <div className="flex w-full items-center justify-between">
           <p>{mode === "add" ? "Add FeedBack" : "Edit Post"}</p>
           <button type="button" onClick={() => onCancel()}>
-            Back
+            Cancel
           </button>
         </div>
 
