@@ -193,7 +193,7 @@ const Form: React.FC<FormProps> = ({ mode, initialData, onCancel }) => {
       >
         {imgError && <p className="text-red-500">{imgError}</p>}
         {notif && <p className="text-green-500">{notif}</p>}
-        {error && <p className="text-red-500">{errorNotif}</p>}
+        {error && <p className="text-backgroundColor: #FFB000-500">{errorNotif}</p>}
         <div className="flex w-full items-center justify-between">
           <p>{mode === "add" ? "Add FeedBack" : "Edit Post"}</p>
           <button type="button" onClick={() => onCancel()}>
