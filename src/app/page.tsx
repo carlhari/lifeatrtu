@@ -1,43 +1,21 @@
-"use client";
-import { useSession, signIn } from "next-auth/react";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import LoginButton from "./components/LoginButton";
+import { authOptions } from "./api/auth/[...nextauth]/route";
+export async function getSession() {
+  const session = await getServerSession(authOptions);
+  return session;
+}
 
-export default function Home() {
-  const router = useRouter();
-  const { data: session, status } = useSession({
-    required: false,
-    onUnauthenticated() {
-      return;
-    },
-  });
+export default async function Home() {
+  const session = await getSession();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      if (status === "loading") {
-        return;
-      }
-
-      if (session?.user) {
-        router.push("/home");
-      }
-    };
-
-    checkSession();
-  }, [session, status, router]);
-
+  if (session) {
+    return redirect("/home");
+  }
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      {status === "loading" ? (
-        <div>Loading...</div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => signIn("google", { callbackUrl: "/home" })}
-        >
-          Login With RTU
-        </button>
-      )}
-    </main>
+    <div>
+      <LoginButton />
+    </div>
   );
 }

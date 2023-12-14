@@ -1,51 +1,15 @@
 "use client";
-import { useState } from "react";
-import { signOut, useSession } from "next-auth/react";
-import { NavData, DataForm, UserData } from "@/types";
-import Form from "../components/Form";
+import React from "react";
+import { useSession } from "next-auth/react";
+import LogoutButton from "./LogoutButton";
 
-function Navigation({ name }: NavData) {
-  const [isOpen, setOpen] = useState(false);
-  const { data: session } = useSession({
-    required: true,
-  });
-
-  const User: UserData = {
-    email: session?.user?.email ?? null,
-    name: session?.user?.name ?? null,
-  };
-
-  const formData: DataForm = {
-    id: "",
-    title: "",
-    content: "",
-    isChecked: false,
-    concern: "",
-    image: "",
-    user: User,
-  };
+function Navigation() {
+  const { data: session, status } = useSession();
 
   return (
-    <div className="flex w-full items-center justify-between px-12 py-6">
-      <div className="cursor-default">
-        Hello, {name ? `${name.split(" ")[0]}` : "Loading.."}
-      </div>
-      <div className="flex items-center gap-5">
-        <button type="button" onClick={() => setOpen(true)}>
-          Add Post
-        </button>
-
-        <button type="button" onClick={() => signOut({ callbackUrl: "/" })}>
-          Logout
-        </button>
-      </div>
-      {isOpen && (
-        <Form
-          mode={`add`}
-          initialData={formData}
-          onCancel={() => setOpen(false)}
-        />
-      )}
+    <div className="flex items-center justify-between px-6 w-full text-2xl font-bold">
+      {status === "loading" ? "Loading" : session && session.user.name}
+      <LogoutButton />
     </div>
   );
 }

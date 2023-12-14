@@ -1,15 +1,18 @@
-import NextAuth from "next-auth/next";
+import { prisma } from "@/utils/PrismaConfig";
+import axios from "axios";
+import { promises } from "dns";
+import NextAuth from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { userInfo } from "os";
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_ID ?? "",
       clientSecret: process.env.GOOGLE_SECRET ?? "",
       authorization: {
         params: {
-          scopes: ["profile", "email"],
+          scopes: ["profile"],
           prompt: "consent",
           access_type: "offline",
         },
@@ -20,6 +23,36 @@ const handler = NextAuth({
   session: {
     maxAge: 60 * 60 * 24,
   },
-});
+  callbacks: {
+    session: ({ session, token }) => ({
+      ...session,
+      user: {
+        ...session.user,
+        id: token.sub,
+      },
+    }),
+
+    async signIn({ user, account, profile }) {
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          email: profile?.email,
+        },
+      });
+
+      if (!existingUser) {
+        await prisma.user.create({
+          data: {
+            id: user.id as string,
+            email: user.email as string,
+            name: user.name as string,
+          },
+        });
+      }
+
+      return Promise.resolve(true);
+    },
+  },
+};
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
