@@ -1,6 +1,4 @@
 import { prisma } from "@/utils/PrismaConfig";
-import axios from "axios";
-import { promises } from "dns";
 import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";

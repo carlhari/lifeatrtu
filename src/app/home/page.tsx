@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import Navigation from "../components/Navigation";
-import GetUser from "../components/GetUser";
 import { authOptions } from "../api/auth/[...nextauth]/route";
+import Navigation from "../components/Navigation";
+import Button from "../components/Button";
 
 export async function getSession() {
   const session = await getServerSession(authOptions);
@@ -14,10 +14,9 @@ export default async function page() {
 
   if (session) {
     return (
-      <div>
+      <div className="w-full">
         <Navigation />
         <p>Session valid</p>
-        <GetUser />
       </div>
     );
   }
