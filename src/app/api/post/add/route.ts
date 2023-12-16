@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/utils/PrismaConfig";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { limiter } from "@/utils/Limiter";
 
 const res = NextResponse;
 
@@ -12,6 +13,15 @@ export async function POST(request: NextRequest) {
 
   try {
     if (session) {
+      const remainingCalls = await limiter.removeTokens(1);
+
+      if (remainingCalls < 0) {
+        return NextResponse.json({
+          limit: true,
+          msg: "Limit Reached! Max 10 per day",
+        });
+      }
+
       const user = await prisma.user.findFirst({
         where: {
           id: session.user.id,
@@ -33,9 +43,9 @@ export async function POST(request: NextRequest) {
 
       return res.json({ ok: false });
     }
-    return res.json({ message: "UnAuthorized Access" });
+    return res.json({ status: "ERROR", message: "UnAuthorized Access" });
   } catch (err) {
     console.log(err);
-    return res.json({ message: "Something went wrong" });
+    return res.json({ status: "ERROR ", message: "Something went wrong" });
   }
 }

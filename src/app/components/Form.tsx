@@ -1,26 +1,34 @@
 "use client";
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import Input from "./Input";
 import Button from "./Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
+import { create } from "zustand";
 
 function Form() {
-  const [states, setState] = useState<FormType>({
+  const useStore = create((set) => ({
+    count: 1,
+    start: () => set((state) => ({ count: state.count + 1 })),
+    reset: () => set(state),
+  }));
+
+  const initialData: FormType = {
     title: "",
     focus: "",
     content: "",
-  });
+  };
+
+  const [states, setStates] = useState<FormType>(initialData);
 
   const handleChange = (e: any) => {
-    setState({ ...states, [e.target.name]: e.target.value });
+    setStates({ ...states, [e.target.name]: e.target.value });
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+    setStates(initialData);
     const response = await axios.post("/api/post/add", { ...states });
-
     const data = response.data;
 
     if (data.ok && data.ok !== null) {
@@ -29,6 +37,7 @@ function Form() {
       alert("failed to add post");
     }
   };
+
   return (
     <form onSubmit={onSubmit}>
       <Input
@@ -56,7 +65,7 @@ function Form() {
         required
       />
 
-      <Button label="Post" type="submit" className="text-2xl font-semibold" />
+      <Button label="Button" type="submit" className="text-2xl font-semibold" />
     </form>
   );
 }

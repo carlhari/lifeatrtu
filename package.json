@@ -14,12 +14,14 @@
     "ahooks": "^3.7.8",
     "axios": "^1.6.2",
     "dompurify": "^3.0.6",
+    "limiter": "^2.1.0",
     "moment": "^2.29.4",
     "next": "13.5.4",
     "next-auth": "^4.24.5",
     "prisma": "^5.7.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/node": "^20",
