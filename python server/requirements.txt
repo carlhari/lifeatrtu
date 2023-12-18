@@ -1,5 +1,0 @@
-flask_limiter
-nltk
-python-dotenv
-textblob
-deep_translator
