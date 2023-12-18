@@ -4,20 +4,30 @@ import Input from "./Input";
 import Button from "./Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
-import { create } from "zustand";
+import { useTimeStore } from "@/utils/useTimeStore";
 
 function Form() {
-  const useStore = create((set) => ({
-    count: 1,
-    start: () => set((state) => ({ count: state.count + 1 })),
-    reset: () => set(state),
-  }));
+  const [hydrate, setHydrate] = useState<boolean>(false);
+  const { time, decrease, trigger } = useTimeStore();
 
   const initialData: FormType = {
     title: "",
     focus: "",
     content: "",
   };
+  useEffect(() => {
+    setHydrate(true);
+    const counter = setInterval(() => {
+      if (trigger) {
+        if (time <= 0) {
+          clearInterval(counter);
+          return;
+        }
+        decrease();
+      }
+    }, 1000);
+    return () => clearInterval(counter);
+  }, [trigger]);
 
   const [states, setStates] = useState<FormType>(initialData);
 
@@ -39,34 +49,42 @@ function Form() {
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      <Input
-        type="text"
-        name="title"
-        className="border-solid border-2 border-black"
-        placeholder="Untitled"
-        onChange={handleChange}
-        required={true}
-      />
+    hydrate && (
+      <form onSubmit={onSubmit}>
+        <Input
+          type="text"
+          name="title"
+          className="border-solid border-2 border-black"
+          placeholder="Untitled"
+          onChange={handleChange}
+          required={true}
+        />
 
-      <select className="" name="focus" onChange={handleChange} required>
-        <option value=""></option>
-        <option value="facility">Facility</option>
-        <option value="professor">Professor</option>
-        <option value="experience">Experience</option>
-        <option value="others">Others</option>
-      </select>
+        <select className="" name="focus" onChange={handleChange} required>
+          <option value=""></option>
+          <option value="facility">Facility</option>
+          <option value="professor">Professor</option>
+          <option value="experience">Experience</option>
+          <option value="others">Others</option>
+        </select>
 
-      <textarea
-        placeholder="What's Happening now?"
-        name="content"
-        maxLength={500}
-        onChange={handleChange}
-        required
-      />
+        <textarea
+          placeholder="What's Happening now?"
+          name="content"
+          maxLength={500}
+          onChange={handleChange}
+          required
+        />
 
-      <Button label="Button" type="submit" className="text-2xl font-semibold" />
-    </form>
+        <Button
+          label="Button"
+          type="submit"
+          className="text-2xl font-semibold"
+        />
+        <Button label="decrease automatic" type="button" onClick={decrease} />
+        <p>{time}</p>
+      </form>
+    )
   );
 }
 
