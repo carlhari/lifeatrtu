@@ -38,13 +38,17 @@ function Form() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStates(initialData);
-    const response = await axios.post("/api/post/add", { ...states });
-    const data = response.data;
 
-    if (data.ok && data.ok !== null) {
-      alert("success added post");
-    } else {
-      alert("failed to add post");
+    try {
+      const response = await axios.post("/api/post/add", {
+        content: states.content,
+      });
+
+      const data = response.data;
+
+      if (data) alert(data.result);
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
