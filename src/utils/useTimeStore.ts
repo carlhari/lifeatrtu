@@ -1,3 +1,4 @@
+"use client";
 import { useTimerStoreType } from "@/types/useTimeStoreType";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";

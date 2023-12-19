@@ -15,11 +15,6 @@ function Navigation() {
         ? "Loading"
         : session && Capitalize(session.user.name).split(" ")[0]}
       <div className="flex items-center gap-6">
-        <Button
-          label="home"
-          type="button"
-          onClick={() => router.push("/home")}
-        />
         <LogoutButton />
       </div>
     </div>
