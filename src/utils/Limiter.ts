@@ -1,3 +1,5 @@
+//limit for post
+
 import { RateLimiter } from "limiter";
 
 export const limiter = new RateLimiter({

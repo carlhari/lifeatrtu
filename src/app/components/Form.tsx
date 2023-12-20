@@ -7,12 +7,14 @@ import axios from "axios";
 import { useTimeStore } from "@/utils/useTimeStore";
 import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
+import DOMPurify from "isomorphic-dompurify";
 
 function Form() {
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { time, decrease, trigger } = useTimeStore();
   const { click, clicked } = useAddPost();
   const fileRef = useRef<HTMLInputElement>(null);
+
   const initialData = {
     title: "",
     focus: "",
@@ -87,8 +89,18 @@ function Form() {
     }
   };
 
+  const cleanText = (data: any) => {
+    if (data) {
+      Object.keys(data).map((items) => {
+        const clean = DOMPurify.sanitize(items);
+        return clean;
+      });
+    }
+  };
+
   const handleChange = (e: any) => {
-    setStates({ ...states, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setStates({ ...states, [name]: value });
   };
 
   const onSubmit = async (e: FormEvent) => {
@@ -97,7 +109,7 @@ function Form() {
 
     try {
       const response = await axios.post("/api/post/add", {
-        content: states.content,
+        data: states,
       });
 
       const data = response.data;
@@ -119,6 +131,7 @@ function Form() {
           <div>
             <Button label="Cancel" type="button" onClick={clicked} />
           </div>
+
           <Input
             type="text"
             name="title"

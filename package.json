@@ -16,8 +16,8 @@
     "bing-translate-api": "^2.10.0",
     "crowd-sentiment": "^1.1.7",
     "dns": "^0.1.2",
-    "dompurify": "^3.0.6",
     "fs": "^0.0.1-security",
+    "isomorphic-dompurify": "^1.13.0",
     "limiter": "^2.1.0",
     "moment": "^2.29.4",
     "next": "13.5.4",
@@ -29,6 +29,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

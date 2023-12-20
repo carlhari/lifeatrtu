@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { limiter } from "@/utils/Limiter";
 import { translate } from "bing-translate-api";
+import { limiter_min } from "@/utils/LimiterEach";
 const vader = require("crowd-sentiment");
 
 const sentimentAnalyzer = (text: string, origText: string) => {
@@ -22,45 +23,54 @@ const sentimentAnalyzer = (text: string, origText: string) => {
 };
 
 export async function POST(request: NextRequest) {
-  const { title, focus, content } = await request.json();
+  const { title, focus, content, anonymous, image } = await request.json();
   const session = await getServerSession(authOptions);
   const result = await translate(content, "fil", "en");
+  const remainingCallsMin = await limiter_min.removeTokens(1);
 
   try {
     if (session) {
-      if (result) {
-        const text = sentimentAnalyzer(result.translation, content);
-        return NextResponse.json({ result: text });
-        // if (text !== "n") {
-        //   const remainingCalls = await limiter.removeTokens(1);
-        //   if (remainingCalls < 0) {
-        //     return NextResponse.json({
-        //       limit: true,
-        //       msg: "Limit Reached! Max 10 per day",
-        //     });
-        //   }
+      if (remainingCallsMin < 0) {
+        if (result) {
+          const text = sentimentAnalyzer(result.translation, content);
+          if (text !== "n") {
+            const remainingCalls = await limiter.removeTokens(1);
+            if (remainingCalls < 0) {
+              return NextResponse.json({
+                limit: true,
+                message: "Limit Reached! Max 10 per day",
+              });
+            }
 
-        //   const user = await prisma.user.findFirst({
-        //     where: {
-        //       id: session.user.id,
-        //     },
-        //   });
+            const user = await prisma.user.findFirst({
+              where: {
+                id: session.user.id,
+              },
+            });
 
-        //   if (user) {
-        //     await prisma.post.create({
-        //       data: {
-        //         title: title,
-        //         focus: focus,
-        //         content: content,
-        //         userId: user.id,
-        //       },
-        //     });
-        //     return NextResponse.json({ ok: true });
-        //   }
-        //   return NextResponse.json({ ok: false });
-        // }
-        // return NextResponse.json({ result: text });
+            if (user) {
+              await prisma.post.create({
+                data: {
+                  title: title,
+                  focus: focus,
+                  content: content,
+                  userId: user.id,
+                },
+              });
+              return NextResponse.json({ ok: true });
+            }
+            return NextResponse.json({ ok: false });
+          }
+          return NextResponse.json({
+            status: "004",
+            message: "Negative Post Detected",
+          });
+        }
       }
+      return NextResponse.json({
+        status: "BUSY",
+        message: "Server is Busy Please Try Again Later",
+      });
     }
     return NextResponse.json({
       status: "ERROR",
@@ -69,8 +79,24 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.log(err);
     return NextResponse.json({
-      status: "ERROR ",
+      status: "ERROR",
       message: "Something went wrong",
     });
+  }
+}
+
+try {
+  if (condition) {
+    // kunwari may error
+    throw new NotFound('blablabla');
+  }
+  return NextResponse.json(...); // success
+} catch (error: unknown) {
+  if (error instanceof HttpError) {
+    return NextResponse.json({
+      status: error.status,
+      message: error.message,
+    });
+   // other shits
   }
 }
