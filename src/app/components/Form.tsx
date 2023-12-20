@@ -89,14 +89,14 @@ function Form() {
     }
   };
 
-  const cleanText = (data: any) => {
-    if (data) {
-      Object.keys(data).map((items) => {
-        const clean = DOMPurify.sanitize(items);
-        return clean;
-      });
-    }
-  };
+  // const cleanText = (data: any) => {
+  //   if (data) {
+  //     Object.keys(data).map((items) => {
+  //       const clean = DOMPurify.sanitize(items);
+  //       return clean;
+  //     });
+  //   }
+  // };
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
