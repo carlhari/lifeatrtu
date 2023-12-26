@@ -19,6 +19,8 @@ model Post{
   title String
   focus String
   content String
+  anonymous Boolean
+  image String
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

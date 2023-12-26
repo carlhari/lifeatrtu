@@ -7,13 +7,17 @@ import axios from "axios";
 import { useTimeStore } from "@/utils/useTimeStore";
 import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
-import DOMPurify from "isomorphic-dompurify";
+import toast, { Toaster } from "react-hot-toast";
+import { useLimiter } from "@/utils/useLimiter";
+import { useInfinite } from "./DisplayPost";
 
 function Form() {
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { time, decrease, trigger } = useTimeStore();
   const { click, clicked } = useAddPost();
   const fileRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { data, mutate, loadMore } = useInfinite();
 
   const initialData = {
     title: "",
@@ -26,6 +30,8 @@ function Form() {
 
   const [states, setStates] = useState<FormType>(initialData);
 
+  const { limit, maxLimit, auto, decreaseLimit } = useLimiter();
+
   useEffect(() => {
     setHydrate(true);
     const counter = setInterval(() => {
@@ -37,8 +43,14 @@ function Form() {
         decrease();
       }
     }, 1000);
+
     return () => clearInterval(counter);
   }, [trigger]);
+
+  useEffect(() => {
+    auto();
+    return;
+  }, []);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -89,15 +101,6 @@ function Form() {
     }
   };
 
-  // const cleanText = (data: any) => {
-  //   if (data) {
-  //     Object.keys(data).map((items) => {
-  //       const clean = DOMPurify.sanitize(items);
-  //       return clean;
-  //     });
-  //   }
-  // };
-
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setStates({ ...states, [name]: value });
@@ -105,16 +108,39 @@ function Form() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setStates(initialData);
+
+    let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "MAX", "ERROR", "FAILED"];
 
     try {
-      const response = await axios.post("/api/post/add", {
-        data: states,
+      const response = new Promise(async (resolve, reject) => {
+        const res = await axios.post("/api/post/add", { ...states });
+
+        const resData = res.data;
+        if (!status.includes(resData.status)) {
+          if (
+            states.title.length !== 0 &&
+            states.focus.length !== 0 &&
+            states.content.length !== 0
+          ) {
+            setTimeout(() => {
+              resolve(resData);
+            }, 1500);
+          } else reject(resData);
+        } else reject(resData);
       });
 
-      const data = response.data;
+      toast.promise(
+        response,
+        {
+          loading: "loading",
+          success: (data: any) => `Success: ${data.msg} `,
+          error: (data) => `Failed [${data.status}]: ${data.msg}`,
+        },
+        { position: "top-center" }
+      );
 
-      if (data) alert(data.result);
+      formRef.current && formRef.current.reset();
+      setStates(initialData);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -124,9 +150,11 @@ function Form() {
     hydrate &&
     click && (
       <div className="absolute w-full z-50">
+        <Toaster />
         <form
           onSubmit={onSubmit}
           className="flex flex-col items-center justify-center"
+          ref={formRef}
         >
           <div>
             <Button label="Cancel" type="button" onClick={clicked} />
@@ -190,6 +218,15 @@ function Form() {
           <Button label="decrease automatic" type="button" onClick={decrease} />
           <p>{time}</p>
         </form>
+
+        <button
+          type="button"
+          className={`${maxLimit ? "cursor-not-allowed" : ""}`}
+          onClick={decreaseLimit}
+          disabled={maxLimit}
+        >
+          Limiter BTN
+        </button>
       </div>
     )
   );

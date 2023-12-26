@@ -3,9 +3,10 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/utils/PrismaConfig";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { limiter } from "@/utils/Limiter";
-import { translate } from "bing-translate-api";
+
+import translate from "@iamtraction/google-translate";
 import { limiter_min } from "@/utils/LimiterEach";
+import AddPost from "@/app/components/overlays/AddPost";
 const vader = require("crowd-sentiment");
 
 const sentimentAnalyzer = async (text: string, origText: string) => {
@@ -25,65 +26,62 @@ const sentimentAnalyzer = async (text: string, origText: string) => {
 };
 
 export async function POST(request: NextRequest) {
-  const { title, focus, content, anonymous, image } = await request.json();
-  const session = await getServerSession(authOptions);
-  const result = await translate(content, "fil", "en");
-  const remainingCallsMin = await limiter_min.removeTokens(1);
+  try {
+    const { title, focus, content, anonymous, image } = await request.json();
 
-  return NextResponse.json({ result: typeof anonymous });
-  // try {
-  //   if (session) {
-  //     if (remainingCallsMin < 0) {
-  //       if (result) {
-  //         const text = sentimentAnalyzer(result.translation, content);
-  //         if (text !== "n") {
-  //           const remainingCalls = await limiter.removeTokens(1);
-  //           if (remainingCalls < 0) {
-  //             return NextResponse.json({
-  //               limit: true,
-  //               message: "Limit Reached! Max 10 per day",
-  //             });
-  //           }
+    const session = await getServerSession(authOptions);
 
-  //           const user = await prisma.user.findFirst({
-  //             where: {
-  //               id: session.user.id,
-  //             },
-  //           });
+    const remainingCallsMin = await limiter_min.removeTokens(1);
 
-  //           if (user) {
-  //             await prisma.post.create({
-  //               data: {
-  //                 title: title,
-  //                 focus: focus,
-  //                 content: content,
-  //                 userId: user.id,
-  //               },
-  //             });
-  //             return NextResponse.json({ ok: true });
-  //           }
-  //           return NextResponse.json({ ok: false });
-  //         }
-  //         return NextResponse.json({
-  //           status: "004",
-  //           message: "Negative Post Detected",
-  //         });
-  //       }
-  //     }
-  //     return NextResponse.json({
-  //       status: "BUSY",
-  //       message: "Server is Busy Please Try Again Later",
-  //     });
-  //   }
-  //   return NextResponse.json({
-  //     status: "ERROR",
-  //     message: "UnAuthorized Access",
-  //   });
-  // } catch (err) {
-  //   console.log(err);
-  //   return NextResponse.json({
-  //     status: "ERROR",
-  //     message: "Something went wrong",
-  //   });
-  // }
+    if (session) {
+      if (remainingCallsMin > 0) {
+        const translated = await translate(content, {
+          from: "tl",
+          to: "en",
+        });
+        const sentimentResult = await sentimentAnalyzer(
+          translated.text,
+          content
+        );
+
+        if (sentimentResult !== "n") {
+          const addPost = await prisma.post.create({
+            data: {
+              title: title,
+              focus: focus,
+              content: content,
+              anonymous: anonymous,
+              image: image,
+              userId: session.user.id,
+            },
+          });
+
+          if (addPost) {
+            const post = await prisma.post.findUnique({
+              where: {
+                id: addPost.id,
+              },
+            });
+            return NextResponse.json({ msg: "Post Added", post: post });
+          } else
+            return NextResponse.json({
+              msg: "Failed to Add Post",
+              status: "FAILED",
+            });
+        } else
+          return NextResponse.json({
+            msg: "Negative Post.",
+            status: "NEGATIVE",
+          });
+      } else
+        return NextResponse.json({ msg: "Server is Busy", status: "BUSY" });
+    } else
+      return NextResponse.json({
+        msg: "UNAUTHORIZED ACCESS",
+        status: "UNAUTHORIZED",
+      });
+  } catch (err) {
+    console.log(err);
+    return NextResponse.json({ msg: "error", status: "ERROR" });
+  }
 }
