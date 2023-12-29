@@ -9,15 +9,13 @@ import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
 import { useLimiter } from "@/utils/useLimiter";
-import { useInfinite } from "./DisplayPost";
 
-function Form() {
+const Form: React.FC<any> = ({ data, mutate }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { time, decrease, trigger } = useTimeStore();
   const { click, clicked } = useAddPost();
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const { data, mutate, loadMore } = useInfinite();
 
   const initialData = {
     title: "",
@@ -30,7 +28,7 @@ function Form() {
 
   const [states, setStates] = useState<FormType>(initialData);
 
-  const { limit, maxLimit, auto, decreaseLimit } = useLimiter();
+  const { limit, maxAge, maxLimit, auto, decreaseLimit } = useLimiter();
 
   useEffect(() => {
     setHydrate(true);
@@ -49,6 +47,7 @@ function Form() {
 
   useEffect(() => {
     auto();
+
     return;
   }, []);
 
@@ -116,6 +115,7 @@ function Form() {
         const res = await axios.post("/api/post/add", { ...states });
 
         const resData = res.data;
+
         if (!status.includes(resData.status)) {
           if (
             states.title.length !== 0 &&
@@ -123,6 +123,7 @@ function Form() {
             states.content.length !== 0
           ) {
             setTimeout(() => {
+              mutate({ list: [...data.list, resData.post] });
               resolve(resData);
             }, 1500);
           } else reject(resData);
@@ -230,6 +231,6 @@ function Form() {
       </div>
     )
   );
-}
+};
 
 export default Form;

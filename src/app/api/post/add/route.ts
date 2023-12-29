@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
                 id: addPost.id,
               },
             });
-            return NextResponse.json({ msg: "Post Added", post: post });
+            if (post)
+              return NextResponse.json({ msg: "Post Added", post: post });
           } else
             return NextResponse.json({
               msg: "Failed to Add Post",

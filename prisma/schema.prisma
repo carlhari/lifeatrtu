@@ -12,6 +12,7 @@ model User {
   email    String    @unique
   name     String
   posts   Post[]
+  createdAt DateTime  @default(now())
 }
 
 model Post{
@@ -23,4 +24,6 @@ model Post{
   image String
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

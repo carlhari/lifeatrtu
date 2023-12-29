@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const remainingTokens = await limiter_min.removeTokens(1);
     if (session) {
       if (remainingTokens > 0) {
-        const posts = await prisma.post.findMany({});
+        const posts = await prisma.post.findMany();
 
         if (posts) {
           return NextResponse.json(posts);

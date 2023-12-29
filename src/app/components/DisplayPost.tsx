@@ -1,56 +1,33 @@
 "use client";
-import axios from "axios";
-import React, { useState } from "react";
-import { useInfiniteScroll } from "ahooks";
-import { resolve } from "path";
-import { rejects } from "assert";
+import React from "react";
+import Image from "next/image";
 
-let status = ["ERROR", "BUSY"];
-
-export function getPosts(take: number, skip: number): Promise<any> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const response = await axios.post("/api/post/get", {
-        take: take,
-        skip: skip,
-      });
-
-      const data = response.data;
-
-      if (!status.includes(data)) {
-        resolve({ list: data });
-      } else reject(data);
-    } catch (err) {}
-  });
-}
-
-export function useInfinite() {
-  return useInfiniteScroll((d) => getPosts(4, 4));
-}
-
-function DisplayPost() {
-  const { data, loading, loadingMore } = useInfinite();
+const DisplayPost: React.FC<any> = ({ data, loading, loadMore, noMore }) => {
+  console.log(data);
   return (
     <div>
+      {loading ? "loading" : ""}
       <div>
-        {loading && <div>Loading..</div>}
-        {loadingMore && <div>Loading More</div>}
-        {data?.list.map((item) => {
-          return (
-            <div key={item.id}>
-              <div>{item.id}</div>
-              <div>{item.title}</div>
-              <div>{item.focus}</div>
-              <div>{item.content}</div>
-              {item.img && <img src={item.img} />}
-            </div>
-          );
-        })}
+        {data &&
+          data.list &&
+          data.list.map((item: any, key: any) => {
+            return (
+              <div key={key}>
+                <div>{item.id}</div>
+                <div>{item.title}</div>
+                <div>{item.focus}</div>
+                <div>{item.content}</div>
 
-        <button onClick={() => getPosts(4, 4)}>Get</button>
+                {item.image && (
+                  <img loading="lazy" src={item.image} alt={"Image Content"} />
+                )}
+              </div>
+            );
+          })}
+        {noMore && <button onClick={loadMore}>LoadMOre</button>}
       </div>
     </div>
   );
-}
+};
 
 export default DisplayPost;
