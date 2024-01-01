@@ -9,7 +9,7 @@ export const useLimiter = create<useLimiterType>()(
   persist(
     (set, get) => ({
       limit: 10,
-      maxAge: 20,
+      maxAge: day,
       maxLimit: false,
       decreaseLimit: () => {
         if (get().limit === 0) return set(() => ({ maxLimit: true }));
@@ -20,10 +20,10 @@ export const useLimiter = create<useLimiterType>()(
         setInterval(() => {
           if (get().maxAge === 0) {
             clearInterval;
-            set(() => ({ maxAge: 20, limit: 10, maxLimit: false }));
+            set(() => ({ maxAge: day, limit: 10, maxLimit: false }));
             return;
           } else set(() => ({ maxAge: get().maxAge - 1 }));
-        }, 1000);
+        }, 100);
       },
     }),
     {

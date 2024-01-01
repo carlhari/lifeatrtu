@@ -20,7 +20,9 @@ export function getPosts(skip: number, take: number): Promise<any> {
       if (!status.includes(data)) {
         resolve({ list: data });
       } else reject(data);
-    } catch (err) {}
+    } catch (err) {
+      console.log(err);
+    }
   });
 }
 
