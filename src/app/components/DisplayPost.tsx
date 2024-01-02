@@ -2,11 +2,16 @@
 import React from "react";
 import Image from "next/image";
 
-const DisplayPost: React.FC<any> = ({ data, loading, loadMore, noMore }) => {
-  console.log(data);
+const DisplayPost: React.FC<any> = ({
+  data,
+  loading,
+  loadMore,
+  noMore,
+  loadingMore,
+}) => {
   return (
-    <div>
-      {loading ? "loading" : ""}
+    <>
+      {loading && "loading"}
       <div>
         {data &&
           data.list &&
@@ -19,14 +24,22 @@ const DisplayPost: React.FC<any> = ({ data, loading, loadMore, noMore }) => {
                 <div>{item.content}</div>
 
                 {item.image && (
-                  <img loading="lazy" src={item.image} alt={"Image Content"} />
+                  <Image
+                    loading="lazy"
+                    src={item.image}
+                    alt={"Image Content"}
+                  />
                 )}
               </div>
             );
           })}
-        {noMore && <button onClick={loadMore}>LoadMOre</button>}
+        {!noMore && (
+          <button type="button" onClick={loadMore} disabled={loadingMore}>
+            {loadingMore ? "Loading more..." : "Click to load more"}
+          </button>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 

@@ -2,6 +2,7 @@ import { prisma } from "@/utils/PrismaConfig";
 import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { Capitalize } from "@/utils/Capitalize";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -42,7 +43,7 @@ export const authOptions: NextAuthOptions = {
           data: {
             id: user.id as string,
             email: user.email as string,
-            name: user.name as string,
+            name: Capitalize(user.name) as string,
           },
         });
       }

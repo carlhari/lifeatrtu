@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import AddPost from "./overlays/AddPost";
 import Form from "./Form";
 import DisplayPost from "./DisplayPost";
@@ -16,9 +16,14 @@ export function getPosts(skip: number, take: number): Promise<any> {
       });
 
       const data = response.data;
+      const newSkip = skip + take;
+      console.log("this is post", data);
 
       if (!status.includes(data)) {
-        resolve({ list: data });
+        resolve({
+          list: data,
+          skip: data && data.length < 4 ? undefined : newSkip,
+        });
       } else reject(data);
     } catch (err) {
       console.log(err);
@@ -27,14 +32,31 @@ export function getPosts(skip: number, take: number): Promise<any> {
 }
 
 function HomeContent() {
-  const { data, mutate, loading, loadMore, noMore } = useInfiniteScroll(() =>
-    getPosts(4, 4)
-  );
+  const ref = useRef<HTMLDivElement>(null);
+  const { data, mutate, loading, loadMore, noMore, loadingMore } =
+    useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 4), {
+      target: ref,
+      isNoMore: (d) => {
+        if (d?.skip === undefined) return true;
+        else return false;
+      },
+    });
+
+  console.log("data outside", data);
   return (
     <>
       <AddPost />
       <Form data={data} mutate={mutate} noMore={noMore} />
-      <DisplayPost data={data} loading={loading} loadMore={loadMore} />
+      <div ref={ref} className="h-32 overflow-auto">
+        <DisplayPost
+          data={data}
+          loading={loading}
+          loadMore={loadMore}
+          ref={() => ref}
+          loadingMore={loadingMore}
+        />
+      </div>
+      {!loading && noMore && "no more"}
     </>
   );
 }
