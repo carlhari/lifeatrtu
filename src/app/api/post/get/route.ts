@@ -3,7 +3,6 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/utils/PrismaConfig";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-
 import { limiter_min } from "@/utils/LimiterEach";
 
 export async function POST(request: NextRequest) {
@@ -16,11 +15,6 @@ export async function POST(request: NextRequest) {
         const posts = await prisma.post.findMany({
           skip: skip,
           take: take,
-          // orderBy: {
-          //   comments: {
-          //     _count: "asc",
-          //   },
-          // },
           include: {
             _count: {
               select: {

@@ -3,10 +3,9 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/utils/PrismaConfig";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-
 import translate from "@iamtraction/google-translate";
 import { limiter_min } from "@/utils/LimiterEach";
-import AddPost from "@/app/components/overlays/AddPost";
+
 const vader = require("crowd-sentiment");
 
 const sentimentAnalyzer = async (text: string, origText: string) => {

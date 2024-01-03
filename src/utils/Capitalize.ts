@@ -1,6 +1,6 @@
-export const Capitalize = (text: string | undefined | null) => {
+export const Capitalize = (text: any) => {
   return text?.replace(
     /(^\w|\s\w)(\S*)/g,
-    (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
+    (_: any, m1: any, m2: any) => m1.toUpperCase() + m2.toLowerCase()
   );
 };
