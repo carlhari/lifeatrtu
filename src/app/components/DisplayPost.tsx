@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import moment from "moment";
 
 const DisplayPost: React.FC<any> = ({
   data,
@@ -30,14 +31,12 @@ const DisplayPost: React.FC<any> = ({
                     alt={"Image Content"}
                   />
                 )}
+
+                <div>{moment(item.createdAt).format("LLL")}</div>
+                <hr></hr>
               </div>
             );
           })}
-        {!noMore && (
-          <button type="button" onClick={loadMore} disabled={loadingMore}>
-            {loadingMore ? "Loading more..." : "Click to load more"}
-          </button>
-        )}
       </div>
     </>
   );

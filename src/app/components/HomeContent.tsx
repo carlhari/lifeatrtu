@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AddPost from "./overlays/AddPost";
 import Form from "./Form";
 import DisplayPost from "./DisplayPost";
@@ -7,6 +7,7 @@ import { useInfiniteScroll } from "ahooks";
 import axios from "axios";
 
 let status = ["ERROR", "BUSY"];
+
 export function getPosts(skip: number, take: number): Promise<any> {
   return new Promise(async (resolve, reject) => {
     try {
@@ -33,26 +34,37 @@ export function getPosts(skip: number, take: number): Promise<any> {
 
 function HomeContent() {
   const ref = useRef<HTMLDivElement>(null);
-  const { data, mutate, loading, loadMore, noMore, loadingMore } =
+  const [keyword, setKeyword] = useState<string>("");
+  const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 4), {
       target: ref,
       isNoMore: (d) => {
         if (d?.skip === undefined) return true;
         else return false;
       },
+      reloadDeps: [keyword],
     });
 
-  console.log("data outside", data);
+  useEffect(() => {
+    reload();
+  }, [keyword]);
+
   return (
     <>
       <AddPost />
-      <Form data={data} mutate={mutate} noMore={noMore} />
-      <div ref={ref} className="h-32 overflow-auto">
+      <Form
+        data={data}
+        mutate={mutate}
+        noMore={noMore}
+        loadMore={loadMore}
+        setKeyword={setKeyword}
+        keyword={keyword}
+      />
+      <div ref={ref} className="h-80 overflow-auto">
         <DisplayPost
           data={data}
           loading={loading}
           loadMore={loadMore}
-          ref={() => ref}
           loadingMore={loadingMore}
         />
       </div>

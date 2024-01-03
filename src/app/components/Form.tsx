@@ -10,7 +10,7 @@ import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
 import { useLimiter } from "@/utils/useLimiter";
 
-const Form: React.FC<any> = ({ data, mutate }) => {
+const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { time, decrease, trigger } = useTimeStore();
   const { click, clicked } = useAddPost();
@@ -123,7 +123,11 @@ const Form: React.FC<any> = ({ data, mutate }) => {
             states.content.length !== 0
           ) {
             setTimeout(() => {
-              mutate({ list: [...data.list, resData.post] });
+              setKeyword(!keyword);
+              mutate({
+                list: [...data.list, resData.post],
+              });
+
               resolve(resData);
             }, 1500);
           } else reject(resData);
