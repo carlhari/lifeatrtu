@@ -8,7 +8,7 @@ import { limiter_min } from "@/utils/LimiterEach";
 
 export async function POST(request: NextRequest) {
   try {
-    const { skip, take } = await request.json();
+    const { skip, take, order } = await request.json();
     const session = await getServerSession(authOptions);
     const remainingTokens = await limiter_min.removeTokens(1);
     if (session) {
@@ -27,12 +27,16 @@ export async function POST(request: NextRequest) {
                 likes: true,
                 reports: true,
                 comments: true,
-                seens: true,
+                engages: true,
               },
             },
           },
           orderBy: {
-            createdAt: "asc",
+            ...(order === "asc" || order === "desc"
+              ? { createdAt: order }
+              : order === "likes" || order === "comments" || order === "engages"
+              ? { [order]: { _count: "asc" } }
+              : {}),
           },
         });
 

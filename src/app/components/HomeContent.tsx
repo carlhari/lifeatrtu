@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import AddPost from "./overlays/AddPost";
 import Form from "./Form";
 import DisplayPost from "./DisplayPost";
@@ -8,12 +8,17 @@ import axios from "axios";
 
 let status = ["ERROR", "BUSY"];
 
-export function getPosts(skip: number, take: number): Promise<any> {
+export function getPosts(
+  skip: number,
+  take: number,
+  order: string
+): Promise<any> {
   return new Promise(async (resolve, reject) => {
     try {
       const response = await axios.post("/api/post/get", {
         skip: skip,
         take: take,
+        order: order,
       });
 
       const data = response.data;
@@ -35,8 +40,9 @@ export function getPosts(skip: number, take: number): Promise<any> {
 function HomeContent() {
   const ref = useRef<HTMLDivElement>(null);
   const [keyword, setKeyword] = useState<string>("");
+  const [select, setSelect] = useState<string>("asc");
   const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
-    useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 4), {
+    useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 4, select), {
       target: ref,
       isNoMore: (d) => {
         if (d?.skip === undefined) return true;
@@ -47,7 +53,7 @@ function HomeContent() {
 
   useEffect(() => {
     reload();
-  }, [keyword]);
+  }, [keyword, select]);
 
   return (
     <>
@@ -61,6 +67,18 @@ function HomeContent() {
         keyword={keyword}
       />
       <div ref={ref} className="h-80 overflow-auto">
+        <select
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            setSelect(e.target.value)
+          }
+        >
+          <option value="asc">Ascending Date</option>
+          <option value="desc">Descending Date</option>
+          <option value="likes">Most Liked</option>
+          <option value="engages">Most Engaged</option>
+          <option value="comments">Most Commented</option>
+        </select>
+
         <DisplayPost
           data={data}
           loading={loading}

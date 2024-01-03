@@ -15,7 +15,7 @@ model User {
   comments  Comment[]
   likes     Like[]
   reports   Report[]
-  seens     Seen[]
+  engages   Engage[]
   createdAt DateTime  @default(now())
 }
 
@@ -28,7 +28,7 @@ model Post {
   image     String
   userId    String    @db.ObjectId
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  seens     Seen[]
+  engages   Engage[]
   likes     Like[]
   comments  Comment[]
   reports   Report[]
@@ -36,7 +36,7 @@ model Post {
   updatedAt DateTime  @updatedAt
 }
 
-model Seen {
+model Engage {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String @db.ObjectId
