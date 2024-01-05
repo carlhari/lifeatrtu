@@ -84,6 +84,7 @@ function HomeContent() {
           loading={loading}
           loadMore={loadMore}
           loadingMore={loadingMore}
+          mutate={mutate}
         />
       </div>
       {!loading && noMore && "no more"}

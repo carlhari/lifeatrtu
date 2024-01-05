@@ -60,7 +60,22 @@ export async function POST(request: NextRequest) {
               where: {
                 id: addPost.id,
               },
+              include: {
+                _count: {
+                  select: {
+                    likes: true,
+                    reports: true,
+                    comments: true,
+                    engages: true,
+                  },
+                },
+                likes: true,
+                comments: true,
+                engages: true,
+              },
             });
+            console.log(post);
+
             if (post)
               return NextResponse.json({ msg: "Post Added", post: post });
           } else

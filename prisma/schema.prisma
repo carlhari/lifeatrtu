@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id        String    @id @map("_id") @db.ObjectId
+  id        String    @id @map("_id") @db.String
   email     String    @unique
   name      String
   posts     Post[]
@@ -20,13 +20,13 @@ model User {
 }
 
 model Post {
-  id        String    @id @default(uuid()) @map("_id") @db.ObjectId
+  id        String    @id @default(uuid()) @map("_id") @db.String
   title     String
   focus     String
   content   String
   anonymous Boolean
   image     String
-  userId    String    @db.ObjectId
+  userId    String    @db.String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   engages   Engage[]
   likes     Like[]
@@ -39,32 +39,32 @@ model Post {
 model Engage {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String @db.ObjectId
+  postId String @db.String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @db.ObjectId
+  userId String @db.String
 }
 
 model Like {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String @db.ObjectId
+  postId String @db.String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @db.ObjectId
+  userId String @db.String
 }
 
 model Comment {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String @db.ObjectId
+  postId String @db.String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @db.ObjectId
+  userId String @db.String
 }
 
 model Report {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  postId    String   @db.ObjectId
+  postId    String   @db.String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId    String   @db.ObjectId
+  userId    String   @db.String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   reason    String
   createdAt DateTime @default(now())

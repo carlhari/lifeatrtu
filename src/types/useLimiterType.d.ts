@@ -1,6 +1,6 @@
 export interface useLimiterType {
   limit: number;
-  maxAge: number;
+  date: string | number;
   maxLimit: boolean;
   decreaseLimit: () => void;
   auto: () => void;

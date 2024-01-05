@@ -24,6 +24,10 @@ export async function POST(request: NextRequest) {
                 engages: true,
               },
             },
+
+            likes: true,
+            comments: true,
+            engages: true,
           },
           orderBy: {
             ...(order === "asc" || order === "desc"

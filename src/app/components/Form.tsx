@@ -4,6 +4,7 @@ import Input from "./Input";
 import Button from "./Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
+import io from "socket.io-client"
 import { useTimeStore } from "@/utils/useTimeStore";
 import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
@@ -28,7 +29,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
 
   const [states, setStates] = useState<FormType>(initialData);
 
-  const { limit, maxAge, maxLimit, auto, decreaseLimit } = useLimiter();
+  const { limit, date, maxLimit, auto, decreaseLimit } = useLimiter();
 
   useEffect(() => {
     setHydrate(true);
@@ -151,16 +152,27 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     }
   };
 
+  const socket = io("http://localhost:3001", { autoConnect: false })
+
+
+  const handleSocket = () => {
+    socket.connect()
+    socket.emit("sendmsg", { message: "this is msg from client" })
+  }
+
+
   return (
     hydrate &&
     click && (
       <div className="absolute w-full z-50">
+
         <Toaster />
         <form
           onSubmit={onSubmit}
           className="flex flex-col items-center justify-center"
           ref={formRef}
         >
+          <Button label={"Socket"} type="button" onClick={handleSocket} />
           <div>
             <Button label="Cancel" type="button" onClick={clicked} />
           </div>
@@ -222,6 +234,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
 
           <Button label="decrease automatic" type="button" onClick={decrease} />
           <p>{time}</p>
+
         </form>
 
         <button
@@ -232,6 +245,8 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
         >
           Limiter BTN
         </button>
+
+
       </div>
     )
   );
