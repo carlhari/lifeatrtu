@@ -23,7 +23,6 @@ export function getPosts(
 
       const data = response.data;
       const newSkip = skip + take;
-      console.log("this is post", data);
 
       if (!status.includes(data)) {
         resolve({
@@ -40,7 +39,7 @@ export function getPosts(
 function HomeContent() {
   const ref = useRef<HTMLDivElement>(null);
   const [keyword, setKeyword] = useState<string>("");
-  const [select, setSelect] = useState<string>("asc");
+  const [select, setSelect] = useState<string>("desc");
   const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 4, select), {
       target: ref,
@@ -66,14 +65,16 @@ function HomeContent() {
         setKeyword={setKeyword}
         keyword={keyword}
       />
-      <div ref={ref} className="h-80 overflow-auto">
+      <div ref={ref} className="overflow-auto columns-2 gap-5 mb-4">
         <select
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
             setSelect(e.target.value)
           }
+          defaultValue={"desc"}
+
         >
-          <option value="asc">Ascending Date</option>
-          <option value="desc">Descending Date</option>
+          <option value="desc">Recently</option>
+          <option value="asc">Oldest</option>
           <option value="likes">Most Liked</option>
           <option value="engages">Most Engaged</option>
           <option value="comments">Most Commented</option>

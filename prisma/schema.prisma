@@ -8,32 +8,34 @@ datasource db {
 }
 
 model User {
-  id        String    @id @map("_id") @db.String
-  email     String    @unique
-  name      String
-  posts     Post[]
-  comments  Comment[]
-  likes     Like[]
-  reports   Report[]
-  engages   Engage[]
-  createdAt DateTime  @default(now())
+  id            String         @id @map("_id") @db.String
+  email         String         @unique
+  name          String
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  reports       Report[]
+  engages       Engage[]
+  createdAt     DateTime       @default(now())
+  Notifications Notification[]
 }
 
 model Post {
-  id        String    @id @default(uuid()) @map("_id") @db.String
-  title     String
-  focus     String
-  content   String
-  anonymous Boolean
-  image     String
-  userId    String    @db.String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  engages   Engage[]
-  likes     Like[]
-  comments  Comment[]
-  reports   Report[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String         @id @default(uuid()) @map("_id") @db.String
+  title         String
+  focus         String
+  content       String
+  anonymous     Boolean
+  image         String
+  userId        String         @db.String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  engages       Engage[]
+  likes         Like[]
+  comments      Comment[]
+  reports       Report[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  Notifications Notification[]
 }
 
 model Engage {
@@ -68,4 +70,12 @@ model Report {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   reason    String
   createdAt DateTime @default(now())
+}
+
+model Notification {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  postId String @db.String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String @db.String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
