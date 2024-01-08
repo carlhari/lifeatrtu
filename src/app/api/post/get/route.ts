@@ -3,50 +3,46 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/utils/PrismaConfig";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { limiter_min } from "@/utils/LimiterEach";
 
 export async function POST(request: NextRequest) {
   try {
     const { skip, take, order } = await request.json();
     const session = await getServerSession(authOptions);
-    const remainingTokens = await limiter_min.removeTokens(1);
+
     if (session) {
-      if (remainingTokens > 0) {
-        const posts = await prisma.post.findMany({
-          skip: skip,
-          take: take,
-          include: {
-            _count: {
-              select: {
-                likes: true,
-                reports: true,
-                comments: true,
-                engages: true,
-              },
+      const posts = await prisma.post.findMany({
+        skip: skip,
+        take: take,
+        include: {
+          _count: {
+            select: {
+              likes: true,
+              reports: true,
+              comments: true,
+              engages: true,
             },
-
-            likes: true,
-            comments: true,
-            engages: true,
           },
-          orderBy: {
-            ...(order === "asc" || order === "desc"
-              ? { createdAt: order }
-              : order === "likes" || order === "comments" || order === "engages"
-              ? { [order]: { _count: "asc" } }
-              : {}),
-          },
-        });
 
-        if (posts) {
-          return NextResponse.json(posts);
-        } else
-          return NextResponse.json({
-            msg: "Retriving Post Data Failed",
-            status: "ERROR",
-          });
+          likes: true,
+          comments: true,
+          engages: true,
+        },
+        orderBy: {
+          ...(order === "asc" || order === "desc"
+            ? { createdAt: order }
+            : order === "likes" || order === "comments" || order === "engages"
+            ? { [order]: { _count: "asc" } }
+            : {}),
+        },
+      });
+
+      if (posts) {
+        return NextResponse.json(posts);
       } else
-        return NextResponse.json({ msg: "Server is Busy", status: "BUSY" });
+        return NextResponse.json({
+          msg: "Retriving Post Data Failed",
+          status: "ERROR",
+        });
     } else
       return NextResponse.json({
         msg: "UNAUTHORIZED ACCESS",

@@ -1,10 +1,14 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import moment from "moment";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import { usePost } from "@/utils/usePost";
+import Button from "./Button";
+import Post from "./overlays/Post";
+
 
 
 const DisplayPost: React.FC<any> = ({
@@ -13,6 +17,8 @@ const DisplayPost: React.FC<any> = ({
   mutate
 }) => {
   const { data: session } = useSession()
+  const [selected, setSelect] = useState<string>("")
+  const { openPost, open } = usePost()
 
   const handleLike = async (postId: string) => {
     try {
@@ -68,11 +74,17 @@ const DisplayPost: React.FC<any> = ({
     } catch (err) { console.log(err) }
   }
 
+  const Comment = (postId: string) => {
+    open()
+    setSelect(postId)
+  }
+
 
   return (
     <>
       {loading && "loading"}
       <div>
+
         <Toaster />
         {data &&
           data.list &&
@@ -92,8 +104,6 @@ const DisplayPost: React.FC<any> = ({
                   />
                 )}
 
-
-
                 <div>{moment(item.createdAt).format("LLL")}</div>
 
                 <div className="w-full flex justify-between items-center">
@@ -104,12 +114,17 @@ const DisplayPost: React.FC<any> = ({
                   )
                     ? "already Liked"
                     : "Like"} {item._count.likes} </button>
-                  <button type="button">Comment {item._count.comments}</button>
+                  <Button label={`Comments ${item._count.comments}`} type="button" onClick={() => Comment(item.id)} />
                   <button type="button">Engages {item._count.engages}</button>
 
+
                 </div>
+                {openPost && selected === item.id && <Post postId={selected} />}
               </div>
+
+
             );
+
           })}
       </div>
     </>

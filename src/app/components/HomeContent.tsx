@@ -6,6 +6,7 @@ import DisplayPost from "./DisplayPost";
 import { useInfiniteScroll } from "ahooks";
 import axios from "axios";
 
+
 let status = ["ERROR", "BUSY"];
 
 export function getPosts(
@@ -87,6 +88,7 @@ function HomeContent() {
           loadingMore={loadingMore}
           mutate={mutate}
         />
+
       </div>
       {!loading && noMore && "no more"}
     </>
