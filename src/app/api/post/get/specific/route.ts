@@ -15,7 +15,11 @@ export async function POST(request: NextRequest) {
         },
 
         include: {
-          comments: true,
+          comments: {
+            include: {
+              user: true,
+            },
+          },
           user: true,
         },
       });

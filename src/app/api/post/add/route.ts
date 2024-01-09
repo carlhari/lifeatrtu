@@ -5,24 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import translate from "@iamtraction/google-translate";
 import { limiter_min } from "@/utils/LimiterEach";
-
-const vader = require("crowd-sentiment");
-
-const sentimentAnalyzer = async (text: string, origText: string) => {
-  const translated = await vader.SentimentIntensityAnalyzer.polarity_scores(
-    text
-  );
-  const orig = await vader.SentimentIntensityAnalyzer.polarity_scores(origText);
-
-  const intensity = translated.compound + orig.compound / 2;
-  if (intensity >= 0.05) {
-    return "p"; // positive
-  } else if (intensity <= -0.05) {
-    return "n"; // negative
-  } else {
-    return "m"; // median/neutral
-  }
-};
+import { sentimentAnalyzer } from "@/utils/sentiment";
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,12 +55,19 @@ export async function POST(request: NextRequest) {
                 likes: true,
                 comments: true,
                 engages: true,
+
+                user: true,
               },
             });
             console.log(post);
 
-            if (post)
-              return NextResponse.json({ msg: "Post Added", post: post });
+            if (post) {
+              if (anonymous && post.anonymous !== true) {
+                post.user.name = null as any;
+                post.user.email = null as any;
+                return NextResponse.json({ msg: "Post Added", post: post });
+              }
+            }
           } else
             return NextResponse.json({
               msg: "Failed to Add Post",

@@ -6,7 +6,6 @@ import DisplayPost from "./DisplayPost";
 import { useInfiniteScroll } from "ahooks";
 import axios from "axios";
 
-
 let status = ["ERROR", "BUSY"];
 
 export function getPosts(
@@ -66,13 +65,12 @@ function HomeContent() {
         setKeyword={setKeyword}
         keyword={keyword}
       />
-      <div ref={ref} className="overflow-auto columns-2 gap-5 mb-4">
+      <div ref={ref} className="overflow-auto columns-4 gap-5 mb-4">
         <select
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
             setSelect(e.target.value)
           }
           defaultValue={"desc"}
-
         >
           <option value="desc">Recently</option>
           <option value="asc">Oldest</option>
@@ -88,7 +86,6 @@ function HomeContent() {
           loadingMore={loadingMore}
           mutate={mutate}
         />
-
       </div>
       {!loading && noMore && "no more"}
     </>

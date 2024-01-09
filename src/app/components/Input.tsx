@@ -1,4 +1,4 @@
-import { Input } from "@/types/input";
+import type { Input } from "@/types/input";
 import React from "react";
 
 function Input({
@@ -7,6 +7,7 @@ function Input({
   className,
   name,
   onChange,
+  maxLength,
   required,
 }: Input) {
   return (
@@ -16,6 +17,7 @@ function Input({
       className={className}
       name={name}
       onChange={onChange}
+      maxLength={maxLength}
       required={required}
     />
   );

@@ -183,6 +183,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             className="border-solid border-2 border-black"
             placeholder="Untitled"
             onChange={handleChange}
+            maxLength={50}
             required={true}
           />
 

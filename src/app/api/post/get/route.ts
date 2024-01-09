@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
           likes: true,
           comments: true,
           engages: true,
+          user: true,
         },
         orderBy: {
           ...(order === "asc" || order === "desc"
@@ -37,6 +38,14 @@ export async function POST(request: NextRequest) {
       });
 
       if (posts) {
+        posts.forEach((post) => {
+          post.userId = null as any;
+          if (post.anonymous) {
+            post.user.name = null as any;
+            post.user.email = null as any;
+            post.user.createdAt = null as any;
+          }
+        });
         return NextResponse.json(posts);
       } else
         return NextResponse.json({

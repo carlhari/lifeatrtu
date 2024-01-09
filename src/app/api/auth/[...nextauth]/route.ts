@@ -13,15 +13,15 @@ export const authOptions: NextAuthOptions = {
         params: {
           scopes: ["profile"],
           prompt: "consent",
-          access_type: "offline",
         },
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET ?? "",
   session: {
     maxAge: 60 * 60 * 24,
   },
+ 
   callbacks: {
     session: ({ session, token }) => ({
       ...session,
@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
 
-    async signIn({ user, account, profile }) {
+    async signIn({ user, profile }) {
       const existingUser = await prisma.user.findUnique({
         where: {
           email: profile?.email,
@@ -50,6 +50,7 @@ export const authOptions: NextAuthOptions = {
 
       return Promise.resolve(true);
     },
+   
   },
 };
 const handler = NextAuth(authOptions);
