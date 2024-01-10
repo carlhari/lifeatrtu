@@ -58,14 +58,8 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate }) => {
       const response = await axios.post("/api/post/actions/like", {
         postId: postId,
       });
-
-      const resData = response.data;
-
-      // if (resData.ok) {
-      //   toast.success(data.msg);
-      // } else toast.error(data.msg);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 

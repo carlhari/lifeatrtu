@@ -4,12 +4,13 @@ import Input from "./Input";
 import Button from "./Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
-import io from "socket.io-client"
+import io from "socket.io-client";
 import { useTimeStore } from "@/utils/useTimeStore";
 import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
 import { useLimiter } from "@/utils/useLimiter";
+import moment from "moment";
 
 const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
@@ -48,8 +49,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
 
   useEffect(() => {
     auto();
-
-    return;
   }, []);
 
   const convertToBase64 = async (file: File) => {
@@ -106,10 +105,17 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     setStates({ ...states, [name]: value });
   };
 
+  function formatTime(time: any) {
+    const m = String(Math.floor(time / 60));
+    const s = String(time % 60);
+
+    return [m.padStart(2, "0"), s.padStart(2, "0")].join(":");
+  }
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "MAX", "ERROR", "FAILED"];
+    let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 
     try {
       const response = new Promise(async (resolve, reject) => {
@@ -118,6 +124,8 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
         const resData = res.data;
 
         if (!status.includes(resData.status)) {
+          decrease();
+          decreaseLimit();
           if (
             states.title.length !== 0 &&
             states.focus.length !== 0 &&
@@ -152,27 +160,23 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     }
   };
 
-  const socket = io("http://localhost:3001", { autoConnect: false })
-
+  const socket = io("http://localhost:3001", { autoConnect: false });
 
   const handleSocket = () => {
-    socket.connect()
-    socket.emit("sendmsg", { message: "this is msg from client" })
-  }
-
+    socket.connect();
+    socket.emit("sendmsg", { message: "this is msg from client" });
+  };
 
   return (
     hydrate &&
     click && (
-      <div className="absolute w-full z-50">
-
+      <div className="absolute top-0 left-0 w-full h-screen z-50 bg-slate-500/90 flex items-center justify-center">
         <Toaster />
         <form
           onSubmit={onSubmit}
           className="flex flex-col items-center justify-center"
           ref={formRef}
         >
-          <Button label={"Socket"} type="button" onClick={handleSocket} />
           <div>
             <Button label="Cancel" type="button" onClick={clicked} />
           </div>
@@ -212,12 +216,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             <BsIncognito />
           </button>
 
-          <Button
-            label="Button"
-            type="submit"
-            className="text-2xl font-semibold"
-          />
-
           <input
             ref={fileRef}
             type="file"
@@ -233,21 +231,21 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             onClick={() => fileRef.current?.click()}
           />
 
-          <Button label="decrease automatic" type="button" onClick={decrease} />
-          <p>{time}</p>
-
+          <button
+            type="submit"
+            className="text-2xl font-semibold"
+            style={{
+              cursor: maxLimit ? "not-allowed" : trigger ? "not-allowed" : "",
+            }}
+            disabled={maxLimit ? true : trigger ? true : false}
+          >
+            {trigger
+              ? formatTime(time)
+              : maxLimit
+              ? "Limit Reached"
+              : "Add Post"}
+          </button>
         </form>
-
-        <button
-          type="button"
-          className={`${maxLimit ? "cursor-not-allowed" : ""}`}
-          onClick={decreaseLimit}
-          disabled={maxLimit}
-        >
-          Limiter BTN
-        </button>
-
-
       </div>
     )
   );

@@ -6,10 +6,10 @@ import { persist } from "zustand/middleware";
 export const useTimeStore = create<useTimerStoreType>()(
   persist(
     (set, get) => ({
-      time: 5,
+      time: 90,
       trigger: false,
       decrease: () => {
-        if (get().time <= 0) return set(() => ({ time: 5, trigger: false }));
+        if (get().time <= 0) return set(() => ({ time: 90, trigger: false }));
 
         return set(() => ({ time: get().time - 1, trigger: true }));
       },

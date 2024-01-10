@@ -55,18 +55,23 @@ export async function POST(request: NextRequest) {
                 likes: true,
                 comments: true,
                 engages: true,
-
                 user: true,
               },
             });
-            console.log(post);
 
             if (post) {
-              if (anonymous && post.anonymous !== true) {
-                post.user.name = null as any;
-                post.user.email = null as any;
-                return NextResponse.json({ msg: "Post Added", post: post });
-              }
+              if (post.anonymous !== true) {
+                const newPost = {
+                  ...post,
+                  user: { ...post.user, name: null, email: null },
+                };
+
+                return NextResponse.json({ msg: "Post Added", post: newPost });
+              } else
+                return NextResponse.json({
+                  msg: "Failed to Process Post",
+                  status: "FAILED",
+                });
             }
           } else
             return NextResponse.json({

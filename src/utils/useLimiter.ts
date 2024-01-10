@@ -2,31 +2,31 @@
 import { useLimiterType } from "@/types/useLimiterType";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import moment from "moment";
 
-const day = 24 * 60 * 60 * 1000;
 const dt = new Date();
 
 export const useLimiter = create<useLimiterType>()(
   persist(
     (set, get) => ({
       limit: 10,
-      date: dt.getDay(),
+      date: dt.toISOString(),
       maxLimit: false,
       decreaseLimit: () => {
-        if (get().limit >= 0) return set(() => ({ maxLimit: true }));
-        else set(() => ({ limit: get().limit - 1 }));
+        if (get().limit === 0) set(() => ({ maxLimit: true }));
+        else set(() => ({ limit: get().limit - 1, maxLimit: false }));
       },
 
       auto: () => {
         setInterval(() => {
-          if (get().date !== dt.getDay())
-            return set(() => ({
-              limit: 10,
-              date: dt.getDay(),
+          const currentDt = new Date();
+          if (get().date !== currentDt.toISOString()) {
+            set(() => ({
+              limit: get().limit,
+              date: currentDt.toISOString(),
               maxLimit: false,
             }));
-        }, 10000);
+          }
+        }, 1000);
       },
     }),
     {
