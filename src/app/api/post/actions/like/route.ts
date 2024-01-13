@@ -31,10 +31,38 @@ export async function POST(request: NextRequest) {
             postId: postId,
             userId: session.user.id,
           },
+          include: {
+            post: {
+              select: {
+                id: true,
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
         });
 
-        if (like) {
-          return NextResponse.json({ ok: true, msg: "liked" });
+        const post = await prisma.post.findUnique({
+          where: {
+            id: postId,
+          },
+          include: {
+            user: true,
+          },
+        });
+
+        if (like && post) {
+          return NextResponse.json({
+            ok: true,
+            msg: "liked",
+            postId: post.id,
+            author: post.user.id,
+            authorName: post.user.name,
+          });
         } else
           return NextResponse.json({
             ok: false,

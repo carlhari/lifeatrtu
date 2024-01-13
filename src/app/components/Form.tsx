@@ -4,13 +4,12 @@ import Input from "./Input";
 import Button from "./Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
-import io from "socket.io-client";
 import { useTimeStore } from "@/utils/useTimeStore";
 import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
 import { useLimiter } from "@/utils/useLimiter";
-import moment from "moment";
+import { formatTime } from "@/utils/FormatTime";
 
 const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
@@ -30,7 +29,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
 
   const [states, setStates] = useState<FormType>(initialData);
 
-  const { limit, date, maxLimit, auto, decreaseLimit } = useLimiter();
+  const { maxLimit, auto, decreaseLimit } = useLimiter();
 
   useEffect(() => {
     setHydrate(true);
@@ -105,13 +104,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     setStates({ ...states, [name]: value });
   };
 
-  function formatTime(time: any) {
-    const m = String(Math.floor(time / 60));
-    const s = String(time % 60);
-
-    return [m.padStart(2, "0"), s.padStart(2, "0")].join(":");
-  }
-
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -124,14 +116,14 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
         const resData = res.data;
 
         if (!status.includes(resData.status)) {
-          decrease();
-          decreaseLimit();
           if (
             states.title.length !== 0 &&
             states.focus.length !== 0 &&
             states.content.length !== 0
           ) {
             setTimeout(() => {
+              decrease();
+              decreaseLimit();
               setKeyword(!keyword);
               mutate({
                 list: [...data.list, resData.post],
@@ -148,7 +140,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
         {
           loading: "loading",
           success: (data: any) => `Success: ${data.msg} `,
-          error: (data) => `Failed [${data.status}]: ${data.msg}`,
+          error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
         },
         { position: "top-center" }
       );
@@ -158,13 +150,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     } catch (error) {
       console.error("Error:", error);
     }
-  };
-
-  const socket = io("http://localhost:3001", { autoConnect: false });
-
-  const handleSocket = () => {
-    socket.connect();
-    socket.emit("sendmsg", { message: "this is msg from client" });
   };
 
   return (

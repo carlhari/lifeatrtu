@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
           ...(order === "asc" || order === "desc"
             ? { createdAt: order }
             : order === "likes" || order === "comments" || order === "engages"
-            ? { [order]: { _count: "asc" } }
+            ? { [order]: { _count: "desc" } }
             : {}),
         },
       });
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
       if (posts) {
         posts.forEach((post) => {
           post.userId = null as any;
+          post.user.email = null as any;
           if (post.anonymous) {
             post.user.name = null as any;
             post.user.email = null as any;

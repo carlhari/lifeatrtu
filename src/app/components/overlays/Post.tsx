@@ -13,6 +13,7 @@ import { Capitalize } from "@/utils/Capitalize";
 function SpecificPost({ postId }: { postId: string }) {
   const { close } = usePost();
   const [comment, setComment] = useState<string>("");
+  const [disabled, setDisabled] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
 
@@ -33,39 +34,50 @@ function SpecificPost({ postId }: { postId: string }) {
       }
     });
   }
-
+  let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const AddComment = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setDisabled(true);
     try {
-      const response = await axios.post("/api/post/actions/comment", {
-        postId: postId,
-        content: comment,
-      });
-      const data = response.data;
-      if (data.ok) {
-        toast.success(data.msg);
-        mutate((prev: any) => {
-          return {
-            ...prev,
-            post: {
-              comments: [
-                ...prev.post.comments,
-                {
-                  content: comment,
-                  postId: postId,
-                  user: {
-                    id: session?.user.id,
-                    name: Capitalize(session?.user.name),
-                  },
-                },
-              ],
-            },
-          };
+      const response = new Promise(async (resolve, reject) => {
+        const res = await axios.post("/api/post/actions/comment", {
+          postId: postId,
+          content: comment,
         });
+        const data = res.data;
+        if (!status.includes(data.status)) {
+          if (data.ok) {
+            setTimeout(() => {
+              mutate((prev: any) => {
+                return {
+                  ...prev,
+                  post: {
+                    comments: [
+                      ...prev.post.comments,
+                      {
+                        content: comment,
+                        postId: postId,
+                        user: {
+                          id: session?.user.id,
+                          name: Capitalize(session?.user.name),
+                        },
+                      },
+                    ],
+                  },
+                };
+              });
+              setDisabled(false);
+              resolve(data);
+            }, 1500);
+          } else reject(data);
+        } else reject(data);
+      });
 
-        formRef.current && formRef.current.reset();
-        setComment("");
-      } else toast.error(data.msg);
+      toast.promise(response, {
+        loading: "loading",
+        success: (data: any) => `Success: ${data.msg}`,
+        error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
+      });
     } catch (err) {
       console.error(err);
     }
@@ -97,7 +109,13 @@ function SpecificPost({ postId }: { postId: string }) {
           onChange={(e) => setComment(e.target.value)}
           maxLength={100}
         />
-        <button type="submit">Add Comment</button>
+        <button
+          type="submit"
+          disabled={disabled}
+          style={{ cursor: disabled ? "not-allowed" : "" }}
+        >
+          {disabled ? "Processing" : "Add Comment"}
+        </button>
       </form>
 
       {data &&

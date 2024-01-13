@@ -51,7 +51,17 @@ function HomeContent() {
     });
 
   useEffect(() => {
+    const handleFocus = () => {
+      reload();
+    };
+
+    window.addEventListener("focus", handleFocus);
+
     reload();
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [keyword, select]);
 
   return (
@@ -85,6 +95,7 @@ function HomeContent() {
           loadMore={loadMore}
           loadingMore={loadingMore}
           mutate={mutate}
+          reload={reload}
         />
       </div>
       {!loading && noMore && "no more"}

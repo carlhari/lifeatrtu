@@ -14,6 +14,6 @@ export const useTimeStore = create<useTimerStoreType>()(
         return set(() => ({ time: get().time - 1, trigger: true }));
       },
     }),
-    { name: "storage" }
+    { name: "limit post" }
   )
 );

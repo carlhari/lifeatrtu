@@ -3,7 +3,7 @@
 import { RateLimiter } from "limiter";
 
 export const limiter_delete = new RateLimiter({
-  tokensPerInterval: 100,
+  tokensPerInterval: 50,
   interval: "min",
   fireImmediately: true,
 });

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (deletePost) {
-          return NextResponse.json({ msg: "Successfully Delete" });
+          return NextResponse.json({ ok: true, msg: "Successfully Delete" });
         } else
           return NextResponse.json({
             msg: "Failed To Delete",

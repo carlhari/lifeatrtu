@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({
               ok: false,
               msg: "Failed to Add Comment",
+              status: "ERROR",
             });
         } else
           return NextResponse.json({
