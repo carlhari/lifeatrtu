@@ -4,7 +4,4 @@ export interface useDeleteTypes {
   maxLimit: boolean;
   decreaseLimit: () => void;
   check: () => void;
-  time: number;
-  trigger: boolean;
-  decreaseTime: () => void;
 }

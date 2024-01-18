@@ -30,7 +30,7 @@ export const useLimiter = create<useLimiterType>()(
       },
     }),
     {
-      name: "limit",
+      name: "Add limit",
     }
   )
 );

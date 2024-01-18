@@ -13,17 +13,16 @@ import { Capitalize } from "@/utils/Capitalize";
 import { IoSettingsOutline, IoCloseCircleOutline } from "react-icons/io5";
 import { useDelete } from "@/utils/useDelete";
 import { formatTime } from "@/utils/FormatTime";
+import { useDeleteTimer } from "@/utils/useDeleteTimer";
 
 const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
   const { data: session } = useSession();
   const [selected, setSelect] = useState<string>("");
-
-  const socket = io("http://localhost:3001");
-  const [openSettings, setSettings] = useState<boolean>(false);
   const { openPost, open } = usePost();
   const [hydrate, setHydrate] = useState<boolean>(false);
-  const { decreaseLimit, maxLimit, check, trigger, time, decreaseTime } =
-    useDelete();
+  const { decreaseLimit, maxLimit, check } = useDelete();
+  const { time, decrease, trigger } = useDeleteTimer();
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const handleLike = async (postId: string) => {
@@ -73,6 +72,7 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
       const data = response.data;
 
       if (data.msg === "liked") {
+        const socket = io("http://localhost:3001");
         socket.emit("active", {
           userId: session?.user.id,
           author: data.author,
@@ -94,6 +94,7 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
 
         if (!status.includes(data.status)) {
           setTimeout(() => {
+            decrease();
             decreaseLimit();
             reload();
             resolve(data);
@@ -116,10 +117,7 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
   };
 
   useEffect(() => {
-    reload();
-  }, [session]);
-
-  useEffect(() => {
+    const socket = io("http://localhost:3001");
     const socketListener = (data: any) => {
       if (data.author === session?.user.id) {
         if (data.whoLiked !== session?.user.id) {
@@ -130,28 +128,34 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
       }
     };
 
-    socket.on("client", socketListener);
+    setTimeout(() => {
+      socket.on("client", socketListener);
+    }, 1000);
 
     return () => {
       socket.off("client", socketListener);
     };
-  }, [session, socket]);
+  }, [session]);
 
   useEffect(() => {
     setHydrate(true);
+    check();
     const counter = setInterval(() => {
       if (trigger) {
         if (time <= 0) {
           clearInterval(counter);
           return;
         }
-        decreaseTime();
+        decrease();
       }
     }, 1000);
     return () => clearInterval(counter);
   }, [trigger]);
 
-  console.log(data);
+  useEffect(() => {
+    check();
+  }, []);
+
   return (
     hydrate && (
       <>
@@ -167,7 +171,7 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
                   className="overflow-auto break-inside-avoid border-2 border-black border-solid"
                 >
                   {/* Post Menu */}
-                  <div className="w-full flex items-center justify-end">
+                  {/* <div className="w-full flex items-center justify-end">
                     <div className="dropdown dropdown-left">
                       {openSettings && selected === item.id ? (
                         <div
@@ -212,6 +216,9 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
                                     setSelect(item.id);
                                     if (selected === item.id) Delete(selected);
                                   }}
+                                  disabled={
+                                    maxLimit ? true : trigger ? true : false
+                                  }
                                 >
                                   {trigger
                                     ? formatTime(time)
@@ -229,7 +236,58 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
                         </ul>
                       )}
                     </div>
+                  </div> */}
+
+                  <div className="relative w-full flex items-center justify-end px-1">
+                    {selected === item.id && menuOpen ? (
+                      <>
+                        <Button
+                          label="Close"
+                          type="button"
+                          onClick={() => {
+                            setSelect("");
+                            setMenuOpen(false);
+                          }}
+                        />
+                        <div className="absolute right-12 top-1 w-32 bg-white border border-gray-200 shadow-lg rounded-md p-2 flex flex-col">
+                          {item.user.id === session?.user.id ? (
+                            <>
+                              <Button label="EDIT" type="button" />
+                              <Button
+                                label={
+                                  trigger
+                                    ? formatTime(time)
+                                    : maxLimit
+                                    ? "Limit Reached"
+                                    : "Delete"
+                                }
+                                type="button"
+                                onClick={() => {
+                                  setSelect(item.id);
+                                  if (selected === item.id) Delete(selected);
+                                }}
+                                disabled={
+                                  maxLimit ? true : trigger ? true : false
+                                }
+                              />
+                            </>
+                          ) : (
+                            <Button label="Report" type="button" />
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <Button
+                        label="Menu"
+                        type="button"
+                        onClick={() => {
+                          setSelect(item.id);
+                          setMenuOpen(true);
+                        }}
+                      />
+                    )}
                   </div>
+
                   {/* ----------------------- */}
 
                   <div>{item.id}</div>
@@ -271,8 +329,8 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
                       label={`Comments ${item._count.comments}`}
                       type="button"
                       onClick={() => {
-                        open();
                         setSelect(item.id);
+                        if (selected === item.id) open();
                       }}
                     />
                     <button type="button">Engages {item._count.engages}</button>
