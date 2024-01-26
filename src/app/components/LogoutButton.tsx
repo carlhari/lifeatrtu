@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
-import { signOut } from "next-auth/react";
+import { isOpenLogout } from "@/utils/Overlay/Logout";
 
 function LogoutButton() {
+  const { changeOpen } = isOpenLogout();
   return (
-    <button type="button" onClick={() => signOut({ callbackUrl: "/" })}>
+    <button type="button" onClick={changeOpen}>
       Logout
     </button>
   );

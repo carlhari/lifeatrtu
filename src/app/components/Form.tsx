@@ -10,11 +10,14 @@ import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
 import { useLimiter } from "@/utils/useLimiter";
 import { formatTime } from "@/utils/FormatTime";
+import { isOpenAgreement } from "@/utils/Overlay/Agreement";
+import Agreement from "./overlays/Agreement";
 
 const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { time, decrease, trigger } = useTimeStore();
   const { click, clicked } = useAddPost();
+  const { openAgreement, agreementT, agreementF } = isOpenAgreement();
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -158,17 +161,21 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   return (
     hydrate &&
     click && (
-      <div className="absolute top-0 left-0 w-full h-screen z-50 bg-slate-500/90 flex items-center justify-center overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-screen z-50 bg-slate-500/90 flex items-center justify-center overflow-hidden animate-fadeIn">
         <Toaster />
+        {states.anonymous && openAgreement && (
+          <Agreement setStates={setStates} states={states} />
+        )}
         <form
           onSubmit={onSubmit}
           className="flex flex-col items-center justify-center"
           ref={formRef}
         >
+          {/* -------------------------------------------------------------------------- */}
           <div>
             <Button label="Cancel" type="button" onClick={clicked} />
           </div>
-
+          {/* -------------------------------------------------------------------------- */}
           <Input
             type="text"
             name="title"
@@ -178,7 +185,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             maxLength={50}
             required={true}
           />
-
+          {/* -------------------------------------------------------------------------- */}
           <select className="" name="focus" onChange={handleChange} required>
             <option value=""></option>
             <option value="facility">Facility</option>
@@ -186,7 +193,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             <option value="experience">Experience</option>
             <option value="others">Others</option>
           </select>
-
+          {/* -------------------------------------------------------------------------- */}
           <textarea
             placeholder="What's Happening now?"
             name="content"
@@ -194,16 +201,18 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             onChange={handleChange}
             required
           />
-
+          {/* -------------------------------------------------------------------------- */}
           <button
             type="button"
-            onClick={() =>
-              setStates({ ...states, anonymous: !states.anonymous })
-            }
+            onClick={() => {
+              setStates({ ...states, anonymous: !states.anonymous });
+              agreementT();
+            }}
           >
-            <BsIncognito />
+            <BsIncognito fill={states.anonymous ? "#706f6d" : "black"} />
           </button>
 
+          {/* -------------------------------------------------------------------------- */}
           <input
             ref={fileRef}
             type="file"
@@ -218,7 +227,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             type="button"
             onClick={() => fileRef.current?.click()}
           />
-
+          {/* -------------------------------------------------------------------------- */}
           <button
             type="submit"
             className="text-2xl font-semibold"
@@ -232,8 +241,8 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
               : maxLimit
               ? "Limit Reached"
               : "Add Post"}
-            Button
           </button>
+          {states.anonymous}
         </form>
       </div>
     )

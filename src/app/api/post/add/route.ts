@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
           from: "tl",
           to: "en",
         });
+
         const sentimentResult = await sentimentAnalyzer(
           translated.text,
           content

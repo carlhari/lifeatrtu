@@ -12,7 +12,7 @@ export const useLimiter = create<useLimiterType>()(
       date: dt.toISOString(),
       maxLimit: false,
       decreaseLimit: () => {
-        if (get().limit === 0) set(() => ({ maxLimit: true }));
+        if (get().limit >= 0) set(() => ({ maxLimit: true }));
         else set(() => ({ limit: get().limit - 1, maxLimit: false }));
       },
 

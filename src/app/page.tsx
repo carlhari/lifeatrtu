@@ -12,7 +12,7 @@ export default async function Home() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden flex items-center justify-center outline-none">
-      <div className="card bg-base-100 shadow-xl p-8 z-50 w-4/12 flex flex-col items-center justify-center">
+      <div className="card bg-white shadow-xl p-8 z-50 w-4/12 flex flex-col items-center justify-center">
         <div className="flex items-center justify-center leading-normal">
           <div className="text-8xl">Life@</div>
           <div

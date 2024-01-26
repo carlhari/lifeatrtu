@@ -161,82 +161,16 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
       <>
         <Toaster />
         {loading && "loading"}
-        <div>
+        <div className="overflow-auto flex-col flex gap-4 w-full">
           {data &&
             data.list &&
             data.list.map((item: any, key: any) => {
               return (
                 <div
                   key={key}
-                  className="overflow-auto break-inside-avoid border-2 border-black border-solid"
+                  className="relative break-inside-avoid border-2 border-black border-solid mb-4"
                 >
                   {/* Post Menu */}
-                  {/* <div className="w-full flex items-center justify-end">
-                    <div className="dropdown dropdown-left">
-                      {openSettings && selected === item.id ? (
-                        <div
-                          tabIndex={0}
-                          role="button"
-                          className="text-3xl m-2"
-                          onClick={() => {
-                            setSelect(item.id);
-                            setSettings(false);
-                          }}
-                        >
-                          <IoCloseCircleOutline />
-                        </div>
-                      ) : (
-                        <div
-                          tabIndex={0}
-                          role="button"
-                          className="text-3xl m-2"
-                          onClick={() => {
-                            setSelect(item.id);
-                            setSettings(true);
-                          }}
-                        >
-                          <IoSettingsOutline />
-                        </div>
-                      )}
-
-                      {openSettings && (
-                        <ul
-                          tabIndex={0}
-                          className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-36"
-                        >
-                          {item.user.id === session?.user.id ? (
-                            <>
-                              <li>
-                                <a>EDIT</a>
-                              </li>
-                              <li>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setSelect(item.id);
-                                    if (selected === item.id) Delete(selected);
-                                  }}
-                                  disabled={
-                                    maxLimit ? true : trigger ? true : false
-                                  }
-                                >
-                                  {trigger
-                                    ? formatTime(time)
-                                    : maxLimit
-                                    ? "Limit Reached"
-                                    : "Delete"}
-                                </button>
-                              </li>
-                            </>
-                          ) : (
-                            <li>
-                              <button type="button">Report</button>
-                            </li>
-                          )}
-                        </ul>
-                      )}
-                    </div>
-                  </div> */}
 
                   <div className="relative w-full flex items-center justify-end px-1">
                     {selected === item.id && menuOpen ? (
@@ -293,7 +227,9 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
                   <div>{item.id}</div>
                   <div>{item.title}</div>
                   <div>{item.focus}</div>
-                  <div>{item.content}</div>
+                  <div className="break-words text-justify line-clamp-4 text-ellipsis">
+                    {item.content}
+                  </div>
                   <div>
                     {item.user.name && item.user.name
                       ? item.user.name
