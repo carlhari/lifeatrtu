@@ -43,10 +43,15 @@ const config: Config = {
           "0%": { opacity: "0" },
           "100%": { opcaity: "1" },
         },
+        fadeOut: {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
       },
 
       animation: {
         fadeIn: `fadeIn .8s ease`,
+        fadeOut: "fadeOut .8s ease",
       },
     },
   },

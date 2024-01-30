@@ -10,18 +10,14 @@ import SpecificPost from "./overlays/Post";
 import { io } from "socket.io-client";
 import toast, { Toaster } from "react-hot-toast";
 import { Capitalize } from "@/utils/Capitalize";
-import { IoSettingsOutline, IoCloseCircleOutline } from "react-icons/io5";
-import { useDelete } from "@/utils/useDelete";
-import { formatTime } from "@/utils/FormatTime";
-import { useDeleteTimer } from "@/utils/useDeleteTimer";
+import { CgClose, CgProfile } from "react-icons/cg";
+import { LuSettings2 } from "react-icons/lu";
 
 const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
   const { data: session } = useSession();
   const [selected, setSelect] = useState<string>("");
   const { openPost, open } = usePost();
   const [hydrate, setHydrate] = useState<boolean>(false);
-  const { decreaseLimit, maxLimit, check } = useDelete();
-  const { time, decrease, trigger } = useDeleteTimer();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
@@ -94,8 +90,6 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
 
         if (!status.includes(data.status)) {
           setTimeout(() => {
-            decrease();
-            decreaseLimit();
             reload();
             resolve(data);
           }, 2000);
@@ -132,6 +126,7 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
       socket.on("client", socketListener);
     }, 1000);
 
+    reload();
     return () => {
       socket.off("client", socketListener);
     };
@@ -139,21 +134,6 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
 
   useEffect(() => {
     setHydrate(true);
-    check();
-    const counter = setInterval(() => {
-      if (trigger) {
-        if (time <= 0) {
-          clearInterval(counter);
-          return;
-        }
-        decrease();
-      }
-    }, 1000);
-    return () => clearInterval(counter);
-  }, [trigger]);
-
-  useEffect(() => {
-    check();
   }, []);
 
   return (
@@ -161,48 +141,42 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
       <>
         <Toaster />
         {loading && "loading"}
-        <div className="overflow-auto flex-col flex gap-4 w-full">
+        <div className="columns-4 gap-4 mb-4">
           {data &&
             data.list &&
             data.list.map((item: any, key: any) => {
               return (
                 <div
                   key={key}
-                  className="relative break-inside-avoid border-2 border-black border-solid mb-4"
+                  className="relative break-inside-avoid border-2 border-black border-solid mb-4 p-2 rounded-xl"
                 >
                   {/* Post Menu */}
 
                   <div className="relative w-full flex items-center justify-end px-1">
                     {selected === item.id && menuOpen ? (
                       <>
-                        <Button
-                          label="Close"
+                        <button
+                          className="text-2xl text-black"
                           type="button"
                           onClick={() => {
                             setSelect("");
                             setMenuOpen(false);
                           }}
-                        />
-                        <div className="absolute right-12 top-1 w-32 bg-white border border-gray-200 shadow-lg rounded-md p-2 flex flex-col">
+                        >
+                          <CgClose />
+                        </button>
+
+                        <div className="absolute right-10 top-1 w-32 bg-white border border-gray-200 shadow-lg rounded-md p-2 flex flex-col">
                           {item.user.id === session?.user.id ? (
                             <>
                               <Button label="EDIT" type="button" />
                               <Button
-                                label={
-                                  trigger
-                                    ? formatTime(time)
-                                    : maxLimit
-                                    ? "Limit Reached"
-                                    : "Delete"
-                                }
+                                label={"Delete"}
                                 type="button"
                                 onClick={() => {
                                   setSelect(item.id);
                                   if (selected === item.id) Delete(selected);
                                 }}
-                                disabled={
-                                  maxLimit ? true : trigger ? true : false
-                                }
                               />
                             </>
                           ) : (
@@ -211,33 +185,49 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
                         </div>
                       </>
                     ) : (
-                      <Button
-                        label="Menu"
+                      <button
                         type="button"
                         onClick={() => {
                           setSelect(item.id);
                           setMenuOpen(true);
                         }}
-                      />
+                        className={`text-2xl ${
+                          selected === item.id && menuOpen && "animate-fadeOut"
+                        }`}
+                      >
+                        <LuSettings2 />
+                      </button>
                     )}
                   </div>
 
-                  {/* ----------------------- */}
+                  {/* ----------------------------------------------------------- */}
 
-                  <div>{item.id}</div>
-                  <div>{item.title}</div>
+                  <div className="font-bold text-2xl break-words text-justify line-clamp-2 text-ellipsis w-full 2xl:text-3xl xl:text-3xl">
+                    {item.title}
+                  </div>
                   <div>{item.focus}</div>
-                  <div className="break-words text-justify line-clamp-4 text-ellipsis">
-                    {item.content}
+                  <div className="text-sm">
+                    {moment(item.createdAt).format("lll")}
                   </div>
-                  <div>
-                    {item.user.name && item.user.name
-                      ? item.user.name
-                      : item.user.id === session?.user.id
-                      ? "Anonymous (me)"
-                      : "Anonymous"}
+                  {/* ----------------------------------------------------------- */}
+                  <div className="bg-slate-100 rounded-tl-xl rounded-tr-xl p-5 flex items-start flex-col gap-5">
+                    <div className="flex items-center gap-1">
+                      <div className="text-5xl">
+                        <CgProfile />
+                      </div>
+                      <div>
+                        {item.user.name && item.user.name
+                          ? item.user.name
+                          : item.user.id === session?.user.id
+                          ? "Anonymous (me)"
+                          : "Anonymous"}
+                      </div>
+                    </div>
+                    <div className="break-words text-justify line-clamp-4 text-ellipsis w-full">
+                      {item.content}
+                    </div>
                   </div>
-
+                  {/* ----------------------------------------------------------- */}
                   {item.image && (
                     <Image
                       loading="lazy"
@@ -245,8 +235,6 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
                       alt={"Image Content"}
                     />
                   )}
-
-                  <div>{moment(item.createdAt).format("LLL")}</div>
 
                   <div className="w-full flex justify-between items-center">
                     <button type="button" onClick={() => handleLike(item.id)}>

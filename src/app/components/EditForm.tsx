@@ -4,16 +4,15 @@ import Input from "./Input";
 import Button from "./Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
-import { useTimeStore } from "@/utils/useTimeStore";
+
 import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
-import { useLimiter } from "@/utils/useLimiter";
 import { formatTime } from "@/utils/FormatTime";
 
 const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
-  const { time, decrease, trigger } = useTimeStore();
+
   const { click, clicked } = useAddPost();
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -29,25 +28,8 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
 
   const [states, setStates] = useState<FormType>(initialData);
 
-  const { maxLimit, auto, decreaseLimit } = useLimiter();
-
   useEffect(() => {
     setHydrate(true);
-    const counter = setInterval(() => {
-      if (trigger) {
-        if (time <= 0) {
-          clearInterval(counter);
-          return;
-        }
-        decrease();
-      }
-    }, 1000);
-
-    return () => clearInterval(counter);
-  }, [trigger]);
-
-  useEffect(() => {
-    auto();
   }, []);
 
   const convertToBase64 = async (file: File) => {
@@ -122,8 +104,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             states.content.length !== 0
           ) {
             setTimeout(() => {
-              decrease();
-              decreaseLimit();
               setKeyword(!keyword);
               mutate({
                 list: [...data.list, resData.post],
@@ -219,20 +199,8 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             onClick={() => fileRef.current?.click()}
           />
 
-          <button
-            type="submit"
-            className="text-2xl font-semibold"
-            style={{
-              cursor: maxLimit ? "not-allowed" : trigger ? "not-allowed" : "",
-            }}
-            disabled={maxLimit ? true : trigger ? true : false}
-          >
-            {trigger
-              ? formatTime(time)
-              : maxLimit
-              ? "Limit Reached"
-              : "Add Post"}
-            Button
+          <button type="submit" className="text-2xl font-semibold">
+            Add Post
           </button>
         </form>
       </div>

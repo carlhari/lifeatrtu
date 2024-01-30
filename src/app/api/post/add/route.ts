@@ -22,12 +22,22 @@ export async function POST(request: NextRequest) {
           to: "en",
         });
 
+        const translatedTitle = await translate(title, {
+          from: "tl",
+          to: "en",
+        });
+
+        const sentimentResultTitle = await sentimentAnalyzer(
+          translatedTitle.text,
+          title
+        );
+
         const sentimentResult = await sentimentAnalyzer(
           translated.text,
           content
         );
 
-        if (sentimentResult !== "n") {
+        if (sentimentResult !== "n" && sentimentResultTitle !== "n") {
           const addPost = await prisma.post.create({
             data: {
               title: title,

@@ -81,23 +81,22 @@ function HomeContent() {
         setKeyword={setKeyword}
         keyword={keyword}
       />
+      <select
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+          setSelect(e.target.value)
+        }
+        defaultValue={"desc"}
+      >
+        <option value="desc">Recently</option>
+        <option value="asc">Oldest</option>
+        <option value="likes">Most Liked</option>
+        <option value="engages">Most Engaged</option>
+        <option value="comments">Most Commented</option>
+      </select>
       <div
         ref={ref}
-        className="m-auto bg-green-100/50 w-p-88 flex flex-col items-center h-p-90 overflow-y-auto"
+        className="m-auto bg-green-100/50 w-p-88 h-p-90 overflow-y-auto"
       >
-        <select
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setSelect(e.target.value)
-          }
-          defaultValue={"desc"}
-        >
-          <option value="desc">Recently</option>
-          <option value="asc">Oldest</option>
-          <option value="likes">Most Liked</option>
-          <option value="engages">Most Engaged</option>
-          <option value="comments">Most Commented</option>
-        </select>
-
         <DisplayPost
           data={data}
           loading={loading}

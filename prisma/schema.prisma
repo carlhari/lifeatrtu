@@ -18,6 +18,7 @@ model User {
   engages       Engage[]
   createdAt     DateTime       @default(now())
   Notifications Notification[]
+  cooldown      Int
 }
 
 model Post {
