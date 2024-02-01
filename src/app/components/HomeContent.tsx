@@ -7,6 +7,7 @@ import { useInfiniteScroll } from "ahooks";
 import axios from "axios";
 import { isOpenLogout } from "@/utils/Overlay/Logout";
 import Logout from "@/app/components/overlays/Logout";
+import { useSession } from "next-auth/react";
 
 let status = ["ERROR", "BUSY"];
 
@@ -29,7 +30,7 @@ export function getPosts(
       if (!status.includes(data)) {
         resolve({
           list: data,
-          skip: data && data.length < 4 ? undefined : newSkip,
+          skip: data && data.length < 10 ? undefined : newSkip,
         });
       } else reject(data);
     } catch (err) {
@@ -43,9 +44,10 @@ function HomeContent() {
   const [keyword, setKeyword] = useState<string>("");
   const [select, setSelect] = useState<string>("desc");
   const { open } = isOpenLogout();
+  const { data: session } = useSession();
 
   const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
-    useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 4, select), {
+    useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10, select), {
       target: ref,
       isNoMore: (d) => {
         if (d?.skip === undefined) return true;
@@ -67,6 +69,12 @@ function HomeContent() {
       window.removeEventListener("focus", handleFocus);
     };
   }, [keyword, select]);
+
+  useEffect(() => {
+    if (session) {
+      localStorage.setItem("id", session.user.id);
+    }
+  }, []);
 
   return (
     <div className="w-full h-full">
@@ -93,10 +101,7 @@ function HomeContent() {
         <option value="engages">Most Engaged</option>
         <option value="comments">Most Commented</option>
       </select>
-      <div
-        ref={ref}
-        className="m-auto bg-green-100/50 w-p-88 h-p-90 overflow-y-auto"
-      >
+      <div ref={ref} className="m-auto w-p-88 h-p-90 overflow-y-auto">
         <DisplayPost
           data={data}
           loading={loading}
@@ -104,6 +109,7 @@ function HomeContent() {
           loadingMore={loadingMore}
           mutate={mutate}
           reload={reload}
+          noMore={noMore}
         />
       </div>
       <div className="w-10/12 m-auto">{!loading && noMore && "no more"}</div>

@@ -4,19 +4,25 @@ import Input from "./Input";
 import Button from "./Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
-
 import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
 import { formatTime } from "@/utils/FormatTime";
+import { isOpenAgreement } from "@/utils/Overlay/Agreement";
+import Agreement from "./overlays/Agreement";
+import { Capitalize } from "@/utils/Capitalize";
+import { useSession } from "next-auth/react";
+import { BiImageAdd } from "react-icons/bi";
 
 const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
-
+  const { data: session } = useSession();
   const { click, clicked } = useAddPost();
+  const { openAgreement, agreementT } = isOpenAgreement();
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // const { remainingTime, setStartingTime } = usePostCountDown();
   const initialData = {
     title: "",
     focus: "",
@@ -59,24 +65,31 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
         if (file.size <= 3 * 1024 * 1024) {
           try {
             const converted = await convertToBase64(file);
-            return setStates({ ...states, image: converted });
+            return setStates({ ...states, image: converted as string | null });
           } catch (err) {
             remove();
-            return setStates({ ...states, error: "error occured" });
+            setStates({ ...states, error: "error occured" });
+            toast.error(states.error);
+            return;
           }
         } else {
           remove();
-          return setStates({
+          setStates({
             ...states,
             error: "File exceeds the maximum size of 3MB",
           });
+          toast.error(states.error);
+          return;
         }
       } else {
         remove();
-        return setStates({
+
+        setStates({
           ...states,
           error: "Please select valid file format.",
         });
+        toast.error(states.error);
+        return;
       }
     }
   };
@@ -135,74 +148,161 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     }
   };
 
+  // useEffect(() => {
+  //   startCountDown();
+  // }, []);
+
   return (
     hydrate &&
     click && (
-      <div className="absolute top-0 left-0 w-full h-screen z-50 bg-slate-500/90 flex items-center justify-center overflow-hidden">
+      <div
+        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden animate-fadeIn"
+        style={{
+          backgroundImage: `url("/bg.png")`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <Toaster />
-        <form
-          onSubmit={onSubmit}
-          className="flex flex-col items-center justify-center"
-          ref={formRef}
-        >
-          <div>
-            <Button label="Cancel" type="button" onClick={clicked} />
+        {states.anonymous && openAgreement && (
+          <Agreement setStates={setStates} states={states} />
+        )}
+        <div className="flex w-full h-full flex-wrap">
+          <div className="flex flex-col justify-center w-1/2 pl-28 gap-20">
+            <div className="text-5xl font-semibold">
+              Hello, {session && Capitalize(session?.user?.name).split(" ")[0]}
+            </div>
+            <div className="flex items-center flex-col justify-center w-full">
+              <div className="font-bold text-7xl leading-snug w-5/12">
+                We care about what you think
+              </div>
+            </div>
+            <div className=" text-justify font-medium text-xl w-10/12">
+              You can share your thoughts anonymously by clicking the anonymous
+              icon and you can add photo if you want *maximum 1 photo only*
+            </div>
           </div>
-
-          <Input
-            type="text"
-            name="title"
-            className="border-solid border-2 border-black"
-            placeholder="Untitled"
-            onChange={handleChange}
-            maxLength={50}
-            required={true}
-          />
-
-          <select className="" name="focus" onChange={handleChange} required>
-            <option value=""></option>
-            <option value="facility">Facility</option>
-            <option value="professor">Professor</option>
-            <option value="experience">Experience</option>
-            <option value="others">Others</option>
-          </select>
-
-          <textarea
-            placeholder="What's Happening now?"
-            name="content"
-            maxLength={500}
-            onChange={handleChange}
-            required
-          />
-
-          <button
-            type="button"
-            onClick={() =>
-              setStates({ ...states, anonymous: !states.anonymous })
-            }
+          {/* ----------------------------------------------------------------------------- */}
+          <form
+            onSubmit={onSubmit}
+            className="w-1/2 h-full flex flex-col item-center p-2 px-10 gap-5"
+            style={{ backgroundColor: "#DBD9D9" }}
+            ref={formRef}
           >
-            <BsIncognito />
-          </button>
+            {/* -------------------------------------------------------------------------- */}
+            <div className="w-full flex justify-end items-center">
+              <Button
+                label="Cancel"
+                type="button"
+                onClick={clicked}
+                className="text-xl font-semibold"
+              />
+            </div>
+            {/* -------------------------------------------------------------------------- */}
+            <Input
+              type="text"
+              name="title"
+              className="outline-none text-7xl w-full bg-transparent font-bold placeholder-black"
+              placeholder="Untitled"
+              onChange={handleChange}
+              maxLength={50}
+              required={true}
+              value={states.title}
+            />
+            {/* -------------------------------------------------------------------------- */}
 
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            name="image"
-            className="hidden"
-            onChange={imageChange}
-          />
+            <div className="w-full flex gap-1 items-center">
+              <div className="text-5xl">Focus: </div>
+              <select
+                className="w-full text-3xl outline-none rounded-xl p-2 bg-transparent text-left"
+                name="focus"
+                onChange={handleChange}
+                value={states.focus}
+                required
+              >
+                <option value=""></option>
+                <option value="facility">Facility</option>
+                <option value="professor">Professor</option>
+                <option value="experience">Experience</option>
+                <option value="others">Others</option>
+              </select>
+            </div>
+            {/* -------------------------------------------------------------------------- */}
+            <div className="flex items-center justify-center flex-col">
+              <textarea
+                placeholder="What's Happening now?"
+                name="content"
+                maxLength={500}
+                onChange={handleChange}
+                value={states.content}
+                className="resize-none w-full h-96 outline-none rounded-t-xl text-xl text-justify p-4"
+                required
+              />
 
-          <Button
-            label="Add Photo"
-            type="button"
-            onClick={() => fileRef.current?.click()}
-          />
+              <div className="w-full rounded-bl-xl rounded-br-xl bg-white p-2 flex items-center justify-between">
+                <div
+                  className={`w-1/3 ${
+                    states.image ? "animate-fadeIn" : "animate-fadeOut"
+                  }`}
+                >
+                  {states.image && "With Photo"}
+                </div>
+                <div>{states.content.length}/500</div>
 
-          <button type="submit" className="text-2xl font-semibold">
-            Add Post
-          </button>
-        </form>
+                <div className="w-1/3"></div>
+              </div>
+            </div>
+            {/* -------------------------------------------------------------------------- */}
+
+            <div className="w-full flex items-center justify-end gap-4">
+              {/* -------------------------------------------------------------------------- */}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                name="image"
+                className="hidden"
+                onChange={imageChange}
+              />
+
+              {states.image ? (
+                <button
+                  type="button"
+                  onClick={() => remove()}
+                  className={`bg-red-600 rounded-xl p-1 text-white text-lg animate-fadeIn`}
+                >
+                  Remove Photo
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="text-5xl flex items-center justify-center"
+                >
+                  <BiImageAdd />
+                </button>
+              )}
+              {/* -------------------------------------------------------------------------- */}
+              <button
+                type="button"
+                onClick={() => {
+                  setStates({ ...states, anonymous: !states.anonymous });
+                  agreementT();
+                }}
+                className="text-4xl flex items-center justify-center"
+              >
+                <BsIncognito fill={states.anonymous ? "#706f6d" : "black"} />
+              </button>
+
+              {/* -------------------------------------------------------------------------- */}
+              <button type="submit" className="text-2xl font-semibold">
+                Submit
+              </button>
+            </div>
+
+            {/* -------------------------------------------------------------------------- */}
+          </form>
+        </div>
       </div>
     )
   );

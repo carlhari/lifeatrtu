@@ -9,6 +9,7 @@ function Input({
   onChange,
   maxLength,
   required,
+  value,
 }: Input) {
   return (
     <input
@@ -19,6 +20,7 @@ function Input({
       onChange={onChange}
       maxLength={maxLength}
       required={required}
+      value={value}
     />
   );
 }

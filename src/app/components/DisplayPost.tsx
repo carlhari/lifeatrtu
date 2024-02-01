@@ -12,8 +12,17 @@ import toast, { Toaster } from "react-hot-toast";
 import { Capitalize } from "@/utils/Capitalize";
 import { CgClose, CgProfile } from "react-icons/cg";
 import { LuSettings2 } from "react-icons/lu";
+import { BsHeartFill } from "react-icons/bs";
+import { HiOutlineChatBubbleOvalLeftEllipsis } from "react-icons/hi2";
+import { BsPeopleFill } from "react-icons/bs";
 
-const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
+const DisplayPost: React.FC<any> = ({
+  data,
+  loading,
+  mutate,
+  reload,
+  noMore,
+}) => {
   const { data: session } = useSession();
   const [selected, setSelect] = useState<string>("");
   const { openPost, open } = usePost();
@@ -141,14 +150,14 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
       <>
         <Toaster />
         {loading && "loading"}
-        <div className="columns-4 gap-4 mb-4">
+        <div className="columns-4 gap-4 mb-4 p-1">
           {data &&
             data.list &&
             data.list.map((item: any, key: any) => {
               return (
                 <div
                   key={key}
-                  className="relative break-inside-avoid border-2 border-black border-solid mb-4 p-2 rounded-xl"
+                  className="relative break-inside-avoid mb-4 p-2 rounded-xl bg-slate-400/80 shadow-sm"
                 >
                   {/* Post Menu */}
 
@@ -235,29 +244,57 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
                       alt={"Image Content"}
                     />
                   )}
-
-                  <div className="w-full flex justify-between items-center">
-                    <button type="button" onClick={() => handleLike(item.id)}>
-                      {item.likes &&
-                      session &&
-                      item.likes.some(
-                        (like: any) =>
-                          like.postId === item.id &&
-                          like.userId === session.user.id
-                      )
-                        ? "already Liked"
-                        : "Like"}
-                      {item._count.likes}
+                  {/* ----------------------------------------------------------- */}
+                  <div className="w-full flex justify-between items-center m-auto px-20 bg-slate-100 rounded-bl-xl rounded-br-xl">
+                    <button
+                      type="button"
+                      onClick={() => handleLike(item.id)}
+                      className="flex items-center gap-1 text-2xl"
+                    >
+                      <BsHeartFill
+                        fill={
+                          item.likes &&
+                          session &&
+                          item.likes.some(
+                            (like: any) =>
+                              like.postId === item.id &&
+                              like.userId === session.user.id
+                          )
+                            ? "red"
+                            : "black"
+                        }
+                      />
+                      {item._count.likes && item._count.likes >= 1000
+                        ? (item._count.likes / 1000).toFixed(1) + "k"
+                        : item._count.likes}
                     </button>
-                    <Button
-                      label={`Comments ${item._count.comments}`}
+                    {/* ----------------------------------------------------------- */}
+                    <button
                       type="button"
                       onClick={() => {
                         setSelect(item.id);
                         if (selected === item.id) open();
                       }}
-                    />
-                    <button type="button">Engages {item._count.engages}</button>
+                      className="flex items-center justify-center gap-1 text-2xl"
+                    >
+                      <div className="text-3xl">
+                        <HiOutlineChatBubbleOvalLeftEllipsis />
+                      </div>
+                      {item._count.comments && item._count.comments >= 1000
+                        ? (item._count.comments / 1000).toFixed(1) + "k"
+                        : item._count.comments}
+                    </button>
+                    {/* ----------------------------------------------------------- */}
+                    <button
+                      type="button"
+                      className="flex items-center justify-center gap-1 text-2xl"
+                    >
+                      <BsPeopleFill />
+                      {item._count.engages && item._count.engages >= 1000
+                        ? (item._count.engages / 1000).toFixed(1) + "k"
+                        : item._count.engages}
+                    </button>
+                    {/* ----------------------------------------------------------- */}
                   </div>
                   {openPost && selected === item.id && (
                     <SpecificPost postId={selected} />
@@ -266,6 +303,8 @@ const DisplayPost: React.FC<any> = ({ data, loading, mutate, reload }) => {
               );
             })}
         </div>
+
+        {noMore && "No More"}
       </>
     )
   );

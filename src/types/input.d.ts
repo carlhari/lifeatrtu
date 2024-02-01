@@ -6,4 +6,5 @@ export interface Input {
   onChange?: (data: any) => void;
   maxLength?: number;
   required?: boolean;
+  value?: any;
 }

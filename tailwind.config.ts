@@ -41,7 +41,7 @@ const config: Config = {
       keyframes: {
         fadeIn: {
           "0%": { opacity: "0" },
-          "100%": { opcaity: "1" },
+          "100%": { opacity: "1" },
         },
         fadeOut: {
           "0%": { opacity: "1" },
@@ -50,8 +50,8 @@ const config: Config = {
       },
 
       animation: {
-        fadeIn: `fadeIn .8s ease`,
-        fadeOut: "fadeOut .8s ease",
+        fadeIn: `fadeIn .5s linear`,
+        fadeOut: "fadeOut .5s linear",
       },
     },
   },
