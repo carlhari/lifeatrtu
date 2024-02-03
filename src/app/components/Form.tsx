@@ -10,7 +10,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { formatTime } from "@/utils/FormatTime";
 import { isOpenAgreement } from "@/utils/Overlay/Agreement";
 import Agreement from "./overlays/Agreement";
-import { usePostCountDown } from "@/utils/useCountdown";
 import { Capitalize } from "@/utils/Capitalize";
 import { useSession } from "next-auth/react";
 import { BiImageAdd } from "react-icons/bi";
@@ -29,7 +28,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     focus: "",
     content: "",
     anonymous: false,
-    error: "",
     image: "",
   };
 
@@ -66,31 +64,23 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
         if (file.size <= 3 * 1024 * 1024) {
           try {
             const converted = await convertToBase64(file);
-            return setStates({ ...states, image: converted as string | null });
+            setStates({
+              ...states,
+              image: converted as string | null,
+            });
           } catch (err) {
             remove();
-            setStates({ ...states, error: "error occured" });
-            toast.error(states.error);
-            return;
+
+            toast.error("Error: Error Occured");
           }
         } else {
           remove();
-          setStates({
-            ...states,
-            error: "File exceeds the maximum size of 3MB",
-          });
-          toast.error(states.error);
-          return;
+
+          toast.error("File exceeds the maximum size of 3MB");
         }
       } else {
         remove();
-
-        setStates({
-          ...states,
-          error: "Please select valid file format.",
-        });
-        toast.error(states.error);
-        return;
+        toast.error("Please select valid file format.");
       }
     }
   };

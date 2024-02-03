@@ -10,7 +10,15 @@ import Input from "@/app/components/Input";
 import { useSession } from "next-auth/react";
 import { Capitalize } from "@/utils/Capitalize";
 
-function SpecificPost({ postId }: { postId: string }) {
+function SpecificPost({
+  postId,
+  setKeyword,
+  keyword,
+}: {
+  postId: string;
+  setKeyword: any;
+  keyword: boolean;
+}) {
   const { close } = usePost();
   const [comment, setComment] = useState<string>("");
   const [disabled, setDisabled] = useState<boolean>(false);
@@ -83,50 +91,58 @@ function SpecificPost({ postId }: { postId: string }) {
     }
   };
 
-  console.log("specific post", data);
-  return loading ? (
-    "loading"
-  ) : (
+  return (
     <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-500">
-      <Toaster />
-      <Button label={"Cancel"} type="button" onClick={close} />
-      {data && (
-        <div className="">
-          <div>{data.post.title}</div>
-          <div>{data.post.focus}</div>
-          <div>{data.post.content}</div>
-          <div>{data.post.anonymous}</div>
-          {data.post.image && (
-            <Image src={data.post.image} alt={"Image Content"} />
-          )}
-          <div>{moment(data.post.createdAt).format("LLL")}</div>
-        </div>
-      )}
-
-      <form ref={formRef} onSubmit={AddComment}>
-        <Input
-          type="text"
-          onChange={(e) => setComment(e.target.value)}
-          maxLength={100}
-        />
-        <button
-          type="submit"
-          disabled={disabled}
-          style={{ cursor: disabled ? "not-allowed" : "" }}
-        >
-          {disabled ? "Processing" : "Add Comment"}
-        </button>
-      </form>
-
-      {data &&
-        data.post.comments.map((item: any, key: number) => {
-          return (
-            <div key={key}>
-              <div>{item.user.name}</div>
-              <div>{item.content}</div>
+      {!data && loading ? (
+        <span className="loading loading-dots w-36"></span>
+      ) : (
+        <>
+          <Toaster />
+          <Button
+            label={"Cancel"}
+            type="button"
+            onClick={() => {
+              close();
+              setKeyword(!keyword);
+            }}
+          />
+          {data && (
+            <div className="">
+              <div>{data.post.title}</div>
+              <div>{data.post.focus}</div>
+              <div>{data.post.content}</div>
+              <div>{data.post.anonymous}</div>
+              {data.post.image && (
+                <img src={data.post.image} alt={"Image Content"} />
+              )}
+              <div>{moment(data.post.createdAt).format("LLL")}</div>
             </div>
-          );
-        })}
+          )}
+          <form ref={formRef} onSubmit={AddComment}>
+            <Input
+              type="text"
+              onChange={(e) => setComment(e.target.value)}
+              maxLength={100}
+            />
+            <button
+              type="submit"
+              disabled={disabled}
+              style={{ cursor: disabled ? "not-allowed" : "" }}
+            >
+              {disabled ? "Processing" : "Add Comment"}
+            </button>
+          </form>
+          {data &&
+            data.post.comments.map((item: any, key: number) => {
+              return (
+                <div key={key}>
+                  <div>{item.user.name}</div>
+                  <div>{item.content}</div>
+                </div>
+              );
+            })}
+        </>
+      )}
     </div>
   );
 }

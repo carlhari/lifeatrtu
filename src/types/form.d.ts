@@ -3,6 +3,5 @@ export interface FormType {
   focus: string;
   content: string;
   anonymous: boolean;
-  error: string;
   image: string | null | ArrayBuffer;
 }

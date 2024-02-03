@@ -41,12 +41,12 @@ export function getPosts(
 
 function HomeContent() {
   const ref = useRef<HTMLDivElement>(null);
-  const [keyword, setKeyword] = useState<string>("");
+  const [keyword, setKeyword] = useState<boolean>(false);
   const [select, setSelect] = useState<string>("desc");
   const { open } = isOpenLogout();
   const { data: session } = useSession();
 
-  const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
+  const { data, mutate, loading, loadMore, noMore, loadingMore } =
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10, select), {
       target: ref,
       isNoMore: (d) => {
@@ -58,23 +58,15 @@ function HomeContent() {
 
   useEffect(() => {
     const handleFocus = () => {
-      reload();
+      setKeyword(!keyword);
     };
 
     window.addEventListener("focus", handleFocus);
-
-    reload();
 
     return () => {
       window.removeEventListener("focus", handleFocus);
     };
   }, [keyword, select]);
-
-  useEffect(() => {
-    if (session) {
-      localStorage.setItem("id", session.user.id);
-    }
-  }, []);
 
   return (
     <div className="w-full h-full">
@@ -108,7 +100,8 @@ function HomeContent() {
           loadMore={loadMore}
           loadingMore={loadingMore}
           mutate={mutate}
-          reload={reload}
+          setKeyword={setKeyword}
+          keyword={keyword}
           noMore={noMore}
         />
       </div>

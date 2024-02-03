@@ -38,6 +38,10 @@ export async function POST(request: NextRequest) {
         );
 
         if (sentimentResult !== "n" && sentimentResultTitle !== "n") {
+          const dt = new Date();
+
+          const time = dt.getTime();
+
           const addPost = await prisma.post.create({
             data: {
               title: title,
@@ -46,6 +50,15 @@ export async function POST(request: NextRequest) {
               anonymous: anonymous,
               image: image,
               userId: session.user.id,
+            },
+          });
+
+          const user = await prisma.user.update({
+            where: {
+              id: session.user.id,
+            },
+            data: {
+              cooldownPost: time,
             },
           });
 

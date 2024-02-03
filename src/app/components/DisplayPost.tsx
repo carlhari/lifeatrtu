@@ -6,7 +6,7 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import { usePost } from "@/utils/usePost";
 import Button from "./Button";
-import SpecificPost from "./overlays/Post";
+import SpecificPost from "./overlays/SpecificPost";
 import { io } from "socket.io-client";
 import toast, { Toaster } from "react-hot-toast";
 import { Capitalize } from "@/utils/Capitalize";
@@ -20,11 +20,13 @@ const DisplayPost: React.FC<any> = ({
   data,
   loading,
   mutate,
-  reload,
   noMore,
+  setKeyword,
+  keyword,
 }) => {
   const { data: session } = useSession();
   const [selected, setSelect] = useState<string>("");
+  const [selectedMenu, setSelectMenu] = useState<string>("");
   const { openPost, open } = usePost();
   const [hydrate, setHydrate] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
@@ -84,6 +86,8 @@ const DisplayPost: React.FC<any> = ({
           currentName: Capitalize(session?.user.name),
           postId: postId,
         });
+
+        setKeyword(!keyword);
       }
     } catch (err) {
       console.error(err);
@@ -99,7 +103,7 @@ const DisplayPost: React.FC<any> = ({
 
         if (!status.includes(data.status)) {
           setTimeout(() => {
-            reload();
+            setKeyword(!keyword);
             resolve(data);
           }, 2000);
         } else reject(data);
@@ -119,6 +123,15 @@ const DisplayPost: React.FC<any> = ({
     }
   };
 
+  const engage = async (postId: string) => {
+    try {
+      await axios.post("/api/post/actions/engages", {
+        postId: postId,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
   useEffect(() => {
     const socket = io("http://localhost:3001");
     const socketListener = (data: any) => {
@@ -135,7 +148,7 @@ const DisplayPost: React.FC<any> = ({
       socket.on("client", socketListener);
     }, 1000);
 
-    reload();
+    setKeyword(!keyword);
     return () => {
       socket.off("client", socketListener);
     };
@@ -145,9 +158,23 @@ const DisplayPost: React.FC<any> = ({
     setHydrate(true);
   }, []);
 
+  useEffect(() => {
+    if (selected !== "") {
+      open();
+      engage(selected);
+    }
+  }, [selected]);
+
   return (
     hydrate && (
       <>
+        {openPost && selected && (
+          <SpecificPost
+            postId={selected}
+            setKeyword={setKeyword}
+            keyword={keyword}
+          />
+        )}
         <Toaster />
         {loading && "loading"}
         <div className="columns-4 gap-4 mb-4 p-1">
@@ -162,13 +189,13 @@ const DisplayPost: React.FC<any> = ({
                   {/* Post Menu */}
 
                   <div className="relative w-full flex items-center justify-end px-1">
-                    {selected === item.id && menuOpen ? (
+                    {selectedMenu === item.id && menuOpen ? (
                       <>
                         <button
                           className="text-2xl text-black"
                           type="button"
                           onClick={() => {
-                            setSelect("");
+                            setSelectMenu("");
                             setMenuOpen(false);
                           }}
                         >
@@ -183,8 +210,9 @@ const DisplayPost: React.FC<any> = ({
                                 label={"Delete"}
                                 type="button"
                                 onClick={() => {
-                                  setSelect(item.id);
-                                  if (selected === item.id) Delete(selected);
+                                  setSelectMenu(item.id);
+                                  if (selectedMenu === item.id)
+                                    Delete(selectedMenu);
                                 }}
                               />
                             </>
@@ -197,11 +225,13 @@ const DisplayPost: React.FC<any> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          setSelect(item.id);
+                          setSelectMenu(item.id);
                           setMenuOpen(true);
                         }}
                         className={`text-2xl ${
-                          selected === item.id && menuOpen && "animate-fadeOut"
+                          selectedMenu === item.id &&
+                          menuOpen &&
+                          "animate-fadeOut"
                         }`}
                       >
                         <LuSettings2 />
@@ -210,7 +240,7 @@ const DisplayPost: React.FC<any> = ({
                   </div>
 
                   {/* ----------------------------------------------------------- */}
-
+                  {item.id}
                   <div className="font-bold text-2xl break-words text-justify line-clamp-2 text-ellipsis w-full 2xl:text-3xl xl:text-3xl">
                     {item.title}
                   </div>
@@ -219,7 +249,17 @@ const DisplayPost: React.FC<any> = ({
                     {moment(item.createdAt).format("lll")}
                   </div>
                   {/* ----------------------------------------------------------- */}
-                  <div className="bg-slate-100 rounded-tl-xl rounded-tr-xl p-5 flex items-start flex-col gap-5">
+
+                  <div
+                    onClick={() => {
+                      setSelect(item.id);
+                      if (selected && selected === item.id) {
+                        open();
+                        engage(selected);
+                      }
+                    }}
+                    className="bg-slate-100 rounded-tl-xl rounded-tr-xl p-5 flex items-start flex-col gap-5 overflow-auto hover:cursor-pointer"
+                  >
                     <div className="flex items-center gap-1">
                       <div className="text-5xl">
                         <CgProfile />
@@ -232,18 +272,14 @@ const DisplayPost: React.FC<any> = ({
                           : "Anonymous"}
                       </div>
                     </div>
+
                     <div className="break-words text-justify line-clamp-4 text-ellipsis w-full">
                       {item.content}
                     </div>
+
+                    {item.image && <img src={item.image} alt="image content" />}
                   </div>
-                  {/* ----------------------------------------------------------- */}
-                  {item.image && (
-                    <Image
-                      loading="lazy"
-                      src={item.image}
-                      alt={"Image Content"}
-                    />
-                  )}
+
                   {/* ----------------------------------------------------------- */}
                   <div className="w-full flex justify-between items-center m-auto px-20 bg-slate-100 rounded-bl-xl rounded-br-xl">
                     <button
@@ -273,7 +309,11 @@ const DisplayPost: React.FC<any> = ({
                       type="button"
                       onClick={() => {
                         setSelect(item.id);
-                        if (selected === item.id) open();
+                        setSelect(item.id);
+                        if (selected && selected === item.id) {
+                          open();
+                          engage(selected);
+                        }
                       }}
                       className="flex items-center justify-center gap-1 text-2xl"
                     >
@@ -296,9 +336,6 @@ const DisplayPost: React.FC<any> = ({
                     </button>
                     {/* ----------------------------------------------------------- */}
                   </div>
-                  {openPost && selected === item.id && (
-                    <SpecificPost postId={selected} />
-                  )}
                 </div>
               );
             })}
