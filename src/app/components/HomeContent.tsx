@@ -46,7 +46,7 @@ function HomeContent() {
   const { open } = isOpenLogout();
   const { data: session } = useSession();
 
-  const { data, mutate, loading, loadMore, noMore, loadingMore } =
+  const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10, select), {
       target: ref,
       isNoMore: (d) => {
@@ -63,10 +63,11 @@ function HomeContent() {
 
     window.addEventListener("focus", handleFocus);
 
+    reload();
     return () => {
       window.removeEventListener("focus", handleFocus);
     };
-  }, [keyword, select]);
+  }, [keyword, select, session]);
 
   return (
     <div className="w-full h-full">

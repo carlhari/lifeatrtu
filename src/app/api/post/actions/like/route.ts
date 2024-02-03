@@ -59,9 +59,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             ok: true,
             msg: "liked",
-            // postId: post.id,
-            // author: post.user.id,
-            // authorName: post.user.name,
+            author: post.user.id,
           });
         } else
           return NextResponse.json({

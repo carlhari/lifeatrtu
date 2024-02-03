@@ -86,8 +86,6 @@ const DisplayPost: React.FC<any> = ({
           currentName: Capitalize(session?.user.name),
           postId: postId,
         });
-
-        setKeyword(!keyword);
       }
     } catch (err) {
       console.error(err);
@@ -132,14 +130,20 @@ const DisplayPost: React.FC<any> = ({
       console.error(err);
     }
   };
+
   useEffect(() => {
     const socket = io("http://localhost:3001");
     const socketListener = (data: any) => {
-      if (data.author === session?.user.id) {
-        if (data.whoLiked !== session?.user.id) {
-          toast.success(`${data.whoLikedName} Like your post ${data.postId}`, {
-            duration: 3000,
-          });
+      if (session) {
+        if (data.author === session.user.id) {
+          if (data.whoLiked !== session?.user.id) {
+            toast.success(
+              `${data.whoLikedName} Like your post ${data.postId}`,
+              {
+                duration: 3000,
+              }
+            );
+          }
         }
       }
     };
@@ -168,6 +172,7 @@ const DisplayPost: React.FC<any> = ({
   return (
     hydrate && (
       <>
+        <Toaster />
         {openPost && selected && (
           <SpecificPost
             postId={selected}
@@ -175,7 +180,7 @@ const DisplayPost: React.FC<any> = ({
             keyword={keyword}
           />
         )}
-        <Toaster />
+
         {loading && "loading"}
         <div className="columns-4 gap-4 mb-4 p-1">
           {data &&
