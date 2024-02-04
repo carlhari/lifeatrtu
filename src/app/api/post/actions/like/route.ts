@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (deleteLikes) return NextResponse.json({ ok: true, msg: "unliked" });
+        else return NextResponse.json({ ok: true, msg: "not found" });
       } else {
         const like = await prisma.like.create({
           data: {

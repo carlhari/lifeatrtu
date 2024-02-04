@@ -281,6 +281,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
                   agreementT();
                 }}
                 className="text-4xl flex items-center justify-center"
+                aria-description="Button"
               >
                 <BsIncognito fill={states.anonymous ? "#706f6d" : "black"} />
               </button>

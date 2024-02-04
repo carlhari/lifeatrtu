@@ -9,10 +9,13 @@ function Navigation() {
   const { data: session, status } = useSession();
   const { open } = isOpenLogout();
   return (
-    <div className="flex items-center justify-between px-6 w-full text-2xl font-bold">
-      {status === "loading"
-        ? "Loading"
-        : session && Capitalize(session?.user?.name).split(" ")[0]}
+    <div className="flex items-center justify-between p-2 px-8 w-full font-bold">
+      <div className="text-4xl">
+        Hello,{" "}
+        {status === "loading"
+          ? "Loading"
+          : session && Capitalize(session?.user?.name).split(" ")[0]}
+      </div>
       <div className="flex items-center gap-6">
         <LogoutButton />
       </div>

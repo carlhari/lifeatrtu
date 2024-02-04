@@ -46,6 +46,7 @@ function SpecificPost({
   const AddComment = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     setDisabled(true);
+    setKeyword(!keyword);
     try {
       const response = new Promise(async (resolve, reject) => {
         const res = await axios.post("/api/post/actions/comment", {
@@ -92,7 +93,7 @@ function SpecificPost({
   };
 
   return (
-    <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-500">
+    <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-400">
       {!data && loading ? (
         <span className="loading loading-dots w-36"></span>
       ) : (
@@ -103,7 +104,6 @@ function SpecificPost({
             type="button"
             onClick={() => {
               close();
-              setKeyword(!keyword);
             }}
           />
           {data && (

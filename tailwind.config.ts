@@ -32,7 +32,7 @@ const config: Config = {
       },
 
       height: {
-        "p-90": "93.5%",
+        "p-90": "89.5%",
       },
 
       width: {

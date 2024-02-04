@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
     <div className="relative w-full h-screen overflow-hidden flex items-center justify-center outline-none">
-      <span className="loading loading-spinner loading-lg"></span>
+      <span className="loading loading-spinner w-20"></span>
       <img
         src="/landingbg.png"
         alt="image"

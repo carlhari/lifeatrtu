@@ -18,13 +18,13 @@ function Logout() {
             label={"Yes"}
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="p-1 px-3 rounded-xl text-2xl hover:bg-green-600 hover:text-white duration-700"
+            className="p-1 px-3 rounded-xl text-2xl shadow-lg bg-green-600 text-white"
           />
           <Button
             label={"No"}
             type="button"
             onClick={changeOpen}
-            className="p-1 px-3 rounded-xl text-2xl hover:bg-red-600 hover:text-white duration-700"
+            className="p-1 px-3 rounded-xl text-2xl shadow-lg bg-red-600 text-white"
           />
         </div>
       </div>
