@@ -1,6 +1,8 @@
-import Button from "@/app/components/Button";
-import { isOpenReport } from "@/utils/Overlay/Report";
+"use client";
+import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
+import axios from "axios";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 
 let reports = [
@@ -15,8 +17,43 @@ let reports = [
 ];
 
 function Report({ reload }: any) {
-  const [report, setReport] = useState<string>("");
+  const [reportCategory, setReportCategory] = useState<string>("");
   const Report = isOpenReport();
+  const reportValue = valueReport();
+
+  let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      const addReport = new Promise(async (resolve, reject) => {
+        const response = await axios.post("/api/post/actions/report", {
+          postId: reportValue.id,
+          reason: reportCategory,
+        });
+
+        const data = response.data;
+
+        if (!status.includes(data.status)) {
+          if (data.ok) {
+            resolve(data);
+          } else reject(data);
+        } else reject(data);
+      });
+
+      toast.promise(
+        addReport,
+        {
+          loading: "loading",
+          success: (data: any) => `Success: ${data.msg}`,
+          error: (data: any) => `Failed: ${data.msg}`,
+        },
+        { position: "top-center" }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <div className="fixed top-0 left-0 w-full h-screen overflow-hidden flex items-center justify-center animate-fadeIn duration-700 z-50 bg-slate-500/60">
       <div className="bg-white w-1/3 p-4 flex items-center flex-col rounded-xl gap-4">
@@ -25,7 +62,7 @@ function Report({ reload }: any) {
             type="button"
             className="text-3xl"
             onClick={() => {
-              setReport("");
+              setReportCategory("");
               Report.close();
             }}
           >
@@ -41,23 +78,28 @@ function Report({ reload }: any) {
           </div>
         </div>
 
-        <form className="w-full flex flex-col items-start justify-center gap-2">
+        <form
+          className="w-full flex flex-col items-start justify-center gap-2"
+          onSubmit={handleSubmit}
+        >
           {reports.map((item, key) => {
             return (
               <button
                 key={key}
                 onClick={() => {
-                  setReport(item.toLowerCase());
+                  setReportCategory(item.toLowerCase());
                 }}
                 type="button"
                 className={`font-semibold text-lg w-full flex items-center justify-start rounded-xl px-4 ${
-                  report === item.toLowerCase() && "bg-slate-200"
+                  reportCategory === item.toLowerCase() && "bg-slate-200"
                 }`}
               >
                 {item}
               </button>
             );
           })}
+
+          <button type="submit">Report</button>
         </form>
       </div>
     </div>

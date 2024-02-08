@@ -200,7 +200,11 @@ function SpecificPost({
                 !disabled && "text-green-700"
               }  text-3xl flex items-center`}
             >
-              {disabled ? "Processing" : <AiOutlineSend />}
+              {disabled ? (
+                <span className="loading loading-dots loading-lg"></span>
+              ) : (
+                <AiOutlineSend />
+              )}
             </button>
           </form>
         </div>

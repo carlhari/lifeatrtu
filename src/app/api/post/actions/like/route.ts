@@ -74,8 +74,7 @@ export async function POST(request: NextRequest) {
         status: "UNAUTHORIZED",
       });
   } catch (err) {
-    console.log(err);
-    console.log(err);
+    console.error(err);
     return NextResponse.json({ msg: "error", status: "ERROR" });
   }
 }
