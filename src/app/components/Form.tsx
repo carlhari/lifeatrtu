@@ -185,7 +185,10 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
               <Button
                 label="Cancel"
                 type="button"
-                onClick={clicked}
+                onClick={() => {
+                  clicked();
+                  setStates(initialData);
+                }}
                 className="text-xl font-semibold"
               />
             </div>

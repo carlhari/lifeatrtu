@@ -8,6 +8,10 @@ import axios from "axios";
 import { isOpenLogout } from "@/utils/Overlay/Logout";
 import Logout from "@/app/components/overlays/Logout";
 import { useSession } from "next-auth/react";
+import { isOpenDelete } from "@/utils/Overlay/Delete";
+import Delete from "@/app/components/overlays/Delete";
+import { isOpenReport } from "@/utils/Overlay/Report";
+import Report from "@/app/components/overlays/Report";
 
 let status = ["ERROR", "BUSY"];
 
@@ -44,6 +48,8 @@ function HomeContent() {
   const [keyword, setKeyword] = useState<boolean>(false);
   const [select, setSelect] = useState<string>("desc");
   const { open } = isOpenLogout();
+  const useDelete = isOpenDelete();
+  const useReport = isOpenReport();
   const { data: session } = useSession();
 
   const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
@@ -72,7 +78,8 @@ function HomeContent() {
   return (
     <div className="w-full h-full">
       {open && <Logout />}
-
+      {useDelete.value && <Delete reload={reload} />}
+      {useReport.value && <Report reload={reload} />}
       <AddPost />
       <Form
         data={data}
@@ -83,34 +90,45 @@ function HomeContent() {
         keyword={keyword}
       />
       <div className="w-p-88 m-auto flex items-center justify-end">
-        <select
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setSelect(e.target.value)
-          }
-          defaultValue={"desc"}
-          className="rounded-2xl px-2 font-semibold text-xl mb-2"
-        >
-          <option value="desc">Recently</option>
-          <option value="asc">Oldest</option>
-          <option value="likes">Most Liked</option>
-          <option value="engages">Most Engaged</option>
-          <option value="comments">Most Commented</option>
-        </select>
+        <div className="rounded-xl px-4 bg-white mb-2">
+          <select
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setSelect(e.target.value)
+            }
+            defaultValue={"desc"}
+            className="font-semibold text-xl"
+          >
+            <option value="desc">Recently</option>
+            <option value="asc">Oldest</option>
+            <option value="likes">Most Liked</option>
+            <option value="engages">Most Engaged</option>
+            <option value="comments">Most Commented</option>
+          </select>
+        </div>
       </div>
 
-      <div ref={ref} className="m-auto w-p-88 h-p-90 overflow-y-auto">
-        <DisplayPost
-          data={data}
-          loading={loading}
-          loadMore={loadMore}
-          loadingMore={loadingMore}
-          mutate={mutate}
-          setKeyword={setKeyword}
-          keyword={keyword}
-          noMore={noMore}
-        />
-      </div>
-      <div className="w-10/12 m-auto">{!loading && noMore && "no more"}</div>
+      {data && data.list.length === 0 ? (
+        <div className="m-auto w-p-88 h-p-90 overflow-hidden flex items-center justify-start">
+          <div className="-mt-20 text-8xl leading-snug font-semibold">
+            We Care <br />
+            about what <br />
+            you think.
+          </div>
+        </div>
+      ) : (
+        <div ref={ref} className="m-auto w-p-88 h-p-90 overflow-y-auto">
+          <DisplayPost
+            data={data}
+            loading={loading}
+            loadMore={loadMore}
+            loadingMore={loadingMore}
+            mutate={mutate}
+            setKeyword={setKeyword}
+            keyword={keyword}
+            noMore={noMore}
+          />
+        </div>
+      )}
     </div>
   );
 }

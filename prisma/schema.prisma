@@ -58,12 +58,13 @@ model Like {
 }
 
 model Comment {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId  String @db.String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String @db.String
-  content String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String   @db.String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.String
+  content   String
+  createdAt DateTime @default(now())
 }
 
 model Report {
