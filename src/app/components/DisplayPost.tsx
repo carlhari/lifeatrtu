@@ -101,6 +101,8 @@ const DisplayPost: React.FC<any> = ({
 
       if (data.msg === "liked") {
         const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
+
+    
         socket.emit("active", {
           userId: session?.user.id,
           author: data.author,
@@ -138,6 +140,7 @@ const DisplayPost: React.FC<any> = ({
 
   useEffect(() => {
     const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
+
     const socketListener = (data: any) => {
       if (session) {
         if (data.author === session.user.id) {
