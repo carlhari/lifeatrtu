@@ -66,6 +66,7 @@ function HomeContent() {
 
     window.addEventListener("focus", handleFocus);
 
+    reload();
     return () => {
       window.removeEventListener("focus", handleFocus);
     };
