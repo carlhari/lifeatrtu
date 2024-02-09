@@ -60,15 +60,12 @@ function HomeContent() {
     });
 
   useEffect(() => {
-    console.log("this infinite: ", data);
-
     const handleFocus = () => {
       setKeyword(!keyword);
     };
 
     window.addEventListener("focus", handleFocus);
 
-    reload();
     return () => {
       window.removeEventListener("focus", handleFocus);
     };
