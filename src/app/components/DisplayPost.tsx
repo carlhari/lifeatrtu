@@ -46,6 +46,7 @@ const DisplayPost: React.FC<any> = ({
 
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const handleLike = async (postId: string) => {
+    setKeyword(!keyword);
     try {
       mutate((prev: any) => {
         return {
@@ -102,7 +103,6 @@ const DisplayPost: React.FC<any> = ({
       if (data.msg === "liked") {
         const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
 
-    
         socket.emit("active", {
           userId: session?.user.id,
           author: data.author,
@@ -156,15 +156,13 @@ const DisplayPost: React.FC<any> = ({
       }
     };
 
-    setTimeout(() => {
-      socket.on("client", socketListener);
-    }, 1000);
+    socket.on("client", socketListener);
 
     setKeyword(!keyword);
     return () => {
       socket.off("client", socketListener);
     };
-  }, [session]);
+  }, [session, keyword]);
 
   useEffect(() => {
     setHydrate(true);
