@@ -46,7 +46,6 @@ const DisplayPost: React.FC<any> = ({
 
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const handleLike = async (postId: string) => {
-    setKeyword(!keyword);
     try {
       mutate((prev: any) => {
         return {
@@ -155,8 +154,9 @@ const DisplayPost: React.FC<any> = ({
         }
       }
     };
-
-    socket.on("client", socketListener);
+    setTimeout(() => {
+      socket.on("client", socketListener);
+    }, 1000);
 
     setKeyword(!keyword);
     return () => {
