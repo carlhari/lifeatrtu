@@ -162,7 +162,7 @@ const DisplayPost: React.FC<any> = ({
     return () => {
       socket.off("client", socketListener);
     };
-  }, [session, keyword]);
+  }, [session]);
 
   useEffect(() => {
     setHydrate(true);
