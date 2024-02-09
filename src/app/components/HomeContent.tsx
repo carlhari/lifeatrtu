@@ -15,12 +15,16 @@ import Report from "@/app/components/overlays/Report";
 
 let status = ["ERROR", "BUSY"];
 
-export function getPosts(
-  skip: number,
-  take: number,
-  order: string
-): Promise<any> {
-  return new Promise(async (resolve, reject) => {
+function HomeContent() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [keyword, setKeyword] = useState<boolean>(false);
+  const [select, setSelect] = useState<string>("desc");
+  const { open } = isOpenLogout();
+  const useDelete = isOpenDelete();
+  const useReport = isOpenReport();
+  const { data: session } = useSession();
+
+  const getPosts = async (skip: any, take: number, order: any) => {
     try {
       const response = await axios.post("/api/post/get", {
         skip: skip,
@@ -32,25 +36,18 @@ export function getPosts(
       const newSkip = skip + take;
 
       if (!status.includes(data)) {
-        resolve({
+        return {
           list: data,
           skip: data && data.length < 10 ? undefined : newSkip,
-        });
-      } else reject(data);
+        };
+      } else {
+        throw data;
+      }
     } catch (err) {
       console.log(err);
+      throw err;
     }
-  });
-}
-
-function HomeContent() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [keyword, setKeyword] = useState<boolean>(false);
-  const [select, setSelect] = useState<string>("desc");
-  const { open } = isOpenLogout();
-  const useDelete = isOpenDelete();
-  const useReport = isOpenReport();
-  const { data: session } = useSession();
+  };
 
   const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10, select), {
@@ -63,6 +60,8 @@ function HomeContent() {
     });
 
   useEffect(() => {
+    console.log("this infinite: ", data);
+
     const handleFocus = () => {
       setKeyword(!keyword);
     };
@@ -80,6 +79,7 @@ function HomeContent() {
       {open && <Logout />}
       {useDelete.value && <Delete reload={reload} />}
       {useReport.value && <Report reload={reload} />}
+
       <AddPost />
       <Form
         data={data}
@@ -96,7 +96,7 @@ function HomeContent() {
               setSelect(e.target.value)
             }
             defaultValue={"desc"}
-            className="font-semibold text-xl"
+            className="font-semibold text-xl bg-white"
           >
             <option value="desc">Recently</option>
             <option value="asc">Oldest</option>
