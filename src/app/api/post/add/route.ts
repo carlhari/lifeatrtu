@@ -6,6 +6,7 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import translate from "@iamtraction/google-translate";
 import { limiter_min } from "@/utils/LimiterEach";
 import { sentimentAnalyzer } from "@/utils/sentiment";
+import { getRemainingTime } from "@/utils/CountDown";
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,89 +43,104 @@ export async function POST(request: NextRequest) {
 
           const time = dt.getTime();
 
-          const addPost = await prisma.post.create({
-            data: {
-              title: title,
-              focus: focus,
-              content: content,
-              anonymous: anonymous,
-              image: image,
-              userId: session.user.id,
-            },
-          });
-
-          const user = await prisma.user.update({
+          const getCD = await prisma.user.findUnique({
             where: {
               id: session.user.id,
             },
-            data: {
-              cooldownPost: time,
+            select: {
+              cooldownPost: true,
             },
           });
 
-          if (addPost && user) {
-            const post = await prisma.post.findUnique({
-              where: {
-                id: addPost.id,
-              },
-              include: {
-                _count: {
-                  select: {
+          if (getCD) {
+            const remaining = getRemainingTime(getCD?.cooldownPost);
+
+            if (remaining === 0) {
+              const addPost = await prisma.post.create({
+                data: {
+                  title: title,
+                  focus: focus,
+                  content: content,
+                  anonymous: anonymous,
+                  image: image,
+                  userId: session.user.id,
+                },
+              });
+
+              if (addPost) {
+                const updateTime = await prisma.user.update({
+                  where: {
+                    id: session.user.id,
+                  },
+                  data: {
+                    cooldownPost: time,
+                  },
+                });
+
+                const post = await prisma.post.findUnique({
+                  where: {
+                    id: addPost.id,
+                  },
+                  include: {
+                    _count: {
+                      select: {
+                        likes: true,
+                        reports: true,
+                        comments: true,
+                        engages: true,
+                      },
+                    },
                     likes: true,
-                    reports: true,
                     comments: true,
                     engages: true,
+                    user: true,
                   },
-                },
-                likes: true,
-                comments: true,
-                engages: true,
-                user: true,
-              },
-            });
-
-            const getCD = await prisma.user.findUnique({
-              where: {
-                id: session.user.id,
-              },
-
-              select: {
-                cooldownPost: true,
-              },
-            });
-
-            if (post && getCD && getCD.cooldownPost) {
-              const currentTime = new Date().getTime();
-
-              const remaining = Math.max(
-                0,
-                Math.floor(
-                  getCD.cooldownPost + 1 * 60 * 60 * 1000 - currentTime
-                ) / 1000
-              );
-
-              if (post.anonymous !== true) {
-                const newPost = {
-                  ...post,
-                  user: { ...post.user, name: null, email: null },
-                };
-
-                return NextResponse.json({
-                  msg: "Post Added",
-                  post: newPost,
-                  remaining: remaining,
                 });
-              } else
+
+                if (post) {
+                  if (post.anonymous !== true) {
+                    const newPost = {
+                      ...post,
+                      user: { ...post.user, name: null, email: null },
+                    };
+
+                    return NextResponse.json({
+                      msg: "Post Added",
+                      post: newPost,
+                      remaining: remaining,
+                    });
+                  } else {
+                    return NextResponse.json({
+                      msg: "Post Added",
+                      post: post,
+                      remaining: remaining,
+                    });
+                  }
+                } else {
+                  return NextResponse.json({
+                    msg: "Failed to retrieve the newly added post",
+                    status: "FAILED",
+                  });
+                }
+              } else {
                 return NextResponse.json({
-                  msg: "Failed to Process Post",
+                  msg: "Failed to add post",
                   status: "FAILED",
                 });
+              }
+            } else {
+              return NextResponse.json({
+                msg: "Cooldown period not yet finished",
+                status: "WAITING",
+                remaining: remaining,
+              });
             }
-          } else
+          } else {
             return NextResponse.json({
-              msg: "Failed to Add Post",
-              status: "FAILED",
+              msg: "Error with getCD",
+              status: "ERROR",
             });
+          }
         } else
           return NextResponse.json({
             msg: "Negative Post.",
@@ -142,3 +158,77 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ msg: "error", status: "ERROR" });
   }
 }
+
+// if (user) {
+//   const getCD = await prisma.user.findUnique({
+//     where: {
+//       id: session.user.id,
+//     },
+
+//     select: {
+//       cooldownPost: true,
+//     },
+//   });
+
+//   const addPost = await prisma.post.create({
+//     data: {
+//       title: title,
+//       focus: focus,
+//       content: content,
+//       anonymous: anonymous,
+//       image: image,
+//       userId: session.user.id,
+//     },
+//   });
+// const post = await prisma.post.findUnique({
+//   where: {
+//     id: addPost.id,
+//   },
+//   include: {
+//     _count: {
+//       select: {
+//         likes: true,
+//         reports: true,
+//         comments: true,
+//         engages: true,
+//       },
+//     },
+//     likes: true,
+//     comments: true,
+//     engages: true,
+//     user: true,
+//   },
+// });
+
+//   if () {
+//     const currentTime = new Date().getTime();
+
+//     const remaining = Math.max(
+//       0,
+//       Math.floor(
+//         getCD.cooldownPost + 1 * 60 * 60 * 1000 - currentTime
+//       ) / 1000
+//     );
+
+//     if (post.anonymous !== true) {
+//       const newPost = {
+//         ...post,
+//         user: { ...post.user, name: null, email: null },
+//       };
+
+//       return NextResponse.json({
+//         msg: "Post Added",
+//         post: newPost,
+//         remaining: remaining,
+//       });
+//     } else
+//       return NextResponse.json({
+//         msg: "Failed to Process Post",
+//         status: "FAILED",
+//       });
+//   }
+// } else
+//   return NextResponse.json({
+//     msg: "Failed to Add Post",
+//     status: "FAILED",
+//   });

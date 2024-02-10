@@ -1,4 +1,4 @@
-export const getRemainingTime = (startingTime: number) => {
+export const getRemainingTime = (startingTime: any) => {
   const currentTime = new Date().getTime();
 
   const remaining = Math.max(

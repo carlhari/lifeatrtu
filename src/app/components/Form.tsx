@@ -14,6 +14,7 @@ import { Capitalize } from "@/utils/Capitalize";
 import { useSession } from "next-auth/react";
 import { BiImageAdd } from "react-icons/bi";
 import { getRemainingTime } from "@/utils/CountDown";
+import moment from "moment";
 
 const Form: React.FC<any> = ({
   data,
@@ -30,6 +31,7 @@ const Form: React.FC<any> = ({
   const formRef = useRef<HTMLFormElement>(null);
 
   const [remainingPost, setRemainingPost] = useState<any>();
+  const [disabled, setDisabled] = useState<boolean>(false);
 
   const initialData = {
     title: "",
@@ -46,6 +48,12 @@ const Form: React.FC<any> = ({
   }, []);
 
   useEffect(() => {
+    const resetPostTime = async () => {
+      await axios.post("/api/post/get/cooldown/reset", {
+        cdField: "cooldownPost",
+      });
+    };
+
     const remaining = () => {
       const getRemaining = getRemainingTime(postTime);
       setRemainingPost(getRemaining);
@@ -56,16 +64,19 @@ const Form: React.FC<any> = ({
     const intervalId = setInterval(() => {
       setRemainingPost((prev: any) => {
         if (prev > 0) {
+          setDisabled(true);
           return prev - 1;
         } else {
           clearInterval(intervalId);
+          resetPostTime();
+          setDisabled(false);
           return prev;
         }
       });
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [remainingPost]);
+  }, [postTime, keyword]);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -316,8 +327,13 @@ const Form: React.FC<any> = ({
               </button>
 
               {/* -------------------------------------------------------------------------- */}
-              <button type="submit" className="text-2xl font-semibold">
-                Submit {remainingPost}
+              <button
+                type="submit"
+                className="text-2xl font-semibold"
+                style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+                disabled={disabled}
+              >
+                {disabled ? formatTime(remainingPost) : "Post"}
               </button>
             </div>
 
