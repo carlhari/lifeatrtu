@@ -13,8 +13,15 @@ import Agreement from "./overlays/Agreement";
 import { Capitalize } from "@/utils/Capitalize";
 import { useSession } from "next-auth/react";
 import { BiImageAdd } from "react-icons/bi";
+import { getRemainingTime } from "@/utils/CountDown";
 
-const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
+const Form: React.FC<any> = ({
+  data,
+  mutate,
+  setKeyword,
+  keyword,
+  postTime,
+}) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { data: session } = useSession();
   const { click, clicked } = useAddPost();
@@ -22,7 +29,8 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // const { remainingTime, setStartingTime } = usePostCountDown();
+  const [remainingPost, setRemainingPost] = useState<any>();
+
   const initialData = {
     title: "",
     focus: "",
@@ -36,6 +44,28 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   useEffect(() => {
     setHydrate(true);
   }, []);
+
+  useEffect(() => {
+    const remaining = () => {
+      const getRemaining = getRemainingTime(postTime);
+      setRemainingPost(getRemaining);
+    };
+
+    remaining();
+
+    const intervalId = setInterval(() => {
+      setRemainingPost((prev: any) => {
+        if (prev > 0) {
+          return prev - 1;
+        } else {
+          clearInterval(intervalId);
+          return prev;
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [remainingPost]);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -138,10 +168,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
       console.error("Error:", error);
     }
   };
-
-  // useEffect(() => {
-  //   startCountDown();
-  // }, []);
 
   return (
     hydrate &&
@@ -291,7 +317,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
 
               {/* -------------------------------------------------------------------------- */}
               <button type="submit" className="text-2xl font-semibold">
-                Submit
+                Submit {remainingPost}
               </button>
             </div>
 

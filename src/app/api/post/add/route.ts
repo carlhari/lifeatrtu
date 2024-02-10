@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          if (addPost) {
+          if (addPost && user) {
             const post = await prisma.post.findUnique({
               where: {
                 id: addPost.id,
@@ -83,14 +83,37 @@ export async function POST(request: NextRequest) {
               },
             });
 
-            if (post) {
+            const getCD = await prisma.user.findUnique({
+              where: {
+                id: session.user.id,
+              },
+
+              select: {
+                cooldownPost: true,
+              },
+            });
+
+            if (post && getCD && getCD.cooldownPost) {
+              const currentTime = new Date().getTime();
+
+              const remaining = Math.max(
+                0,
+                Math.floor(
+                  getCD.cooldownPost + 1 * 60 * 60 * 1000 - currentTime
+                ) / 1000
+              );
+
               if (post.anonymous !== true) {
                 const newPost = {
                   ...post,
                   user: { ...post.user, name: null, email: null },
                 };
 
-                return NextResponse.json({ msg: "Post Added", post: newPost });
+                return NextResponse.json({
+                  msg: "Post Added",
+                  post: newPost,
+                  remaining: remaining,
+                });
               } else
                 return NextResponse.json({
                   msg: "Failed to Process Post",

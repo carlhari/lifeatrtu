@@ -13,6 +13,7 @@ import Delete from "@/app/components/overlays/Delete";
 import { isOpenReport } from "@/utils/Overlay/Report";
 import Report from "@/app/components/overlays/Report";
 import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 
@@ -20,10 +21,16 @@ function HomeContent() {
   const ref = useRef<HTMLDivElement>(null);
   const [keyword, setKeyword] = useState<boolean>(false);
   const [select, setSelect] = useState<string>("desc");
+
+  const [postTime, setPostTime] = useState<number>(0);
+  const [deleteTime, setDeleteTime] = useState<number>(0);
+  const [editTime, setEditTime] = useState<number>(0);
+
   const { open } = isOpenLogout();
   const useDelete = isOpenDelete();
   const useReport = isOpenReport();
   const { data: session } = useSession();
+  const router = useRouter();
 
   const getPosts = async (skip: any, take: number, order: any) => {
     try {
@@ -80,14 +87,33 @@ function HomeContent() {
       const data = response.data;
 
       if (!data.ok) {
-        return redirect("/");
+        return router.push("/");
       }
     };
 
     checkUser();
-
-    return;
   }, [session]);
+
+  useEffect(() => {
+    const getCD = async () => {
+      try {
+        const cd = await axios.post("/api/post/get/cooldown");
+
+        const data = cd.data;
+
+        if (data.ok) {
+          setPostTime(data.postTime);
+          setDeleteTime(data.deleteTime);
+          setEditTime(data.editTime);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getCD();
+  }, [session, keyword]);
 
   return (
     <div className="w-full h-full">
@@ -103,6 +129,7 @@ function HomeContent() {
         loadMore={loadMore}
         setKeyword={setKeyword}
         keyword={keyword}
+        postTime={postTime}
       />
       <div className="w-p-88 m-auto flex items-center justify-end">
         <div className="rounded-xl px-4 bg-white mb-2">
