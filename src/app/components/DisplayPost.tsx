@@ -18,6 +18,8 @@ import { BsPeopleFill } from "react-icons/bs";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { isOpenDelete, valueDelete } from "@/utils/Overlay/Delete";
 import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { FiEdit } from "react-icons/fi";
 
 const DisplayPost: React.FC<any> = ({
   data,
@@ -321,18 +323,28 @@ const DisplayPost: React.FC<any> = ({
                               <CgClose />
                             </button>
 
-                            <div className="absolute right-10 top-1 w-32 bg-white border border-gray-200 shadow-lg rounded-md p-2 flex flex-col">
+                            <div className="absolute right-10 top-1 w-28 bg-white border border-gray-200 shadow-lg rounded-md p-2 flex flex-col">
                               {item.user.id === session?.user.id ? (
                                 <>
-                                  <Button label="EDIT" type="button" />
-                                  <Button
-                                    label={"Delete"}
+                                  <button
+                                    type="button"
+                                    className="flex items-center justify-start w-full hover:bg-slate-300  duration-700 rounded-md bg-white px-2"
+                                  >
+                                    <FiEdit />
+                                    EDIT
+                                  </button>
+
+                                  <button
                                     type="button"
                                     onClick={() => {
                                       setId(item.id);
                                       Delete.open();
                                     }}
-                                  />
+                                    className="flex items-center justify-start w-full hover:bg-slate-200  duration-700 rounded-md bg-white px-2"
+                                  >
+                                    <RiDeleteBin6Line fill="red" />
+                                    DELETE
+                                  </button>
                                 </>
                               ) : (
                                 <Button
