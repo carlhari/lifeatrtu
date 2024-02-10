@@ -91,25 +91,27 @@ function Delete({ reload }: any) {
             "
           </div>
         </div>
-        <div className="flex items-center w-full gap-4 justify-center">
-          <Button
-            label="Yes"
-            type="button"
-            onClick={() => {
-              HandleDelete(id);
-            }}
-            className="p-1 px-3 rounded-xl text-2xl bg-green-600 text-white hover:scale-125 duration-500"
-          />
-          <Button
-            label="No"
-            type="button"
-            onClick={() => {
-              clear();
-              useDelete.close();
-            }}
-            className="p-1 px-3 rounded-xl text-2xl bg-red-600 text-white hover:scale-125 duration-500"
-          />
-        </div>
+        {!loading && (
+          <div className="flex items-center w-full gap-4 justify-center animate-fadeIn">
+            <Button
+              label="Yes"
+              type="button"
+              onClick={() => {
+                HandleDelete(id);
+              }}
+              className="p-1 px-3 rounded-xl text-2xl bg-green-600 text-white hover:scale-125 duration-500"
+            />
+            <Button
+              label="No"
+              type="button"
+              onClick={() => {
+                clear();
+                useDelete.close();
+              }}
+              className="p-1 px-3 rounded-xl text-2xl bg-red-600 text-white hover:scale-125 duration-500"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

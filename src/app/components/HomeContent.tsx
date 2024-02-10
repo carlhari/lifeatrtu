@@ -12,8 +12,9 @@ import { isOpenDelete } from "@/utils/Overlay/Delete";
 import Delete from "@/app/components/overlays/Delete";
 import { isOpenReport } from "@/utils/Overlay/Report";
 import Report from "@/app/components/overlays/Report";
+import { redirect } from "next/navigation";
 
-let status = ["ERROR", "BUSY"];
+let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 
 function HomeContent() {
   const ref = useRef<HTMLDivElement>(null);
@@ -71,6 +72,22 @@ function HomeContent() {
       window.removeEventListener("focus", handleFocus);
     };
   }, [keyword, select, session]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const response = await axios.post("/api/check/user");
+
+      const data = response.data;
+
+      if (!data.ok) {
+        return redirect("/");
+      }
+    };
+
+    checkUser();
+
+    return;
+  }, [session]);
 
   return (
     <div className="w-full h-full">
