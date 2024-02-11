@@ -43,7 +43,7 @@ const EditPost: React.FC<any> = ({
   };
 
   const [post, setPostData] = useState<any>(initialData);
-  const [states, setStates] = useState<FormType>(initialData);
+  const [states, setStates] = useState<any>(initialData);
   const [disabled, setDisabled] = useState<boolean>(false);
 
   function getPost(): Promise<any> {
@@ -71,11 +71,17 @@ const EditPost: React.FC<any> = ({
 
   useEffect(() => {
     if (postReq && postReq.data) {
+      setPostData(postReq.data.post);
       setStates(postReq.data.post);
     }
-
-    console.log(states);
   }, [postReq.data]);
+
+  useEffect(() => {
+    const isChanged = Object.keys(post).some(
+      (key) => post[key] !== states[key]
+    );
+    setDisabled(!isChanged);
+  }, [states]);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -134,178 +140,179 @@ const EditPost: React.FC<any> = ({
     e.preventDefault();
   };
   return (
-    hydrate &&
-    (postReq.loading ? (
-      <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-400">
-        <span className="loading loading-dots w-20"></span>
-      </div>
-    ) : (
+    hydrate && (
       <div
-        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden"
+        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden animate-fadeIn"
         style={{
           backgroundImage: `url("/bg.png")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <Toaster />
-        {states.anonymous && openAgreement && (
-          <Agreement setStates={setStates} states={states} />
-        )}
-        <div className="flex w-full h-full flex-wrap">
-          <div className="flex flex-col justify-center w-1/2 pl-28 gap-20">
-            <div className="text-5xl font-semibold">
-              Hello, {session && Capitalize(session?.user?.name).split(" ")[0]}
-            </div>
-            <div className="flex items-center flex-col justify-center w-full">
-              <div className="font-bold text-7xl leading-snug w-5/12">
-                We care about what you think
+        {postReq.loading ? (
+          <span className="loading loading-dots w-40 z-50"></span>
+        ) : (
+          <div className="w-full h-screen animate-fadeIn">
+            <Toaster />
+            {states.anonymous && openAgreement && (
+              <Agreement setStates={setStates} states={states} />
+            )}
+            <div className="flex w-full h-full flex-wrap">
+              <div className="flex flex-col justify-center w-1/2 pl-28 gap-20">
+                <div className="text-5xl font-semibold">
+                  Hello,{" "}
+                  {session && Capitalize(session?.user?.name).split(" ")[0]}
+                </div>
+                <div className="flex items-center flex-col justify-center w-full">
+                  <div className="font-bold text-7xl leading-snug w-5/12">
+                    We care about what you think
+                  </div>
+                </div>
+                <div className=" text-justify font-medium text-xl w-10/12">
+                  You can share your thoughts anonymously by clicking the
+                  anonymous icon and you can add photo if you want *maximum 1
+                  photo only*
+                </div>
               </div>
-            </div>
-            <div className=" text-justify font-medium text-xl w-10/12">
-              You can share your thoughts anonymously by clicking the anonymous
-              icon and you can add photo if you want *maximum 1 photo only*
+              {/* ----------------------------------------------------------------------------- */}
+              <form
+                onSubmit={onSubmit}
+                className="w-1/2 h-full flex flex-col item-center p-2 px-10 gap-5"
+                style={{ backgroundColor: "#DBD9D9" }}
+                ref={formRef}
+              >
+                {/* -------------------------------------------------------------------------- */}
+                <div className="w-full flex justify-end items-center">
+                  <Button
+                    label="Cancel"
+                    type="button"
+                    onClick={() => {
+                      edit.close();
+                      editValue.clear();
+                      setStates(initialData);
+                    }}
+                    className="text-xl font-semibold"
+                  />
+                </div>
+                {/* -------------------------------------------------------------------------- */}
+                <Input
+                  type="text"
+                  name="title"
+                  className="outline-none text-7xl w-full bg-transparent font-bold placeholder-black"
+                  placeholder="Untitled"
+                  onChange={handleChange}
+                  maxLength={50}
+                  required={true}
+                  value={states.title}
+                />
+
+                {/* -------------------------------------------------------------------------- */}
+
+                <div className="w-full flex gap-1 items-center">
+                  <div className="text-5xl">Focus: </div>
+                  <select
+                    className="w-full text-3xl outline-none rounded-xl p-2 bg-transparent text-left"
+                    name="focus"
+                    onChange={handleChange}
+                    value={states.focus}
+                    required
+                  >
+                    <option value=""></option>
+                    <option value="facility">Facility</option>
+                    <option value="professor">Professor</option>
+                    <option value="experience">Experience</option>
+                    <option value="others">Others</option>
+                  </select>
+                </div>
+                {/* -------------------------------------------------------------------------- */}
+                <div className="flex items-center justify-center flex-col">
+                  <textarea
+                    placeholder="What's Happening now?"
+                    name="content"
+                    maxLength={500}
+                    onChange={handleChange}
+                    value={states.content}
+                    className="resize-none w-full h-96 outline-none rounded-t-xl text-xl text-justify p-4"
+                    required
+                  />
+
+                  <div className="w-full rounded-bl-xl rounded-br-xl bg-white p-2 flex items-center justify-between">
+                    <div
+                      className={`w-1/3 ${
+                        states.image ? "animate-fadeIn" : "animate-fadeOut"
+                      }`}
+                    >
+                      {states.image && "With Photo"}
+                    </div>
+                    <div>{states.content.length}/500</div>
+
+                    <div className="w-1/3"></div>
+                  </div>
+                </div>
+                {/* -------------------------------------------------------------------------- */}
+
+                <div className="w-full flex items-center justify-end gap-4">
+                  {/* -------------------------------------------------------------------------- */}
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    name="image"
+                    className="hidden"
+                    onChange={imageChange}
+                  />
+
+                  {states.image ? (
+                    <button
+                      type="button"
+                      onClick={() => remove()}
+                      className={`bg-red-600 rounded-xl p-1 text-white text-lg animate-fadeIn`}
+                    >
+                      Remove Photo
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="text-5xl flex items-center justify-center"
+                    >
+                      <BiImageAdd />
+                    </button>
+                  )}
+                  {/* -------------------------------------------------------------------------- */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStates({ ...states, anonymous: !states.anonymous });
+                      agreementT();
+                    }}
+                    className="text-4xl flex items-center justify-center"
+                    aria-description="Button"
+                  >
+                    <BsIncognito
+                      fill={states.anonymous ? "#706f6d" : "black"}
+                    />
+                  </button>
+
+                  {/* -------------------------------------------------------------------------- */}
+
+                  <button
+                    type="submit"
+                    className="text-2xl font-semibold"
+                    style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+                    disabled={disabled}
+                  >
+                    {disabled ? "disabled" : "Post"}
+                  </button>
+                </div>
+
+                {/* -------------------------------------------------------------------------- */}
+              </form>
             </div>
           </div>
-          {/* ----------------------------------------------------------------------------- */}
-          <form
-            onSubmit={onSubmit}
-            className="w-1/2 h-full flex flex-col item-center p-2 px-10 gap-5"
-            style={{ backgroundColor: "#DBD9D9" }}
-            ref={formRef}
-          >
-            {/* -------------------------------------------------------------------------- */}
-            <div className="w-full flex justify-end items-center">
-              <Button
-                label="Cancel"
-                type="button"
-                onClick={() => {
-                  edit.close();
-                  editValue.clear();
-                  setStates(initialData);
-                }}
-                className="text-xl font-semibold"
-              />
-            </div>
-            {/* -------------------------------------------------------------------------- */}
-            <Input
-              type="text"
-              name="title"
-              className="outline-none text-7xl w-full bg-transparent font-bold placeholder-black"
-              placeholder="Untitled"
-              onChange={handleChange}
-              maxLength={50}
-              required={true}
-              value={states.title}
-            />
-
-            {/* -------------------------------------------------------------------------- */}
-
-            <div className="w-full flex gap-1 items-center">
-              <div className="text-5xl">Focus: </div>
-              <select
-                className="w-full text-3xl outline-none rounded-xl p-2 bg-transparent text-left"
-                name="focus"
-                onChange={handleChange}
-                value={states.focus}
-                required
-              >
-                <option value=""></option>
-                <option value="facility">Facility</option>
-                <option value="professor">Professor</option>
-                <option value="experience">Experience</option>
-                <option value="others">Others</option>
-              </select>
-            </div>
-            {/* -------------------------------------------------------------------------- */}
-            <div className="flex items-center justify-center flex-col">
-              <textarea
-                placeholder="What's Happening now?"
-                name="content"
-                maxLength={500}
-                onChange={handleChange}
-                value={states.content}
-                className="resize-none w-full h-96 outline-none rounded-t-xl text-xl text-justify p-4"
-                required
-              />
-
-              <div className="w-full rounded-bl-xl rounded-br-xl bg-white p-2 flex items-center justify-between">
-                <div
-                  className={`w-1/3 ${
-                    states.image ? "animate-fadeIn" : "animate-fadeOut"
-                  }`}
-                >
-                  {states.image && "With Photo"}
-                </div>
-                <div>{states.content.length}/500</div>
-
-                <div className="w-1/3"></div>
-              </div>
-            </div>
-            {/* -------------------------------------------------------------------------- */}
-
-            <div className="w-full flex items-center justify-end gap-4">
-              {/* -------------------------------------------------------------------------- */}
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                name="image"
-                className="hidden"
-                onChange={imageChange}
-              />
-
-              {states.image ? (
-                <button
-                  type="button"
-                  onClick={() => remove()}
-                  className={`bg-red-600 rounded-xl p-1 text-white text-lg animate-fadeIn`}
-                >
-                  Remove Photo
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="text-5xl flex items-center justify-center"
-                >
-                  <BiImageAdd />
-                </button>
-              )}
-              {/* -------------------------------------------------------------------------- */}
-              <button
-                type="button"
-                onClick={() => {
-                  setStates({ ...states, anonymous: !states.anonymous });
-                  agreementT();
-                }}
-                className="text-4xl flex items-center justify-center"
-                aria-description="Button"
-              >
-                <BsIncognito fill={states.anonymous ? "#706f6d" : "black"} />
-              </button>
-
-              {/* -------------------------------------------------------------------------- */}
-              {disabled ? (
-                "No changes"
-              ) : (
-                <button
-                  type="submit"
-                  className="text-2xl font-semibold"
-                  style={{ cursor: disabled ? "not-allowed" : "pointer" }}
-                  disabled={disabled}
-                >
-                  {disabled ? "time limit" : "Post"}
-                  {`${disabled}`}
-                </button>
-              )}
-            </div>
-
-            {/* -------------------------------------------------------------------------- */}
-          </form>
-        </div>
+        )}
       </div>
-    ))
+    )
   );
 };
 
