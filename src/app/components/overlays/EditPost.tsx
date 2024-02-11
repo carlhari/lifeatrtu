@@ -55,6 +55,7 @@ const EditPost: React.FC<any> = ({
         const data = response.data;
         if (data.ok) {
           resolve(data);
+          toast.success("DATA RECEIENVE");
         } else reject(data);
       } catch (err) {
         reject(err);
@@ -64,14 +65,17 @@ const EditPost: React.FC<any> = ({
 
   const postReq = useRequest(() => getPost());
 
-  if (postReq) {
-    setStates(postReq.data);
-    console.log(states)
-  }
-  console.log(states);
   useEffect(() => {
     setHydrate(true);
   }, []);
+
+  useEffect(() => {
+    if (postReq && postReq.data) {
+      setStates(postReq.data.post);
+    }
+
+    console.log(states);
+  }, [postReq.data]);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -132,17 +136,12 @@ const EditPost: React.FC<any> = ({
   return (
     hydrate &&
     (postReq.loading ? (
-      <div
-        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden animate-fadeIn"
-        style={{
-          backgroundImage: `url("/bg.png")`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      ></div>
+      <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-400">
+        <span className="loading loading-dots w-20"></span>
+      </div>
     ) : (
       <div
-        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden animate-fadeIn"
+        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden"
         style={{
           backgroundImage: `url("/bg.png")`,
           backgroundSize: "cover",
