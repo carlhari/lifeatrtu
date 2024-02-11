@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import Image from "next/image";
 import moment from "moment";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -20,6 +19,9 @@ import { isOpenDelete, valueDelete } from "@/utils/Overlay/Delete";
 import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FiEdit } from "react-icons/fi";
+import { getRemainingTime } from "@/utils/CountDown";
+import { formatTime } from "@/utils/FormatTime";
+import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 
 const DisplayPost: React.FC<any> = ({
   data,
@@ -29,6 +31,7 @@ const DisplayPost: React.FC<any> = ({
   noMore,
   setKeyword,
   keyword,
+  deleteTime,
 }) => {
   const { data: session } = useSession();
   const [selected, setSelect] = useState<string>("");
@@ -41,10 +44,19 @@ const DisplayPost: React.FC<any> = ({
   const [skeletonMore, setSkeletonMore] = useState<Array<any>>([]);
 
   const { openPost, open } = usePost();
+
   const Delete = isOpenDelete();
   const Report = isOpenReport();
+  const Edit = isOpenEdit();
+
   const { id, setId, clear } = valueDelete();
+
   const reportValue = valueReport();
+  const editValue = valueEdit();
+
+  const [remainingDelete, setRemainingDelete] = useState<any>();
+
+  const [disabled, setDisabled] = useState<boolean>(false);
 
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const handleLike = async (postId: string) => {
@@ -196,6 +208,36 @@ const DisplayPost: React.FC<any> = ({
     }
   }, [selected]);
 
+  useEffect(() => {
+    const resetDeleteTime = async () => {
+      await axios.post("/api/post/get/cooldown/reset", {
+        cdField: "cooldownDelete",
+      });
+    };
+    const remaining = () => {
+      const getRemaining = getRemainingTime(deleteTime);
+      setRemainingDelete(getRemaining);
+    };
+
+    remaining();
+
+    const interval = setInterval(() => {
+      setRemainingDelete((prev: any) => {
+        if (prev > 0) {
+          setDisabled(true);
+          return prev - 1;
+        } else {
+          clearInterval(interval);
+          resetDeleteTime();
+          setDisabled(false);
+          return prev;
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [deleteTime, keyword, session]);
+
   // useEffect(() => {
   //   const divs = [];
 
@@ -329,6 +371,11 @@ const DisplayPost: React.FC<any> = ({
                                   <button
                                     type="button"
                                     className="flex items-center justify-start w-full hover:bg-slate-300  duration-700 rounded-md bg-white px-2"
+                                    onClick={() => {
+                                      editValue.setId(item.id);
+                                      Edit.open();
+                                      setKeyword(!keyword);
+                                    }}
                                   >
                                     <FiEdit />
                                     EDIT
@@ -339,11 +386,24 @@ const DisplayPost: React.FC<any> = ({
                                     onClick={() => {
                                       setId(item.id);
                                       Delete.open();
+                                      setKeyword(!keyword);
                                     }}
                                     className="flex items-center justify-start w-full hover:bg-slate-200  duration-700 rounded-md bg-white px-2"
+                                    style={{
+                                      cursor: disabled
+                                        ? "not-allowed"
+                                        : "pointer",
+                                    }}
+                                    disabled={disabled}
                                   >
-                                    <RiDeleteBin6Line fill="red" />
-                                    DELETE
+                                    {disabled ? (
+                                      formatTime(remainingDelete)
+                                    ) : (
+                                      <>
+                                        <RiDeleteBin6Line fill="red" />
+                                        DELETE
+                                      </>
+                                    )}
                                   </button>
                                 </>
                               ) : (

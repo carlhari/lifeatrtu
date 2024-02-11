@@ -1,7 +1,7 @@
 "use client";
 import React, { FormEvent, useEffect, useRef, useState } from "react";
-import Input from "./Input";
-import Button from "./Button";
+import Input from "@/app/components/Input";
+import Button from "@/app/components/Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
 import { useAddPost } from "@/utils/useAddPost";
@@ -9,28 +9,30 @@ import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
 import { formatTime } from "@/utils/FormatTime";
 import { isOpenAgreement } from "@/utils/Overlay/Agreement";
-import Agreement from "./overlays/Agreement";
+import Agreement from "@/app/components/overlays/Agreement";
 import { Capitalize } from "@/utils/Capitalize";
 import { useSession } from "next-auth/react";
 import { BiImageAdd } from "react-icons/bi";
 import { getRemainingTime } from "@/utils/CountDown";
+import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
+import { useRequest } from "ahooks";
 
-const Form: React.FC<any> = ({
+const EditPost: React.FC<any> = ({
   data,
   mutate,
   setKeyword,
   keyword,
-  postTime,
+  postId,
 }) => {
+  let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { data: session } = useSession();
   const { click, clicked } = useAddPost();
   const { openAgreement, agreementT } = isOpenAgreement();
+  const edit = isOpenEdit();
+  const editValue = valueEdit();
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  const [remainingPost, setRemainingPost] = useState<any>();
-  const [disabled, setDisabled] = useState<boolean>(false);
 
   const initialData = {
     title: "",
@@ -40,42 +42,36 @@ const Form: React.FC<any> = ({
     image: "",
   };
 
+  const [post, setPostData] = useState<any>(initialData);
   const [states, setStates] = useState<FormType>(initialData);
+  const [disabled, setDisabled] = useState<boolean>(false);
 
+  function getPost(): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await axios.post("/api/post/get/specific", {
+          postId: postId,
+        });
+        const data = response.data;
+        if (data.ok) {
+          resolve(data);
+        } else reject(data);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  const postReq = useRequest(() => getPost());
+
+  if (postReq) {
+    setStates(postReq.data);
+    console.log(states)
+  }
+  console.log(states);
   useEffect(() => {
     setHydrate(true);
   }, []);
-
-  useEffect(() => {
-    const resetPostTime = async () => {
-      await axios.post("/api/post/get/cooldown/reset", {
-        cdField: "cooldownPost",
-      });
-    };
-
-    const remaining = () => {
-      const getRemaining = getRemainingTime(postTime);
-      setRemainingPost(getRemaining);
-    };
-
-    remaining();
-
-    const intervalId = setInterval(() => {
-      setRemainingPost((prev: any) => {
-        if (prev > 0) {
-          setDisabled(true);
-          return prev - 1;
-        } else {
-          clearInterval(intervalId);
-          resetPostTime();
-          setDisabled(false);
-          return prev;
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [postTime, keyword, session]);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -132,56 +128,19 @@ const Form: React.FC<any> = ({
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
-
-    try {
-      const response = new Promise(async (resolve, reject) => {
-        const res = await axios.post("/api/post/add", { ...states });
-
-        const resData = res.data;
-
-        if (!status.includes(resData.status)) {
-          if (
-            states.title.length !== 0 &&
-            states.focus.length !== 0 &&
-            states.content.length !== 0
-          ) {
-            setTimeout(() => {
-              setKeyword(!keyword);
-              mutate({
-                list: [...data.list, resData.post],
-              });
-
-              resolve(resData);
-            }, 1500);
-          } else reject(resData);
-        } else reject(resData);
-      });
-
-      toast.promise(
-        response,
-        {
-          loading: "loading",
-          success: (data: any) => {
-            clicked();
-            return `Success: ${data.msg}`;
-          },
-          error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
-        },
-        { position: "top-center" }
-      );
-
-      formRef.current && formRef.current.reset();
-      setStates(initialData);
-    } catch (error) {
-      console.error("Error:", error);
-    }
   };
-
   return (
     hydrate &&
-    click && (
+    (postReq.loading ? (
+      <div
+        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden animate-fadeIn"
+        style={{
+          backgroundImage: `url("/bg.png")`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      ></div>
+    ) : (
       <div
         className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden animate-fadeIn"
         style={{
@@ -222,7 +181,8 @@ const Form: React.FC<any> = ({
                 label="Cancel"
                 type="button"
                 onClick={() => {
-                  clicked();
+                  edit.close();
+                  editValue.clear();
                   setStates(initialData);
                 }}
                 className="text-xl font-semibold"
@@ -239,6 +199,7 @@ const Form: React.FC<any> = ({
               required={true}
               value={states.title}
             />
+
             {/* -------------------------------------------------------------------------- */}
 
             <div className="w-full flex gap-1 items-center">
@@ -326,22 +287,27 @@ const Form: React.FC<any> = ({
               </button>
 
               {/* -------------------------------------------------------------------------- */}
-              <button
-                type="submit"
-                className="text-2xl font-semibold"
-                style={{ cursor: disabled ? "not-allowed" : "pointer" }}
-                disabled={disabled}
-              >
-                {disabled ? formatTime(remainingPost) : "Post"}
-              </button>
+              {disabled ? (
+                "No changes"
+              ) : (
+                <button
+                  type="submit"
+                  className="text-2xl font-semibold"
+                  style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+                  disabled={disabled}
+                >
+                  {disabled ? "time limit" : "Post"}
+                  {`${disabled}`}
+                </button>
+              )}
             </div>
 
             {/* -------------------------------------------------------------------------- */}
           </form>
         </div>
       </div>
-    )
+    ))
   );
 };
 
-export default Form;
+export default EditPost;

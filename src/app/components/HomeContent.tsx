@@ -12,8 +12,9 @@ import { isOpenDelete } from "@/utils/Overlay/Delete";
 import Delete from "@/app/components/overlays/Delete";
 import { isOpenReport } from "@/utils/Overlay/Report";
 import Report from "@/app/components/overlays/Report";
-import { redirect } from "next/navigation";
 import { useRouter } from "next/navigation";
+import EditPost from "./overlays/EditPost";
+import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 
 let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 
@@ -29,6 +30,10 @@ function HomeContent() {
   const { open } = isOpenLogout();
   const useDelete = isOpenDelete();
   const useReport = isOpenReport();
+
+  const useEdit = isOpenEdit();
+  const edit = valueEdit();
+
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -120,6 +125,15 @@ function HomeContent() {
       {open && <Logout />}
       {useDelete.value && <Delete reload={reload} />}
       {useReport.value && <Report reload={reload} />}
+      {useEdit.value && (
+        <EditPost
+          postId={edit.id}
+          data={data}
+          mutate={mutate}
+          setKeyword={setKeyword}
+          keyword={keyword}
+        />
+      )}
 
       <AddPost />
       <Form
@@ -168,6 +182,7 @@ function HomeContent() {
             setKeyword={setKeyword}
             keyword={keyword}
             noMore={noMore}
+            deleteTime={deleteTime}
           />
         </div>
       )}

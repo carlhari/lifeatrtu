@@ -128,13 +128,11 @@ export async function POST(request: NextRequest) {
                   status: "FAILED",
                 });
               }
-            } else {
+            } else
               return NextResponse.json({
                 msg: "Cooldown period not yet finished",
-                status: "WAITING",
-                remaining: remaining,
+                status: "ERROR",
               });
-            }
           } else {
             return NextResponse.json({
               msg: "Error with getCD",
