@@ -3,6 +3,7 @@ import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { Capitalize } from "@/utils/Capitalize";
+import { signIn } from "next-auth/react";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -13,6 +14,7 @@ export const authOptions: NextAuthOptions = {
         params: {
           scopes: ["profile"],
           prompt: "consent",
+          access_type: "offline",
         },
       },
     }),
@@ -21,16 +23,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     maxAge: 60 * 60 * 24,
   },
- 
   callbacks: {
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub,
-      },
-    }),
-
     async signIn({ user, profile }) {
       const existingUser = await prisma.user.findUnique({
         where: {
@@ -38,21 +31,26 @@ export const authOptions: NextAuthOptions = {
         },
       });
 
-      if (!existingUser) {
-        await prisma.user.create({
-          data: {
-            id: user.id as string,
-            email: user.email as string,
-            name: Capitalize(user.name) as string,
-          },
-        });
-      }
+      if (!user || !profile) {
+        return Promise.reject(false);
+      } else {
+        if (!existingUser) {
+          await prisma.user.create({
+            data: {
+              id: user.id as string,
+              email: user.email as string,
+              name: Capitalize(user.name) as string,
+            },
+          });
 
-      return Promise.resolve(true);
+          return Promise.resolve(true);
+        }
+        return Promise.resolve(true);
+      }
     },
-   
   },
 };
+
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

@@ -3,14 +3,13 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import LogoutButton from "./LogoutButton";
 import { Capitalize } from "@/utils/Capitalize";
-import { isOpenLogout } from "@/utils/Overlay/Logout";
 
 function Navigation() {
   const { data: session, status } = useSession();
-  const { open } = isOpenLogout();
+
   return (
     <div className="flex items-center justify-between p-2 px-8 w-full font-bold">
-      <div className="text-4xl">
+      <div className="text-4xl text-black">
         Hello,{" "}
         {status === "loading"
           ? "Loading"

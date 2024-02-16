@@ -35,6 +35,10 @@ export async function POST(request: NextRequest) {
             const deletePost = await prisma.post.delete({
               where: {
                 id: postId,
+                user: {
+                  id: session.user.id,
+                  email: session.user.email,
+                },
               },
             });
 

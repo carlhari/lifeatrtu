@@ -12,20 +12,20 @@ export default async function Home() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden flex items-center justify-center outline-none">
-      <div className="card bg-white shadow-xl p-8 z-50 w-4/12 flex flex-col items-center justify-center">
-        <div className="flex items-center justify-center leading-normal">
+      <div className="bg-white shadow-xl p-4 z-50 w-4/12 flex flex-col items-center justify-center rounded-2xl">
+        <div className="flex items-center justify-center w-full h-full flex-wrap">
           <div className="text-8xl">Life@</div>
           <div
             style={{
               backgroundImage: "url('/textbg.png')",
             }}
-            className="text-img font-extrabold leading-relaxed  text-center bg-clip-text text-transparent text-9xl"
+            className="text-img font-extrabold text-center bg-clip-text text-transparent text-9xl"
           >
             RTU
           </div>
         </div>
 
-        <div className="flex items-center flex-col mb-2">
+        <div className="flex items-center flex-col gap-4">
           <div className="tagline flex items-center gap-4 text-4xl text-transparent">
             Your <p className="voice text-slate-600 shadow-none">VOICE</p>
             Matters
@@ -33,8 +33,8 @@ export default async function Home() {
           <div className="italic">
             We make it easier to share your thoughts about the campus
           </div>
+          <LoginButton />
         </div>
-        <LoginButton />
       </div>
 
       <img

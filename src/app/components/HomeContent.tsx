@@ -101,19 +101,21 @@ function HomeContent() {
 
   useEffect(() => {
     const getCD = async () => {
-      try {
-        const cd = await axios.post("/api/post/get/cooldown");
+      if (session) {
+        try {
+          const cd = await axios.post("/api/post/get/cooldown");
 
-        const data = cd.data;
+          const data = cd.data;
 
-        if (data.ok) {
-          setPostTime(data.postTime);
-          setDeleteTime(data.deleteTime);
-          setEditTime(data.editTime);
-          return;
+          if (data.ok) {
+            setPostTime(data.postTime);
+            setDeleteTime(data.deleteTime);
+            setEditTime(data.editTime);
+            return;
+          }
+        } catch (err) {
+          console.error(err);
         }
-      } catch (err) {
-        console.error(err);
       }
     };
 
@@ -173,7 +175,7 @@ function HomeContent() {
         </div>
       ) : (
         <div ref={ref} className="m-auto w-p-88 h-p-90 overflow-y-auto">
-          <DisplayPost
+          {/* <DisplayPost
             data={data}
             loading={loading}
             loadMore={loadMore}
@@ -183,7 +185,7 @@ function HomeContent() {
             keyword={keyword}
             noMore={noMore}
             deleteTime={deleteTime}
-          />
+          /> */}
         </div>
       )}
     </div>

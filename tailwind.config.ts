@@ -25,6 +25,7 @@ const config: Config = {
 
       xs: { max: "480px" },
     },
+
     extend: {
       fontFamily: {},
       fontSize: {
