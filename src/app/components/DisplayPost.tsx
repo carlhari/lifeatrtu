@@ -289,21 +289,10 @@ const DisplayPost: React.FC<any> = ({
                                         setKeyword(!keyword);
                                       }}
                                       className="flex items-center justify-start w-full hover:bg-slate-200  duration-700 rounded-md bg-white px-2"
-                                      style={{
-                                        cursor: disabled
-                                          ? "not-allowed"
-                                          : "pointer",
-                                      }}
-                                      disabled={disabled}
+                                     
+                                     
                                     >
-                                      {disabled ? (
-                                        formatTime(remainingDelete)
-                                      ) : (
-                                        <>
-                                          <RiDeleteBin6Line fill="red" />
-                                          DELETE
-                                        </>
-                                      )}
+                                     DELETE
                                     </button>
                                   </>
                                 ) : (

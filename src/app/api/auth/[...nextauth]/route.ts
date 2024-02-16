@@ -26,10 +26,17 @@ export const authOptions: NextAuthOptions = {
     maxAge: 60 * 60 * 24,
   },
   callbacks: {
+    session: ({ session, token }) => ({
+      ...session,
+      user: {
+        ...session.user,
+        id: token.sub,
+      },
+    }),
     async signIn({ user, profile }) {
       const existingUser = await prisma.user.findUnique({
         where: {
-          email: profile?.email,
+          id: user.id,
         },
       });
 

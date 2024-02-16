@@ -86,20 +86,6 @@ function HomeContent() {
   }, [keyword, select, session]);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const response = await axios.post("/api/check/user");
-
-      const data = response.data;
-
-      if (!data.ok) {
-        return router.push("/");
-      }
-    };
-
-    checkUser();
-  }, [session]);
-
-  useEffect(() => {
     const getCD = async () => {
       if (session) {
         try {
