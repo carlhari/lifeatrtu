@@ -16,7 +16,9 @@ function Navigation() {
   const { open } = isOpenLogout();
   const notif = isOpenNotif();
   const [resData, setResData] = useState<any>();
-  console.log(resData);
+
+  const getNotif = new Promise((resolve, reject) => {});
+
   return (
     <div className="flex items-center justify-between p-2 px-8 w-full font-bold">
       <div className="text-4xl">
