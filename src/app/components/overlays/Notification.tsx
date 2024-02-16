@@ -1,6 +1,6 @@
 import React from "react";
 
-function Notification() {
+function Notification({ loading }: any) {
   return (
     <div className="absolute top-2 right-24 animate-fadeIn duration-500 z-40">
       <div className="w-96 bg-slate-400 h-44 p-3 rounded-2xl">

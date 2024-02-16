@@ -175,7 +175,7 @@ function HomeContent() {
         </div>
       ) : (
         <div ref={ref} className="m-auto w-p-88 h-p-90 overflow-y-auto">
-          {/* <DisplayPost
+          <DisplayPost
             data={data}
             loading={loading}
             loadMore={loadMore}
@@ -185,7 +185,7 @@ function HomeContent() {
             keyword={keyword}
             noMore={noMore}
             deleteTime={deleteTime}
-          /> */}
+          />
         </div>
       )}
     </div>
