@@ -56,8 +56,6 @@ const DisplayPost: React.FC<any> = ({
 
   const [remainingDelete, setRemainingDelete] = useState<any>();
 
-  const [disabled, setDisabled] = useState<boolean>(false);
-
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const handleLike = async (postId: string) => {
     try {
@@ -104,7 +102,7 @@ const DisplayPost: React.FC<any> = ({
         "/api/post/actions/like",
         {
           postId: postId,
-          author: session?.user.id
+          author: session?.user.id,
         },
         {
           headers: {
@@ -209,101 +207,6 @@ const DisplayPost: React.FC<any> = ({
     }
   }, [selected]);
 
-  useEffect(() => {
-    const resetDeleteTime = async () => {
-      await axios.post("/api/post/get/cooldown/reset", {
-        cdField: "cooldownDelete",
-      });
-    };
-    const remaining = () => {
-      const getRemaining = getRemainingTime(deleteTime);
-      setRemainingDelete(getRemaining);
-    };
-
-    remaining();
-
-    const interval = setInterval(() => {
-      setRemainingDelete((prev: any) => {
-        if (prev > 0) {
-          setDisabled(true);
-          return prev - 1;
-        } else {
-          clearInterval(interval);
-          resetDeleteTime();
-          setDisabled(false);
-          return prev;
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [deleteTime, keyword, session]);
-
-  // useEffect(() => {
-  //   const divs = [];
-
-  //   for (let i = 0; i < 16; i++) {
-  //     divs.push(
-  //       <div
-  //         key={i}
-  //         className="relative break-inside-avoid mb-4 p-2 rounded-xl bg-slate-400/80 shadow-sm mx-4 opacity-25"
-  //       >
-  //         <div className="flex w-full items-center justify-end">
-  //           <div className="skeleton h-4 w-6"></div>
-  //         </div>
-
-  //         <div className="flex flex-col items-start justify-center gap-2">
-  //           <div className="skeleton h-6 w-28"></div>
-  //           <div className="skeleton h-4 w-16"></div>
-  //           <div className="skeleton h-4 w-16"></div>
-  //           <div
-  //             className="skeleton h-40 w-full"
-  //             style={{
-  //               minWidth: "100%",
-  //             }}
-  //           ></div>
-  //         </div>
-  //       </div>
-  //     );
-  //   }
-
-  //   if (divs !== null) {
-  //     setSkeleton(divs);
-  //   }
-  // }, [loading]);
-
-  // useEffect(() => {
-  //   const divs: any = [];
-  //   for (let i = 0; i < 16; i++) {
-  //     divs.push(
-  //       <div
-  //         key={i}
-  //         className="relative break-inside-avoid mb-4 p-2 rounded-xl bg-slate-400/80 shadow-sm opacity-25 mx-4"
-  //       >
-  //         <div className="flex w-full items-center justify-end">
-  //           <div className="skeleton h-4 w-6"></div>
-  //         </div>
-
-  //         <div className="flex flex-col items-start justify-center gap-2">
-  //           <div className="skeleton h-6 w-28"></div>
-  //           <div className="skeleton h-4 w-16"></div>
-  //           <div className="skeleton h-4 w-16"></div>
-  //           <div
-  //             className="skeleton h-40 w-full"
-  //             style={{
-  //               minWidth: "100%",
-  //             }}
-  //           ></div>
-  //         </div>
-  //       </div>
-  //     );
-  //   }
-
-  //   if (divs !== null) {
-  //     setSkeletonMore(divs);
-  //   }
-  // }, [loadingMore]);
-
   return (
     hydrate && (
       <>
@@ -316,11 +219,6 @@ const DisplayPost: React.FC<any> = ({
           />
         )}
 
-        {/*loading ? (
-          // <Masonry gutter="5" columnsCount={3}>
-          //   {skeleton}
-          // </Masonry>
-        // ) : ( */}
         <Masonry gutter="5" columnsCount={3}>
           {data &&
             data.list &&
@@ -467,8 +365,8 @@ const DisplayPost: React.FC<any> = ({
                               {item.user.name && item.user.name
                                 ? item.user.name
                                 : item.user.id === session?.user.id
-                                ? "Anonymous (me)"
-                                : "Anonymous"}
+                                  ? "Anonymous (me)"
+                                  : "Anonymous"}
                             </div>
                           </div>
 
@@ -571,26 +469,6 @@ const DisplayPost: React.FC<any> = ({
             </div>
           )}
         </Masonry>
-
-        {/* 
-        {loadingMore && (
-          <Masonry gutter="5" columnsCount={3}>
-            {skeletonMore}
-          </Masonry>
-        )}
-      */}
-
-        {/* {!loading && !loadingMore && noMore ? (
-          <div className="w-full flex items-center justify-center font-semibold opacity-75">
-            <div className="bg-white rounded-lg px-2 text-xl">
-              Nothing to Load
-            </div>
-          </div>
-        ) : (
-          <div className="w-full flex items-center justify-center font-semibold opacity-75">
-            <span className="loading loading-dots loading-lg"></span>
-          </div>
-        )} */}
       </>
     )
   );

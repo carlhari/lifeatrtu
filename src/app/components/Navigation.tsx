@@ -17,22 +17,22 @@ function Navigation() {
   const notif = isOpenNotif();
   const [resData, setResData] = useState<any>();
 
-  const getNotif = new Promise(async (resolve, reject) => {
-    try {
-      const response = await axios.post("/api/post/get/notif");
+  // const getNotif = new Promise(async (resolve, reject) => {
+  //   try {
+  //     const response = await axios.post("/api/post/get/notif");
 
-      const data = response.data;
+  //     const data = response.data;
 
-      if (data.ok) {
-        resolve(data);
-      }
-      return reject();
-    } catch (err) {
-      console.error(err);
-    }
-  });
+  //     if (data.ok) {
+  //       resolve(data);
+  //     }
+  //     return reject();
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // });
 
-  const notifs = useRequest(() => getNotif);
+  // const notifs = useRequest(() => getNotif);
 
   return (
     <div className="flex items-center justify-between p-2 px-8 w-full font-bold">
@@ -43,9 +43,7 @@ function Navigation() {
           : session && Capitalize(session?.user?.name).split(" ")[0]}
       </div>
       <div className=" relative flex items-center justify-center gap-4">
-        {notif.value && (
-          <Notification loading={notifs.loading} data={notifs.data} />
-        )}
+        {notif.value && <Notification />}
         <div
           className="text-3xl cursor-pointer flex items-center"
           onClick={() => notif.change()}
