@@ -29,8 +29,8 @@ const Form: React.FC<any> = ({
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [remainingPost, setRemainingPost] = useState<any>();
-  const [disabled, setDisabled] = useState<boolean>(false);
+  // const [remainingPost, setRemainingPost] = useState<any>();
+  // const [disabled, setDisabled] = useState<boolean>(false);
 
   const initialData = {
     title: "",
@@ -46,36 +46,36 @@ const Form: React.FC<any> = ({
     setHydrate(true);
   }, []);
 
-  useEffect(() => {
-    const resetPostTime = async () => {
-      await axios.post("/api/post/get/cooldown/reset", {
-        cdField: "cooldownPost",
-      });
-    };
+  // useEffect(() => {
+  //   const resetPostTime = async () => {
+  //     await axios.post("/api/post/get/cooldown/reset", {
+  //       cdField: "cooldownPost",
+  //     });
+  //   };
 
-    const remaining = () => {
-      const getRemaining = getRemainingTime(postTime);
-      setRemainingPost(getRemaining);
-    };
+  //   const remaining = () => {
+  //     const getRemaining = getRemainingTime(postTime);
+  //     setRemainingPost(getRemaining);
+  //   };
 
-    remaining();
+  //   remaining();
 
-    const intervalId = setInterval(() => {
-      setRemainingPost((prev: any) => {
-        if (prev > 0) {
-          setDisabled(true);
-          return prev - 1;
-        } else {
-          clearInterval(intervalId);
-          resetPostTime();
-          setDisabled(false);
-          return prev;
-        }
-      });
-    }, 1000);
+  //   const intervalId = setInterval(() => {
+  //     setRemainingPost((prev: any) => {
+  //       if (prev > 0) {
+  //         setDisabled(true);
+  //         return prev - 1;
+  //       } else {
+  //         clearInterval(intervalId);
+  //         resetPostTime();
+  //         setDisabled(false);
+  //         return prev;
+  //       }
+  //     });
+  //   }, 1000);
 
-    return () => clearInterval(intervalId);
-  }, [postTime, keyword, session]);
+  //   return () => clearInterval(intervalId);
+  // }, [postTime, keyword, session]);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -329,10 +329,8 @@ const Form: React.FC<any> = ({
               <button
                 type="submit"
                 className="text-2xl font-semibold"
-                style={{ cursor: disabled ? "not-allowed" : "pointer" }}
-                disabled={disabled}
               >
-                {disabled ? formatTime(remainingPost) : "Post"}
+               Post
               </button>
             </div>
 

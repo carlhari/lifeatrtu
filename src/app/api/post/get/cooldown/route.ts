@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
           deleteTime: cd.cooldownDelete,
           editTime: cd.cooldownEdit,
         });
-      }
+      } else return NextResponse.json({ok:false, msg:"error getting data", status: "ERROR"})
     } else
       return NextResponse.json({
         msg: "UNAUTHORIZED ACCESS",

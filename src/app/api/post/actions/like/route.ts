@@ -6,7 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(request: NextRequest) {
   try {
-    const { postId } = await request.json();
+    const { postId, author } = await request.json();
     const session = await getServerSession(authOptions);
 
     if (session) {
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
           },
         });
 
+
         const post = await prisma.post.findUnique({
           where: {
             id: postId,
@@ -57,6 +58,28 @@ export async function POST(request: NextRequest) {
         });
 
         if (like && post) {
+       
+          const existingNotif = await prisma.notification.findFirst({
+            where:{
+              userId: session.user.id,
+              postId: postId,
+              type:"like"
+            }
+          })
+
+        if(post.user.id !== author){
+          if(!existingNotif){
+            await prisma.notification.create({data:{
+             postId: postId,
+             userId: session.user.id,
+             read: false,
+             type:"like",
+           }})}else await prisma.notification.delete({where:{
+            id: existingNotif.id
+           }})
+        }
+
+
           return NextResponse.json({
             ok: true,
             msg: "liked",

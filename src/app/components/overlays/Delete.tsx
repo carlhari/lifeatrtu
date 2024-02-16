@@ -28,6 +28,18 @@ function Delete({ reload }: any) {
 
         const data = res.data;
 
+        toast.promise(
+          response,
+          {
+            loading: "Deleting Post",
+            success: (data: any) => `Success: ${data.msg} `,
+            error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
+          },
+          { position: "top-center" }
+        );
+
+
+        
         if (!status.includes(data.status)) {
           setTimeout(() => {
             clear();
@@ -41,15 +53,6 @@ function Delete({ reload }: any) {
         } else reject(data);
       });
 
-      toast.promise(
-        response,
-        {
-          loading: "Deleting Post",
-          success: (data: any) => `Success: ${data.msg} `,
-          error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
-        },
-        { position: "top-center" }
-      );
     } catch (err) {
       console.error(err);
     }

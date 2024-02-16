@@ -11,7 +11,7 @@ const vader = require("crowd-sentiment");
 
 export async function POST(request: NextRequest) {
   try {
-    const { postId, content } = await request.json();
+    const { postId, content, author } = await request.json();
     const session = await getServerSession(authOptions);
     const remainingTokens = await limiter_comment.removeTokens(1);
 
@@ -28,9 +28,41 @@ export async function POST(request: NextRequest) {
               content: content,
               userId: session?.user.id,
             },
+
+          
           });
 
-          if (comment) {
+
+          const post = await prisma.post.findUnique({
+            where:{
+              id: postId,
+            },
+            select:{
+              user: true
+            }
+          })
+
+
+          if (comment && post) {
+            const existingNotif = await prisma.notification.findFirst({
+              where:{
+                postId: postId,
+                userId: session.user.id,
+                type:"comment"
+              }
+            })
+
+            if(post.user.id !== author){
+              if(!existingNotif){
+                await prisma.notification.create({data:{
+                  postId: postId,
+                  userId: session.user.id,
+                  read: false,
+                  type: "comment"
+                }})
+              }
+            }
+   
             return NextResponse.json({
               ok: true,
               msg: "Comment Added",

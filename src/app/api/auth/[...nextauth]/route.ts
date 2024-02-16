@@ -12,11 +12,16 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scopes: ["profile"],
-          prompt: "consent",
+          prompt:"consent",
+          response_type: "code"
         },
       },
+    
     }),
   ],
+  pages:{
+    signIn: "/"
+  },
   secret: process.env.NEXTAUTH_SECRET ?? "",
   session: {
     maxAge: 60 * 60 * 24,

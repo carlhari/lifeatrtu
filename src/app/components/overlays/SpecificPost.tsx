@@ -54,6 +54,7 @@ function SpecificPost({
         const res = await axios.post("/api/post/actions/comment", {
           postId: postId,
           content: comment,
+          author: session?.user.id
         });
         const data = res.data;
         if (!status.includes(data.status)) {

@@ -55,7 +55,7 @@ const EditPost: React.FC<any> = ({
         const data = response.data;
         if (data.ok) {
           resolve(data);
-          toast.success("DATA RECEIENVE");
+     
         } else reject(data);
       } catch (err) {
         reject(err);
@@ -138,6 +138,13 @@ const EditPost: React.FC<any> = ({
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    try{
+      const response = await axios.post("/api/post/edit", {...states, postId: postId})
+      
+    }catch(err){
+      console.error(err)
+    }
   };
   return (
     hydrate && (

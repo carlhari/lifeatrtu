@@ -10,9 +10,19 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (session) {
-      const reset = await prisma.user.update({
+      const user = await prisma.user.findUnique({
         where: {
           id: session.user.id,
+          email: session.user.id
+        }
+      })
+
+
+    if(user){
+      const reset = await prisma.user.update({
+        where: {
+          id: user.id,
+          email: user.email
         },
 
         data: {
@@ -23,6 +33,7 @@ export async function POST(request: NextRequest) {
       if (reset) {
         return NextResponse.json({ ok: true });
       } else return NextResponse.json({ ok: false });
+    } else return NextResponse.json({ok: false, msg:"user data not found", status: "ERROR"})
     } else
       return NextResponse.json({
         msg: "UNAUTHORIZED ACCESS",

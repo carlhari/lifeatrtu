@@ -104,6 +104,7 @@ const DisplayPost: React.FC<any> = ({
         "/api/post/actions/like",
         {
           postId: postId,
+          author: session?.user.id
         },
         {
           headers: {
