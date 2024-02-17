@@ -47,8 +47,7 @@ export async function POST(request: NextRequest) {
           },
         });
 
-
-        const post = await prisma.post.findUnique({
+        const post = await prisma.post.findFirst({
           where: {
             id: postId,
           },
@@ -58,27 +57,16 @@ export async function POST(request: NextRequest) {
         });
 
         if (like && post) {
-       
-          const existingNotif = await prisma.notification.findFirst({
-            where:{
-              userId: session.user.id,
-              postId: postId,
-              type:"like"
-            }
-          })
-
-        if(post.user.id !== author){
-          if(!existingNotif){
-            await prisma.notification.create({data:{
-             postId: postId,
-             userId: session.user.id,
-             read: false,
-             type:"like",
-           }})}else await prisma.notification.delete({where:{
-            id: existingNotif.id
-           }})
-        }
-
+          if (session.user.id !== post.user.id) {
+            await prisma.notification.create({
+              data: {
+                postId: post.id,
+                userId: session.user.id,
+                read: false,
+                type: "like",
+              },
+            });
+          }
 
           return NextResponse.json({
             ok: true,

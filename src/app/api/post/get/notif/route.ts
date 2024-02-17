@@ -10,9 +10,16 @@ export async function POST(request: NextRequest) {
     if (session) {
       const notifs = await prisma.notification.findMany({
         where: {
-          userId: session.user.id,
+          post: {
+            userId: session.user.id,
+          },
+        },
+
+        include: {
+          user: true,
         },
       });
+
       if (notifs) {
         return NextResponse.json({ ok: true, notifs: notifs });
       } else

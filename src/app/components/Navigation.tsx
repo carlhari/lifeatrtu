@@ -17,23 +17,6 @@ function Navigation() {
   const notif = isOpenNotif();
   const [resData, setResData] = useState<any>();
 
-  // const getNotif = new Promise(async (resolve, reject) => {
-  //   try {
-  //     const response = await axios.post("/api/post/get/notif");
-
-  //     const data = response.data;
-
-  //     if (data.ok) {
-  //       resolve(data);
-  //     }
-  //     return reject();
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // });
-
-  // const notifs = useRequest(() => getNotif);
-
   return (
     <div className="flex items-center justify-between p-2 px-8 w-full font-bold">
       <div className="text-4xl">
