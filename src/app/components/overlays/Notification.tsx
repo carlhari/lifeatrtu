@@ -1,8 +1,11 @@
 import React from "react";
 import axios from "axios";
 import { useRequest } from "ahooks";
+import { useSession } from "next-auth/react";
 
 function Notification() {
+  const { data: session } = useSession();
+
   function getNotif() {
     return new Promise(async (resolve, reject) => {
       try {
@@ -20,7 +23,9 @@ function Notification() {
     });
   }
 
-  const { data, loading, mutate } = useRequest(() => getNotif());
+  const { data, loading, mutate } = useRequest(() => getNotif(), {
+    refreshDeps: [session],
+  });
 
   const resData = data as any;
 
@@ -30,17 +35,18 @@ function Notification() {
       <div className="w-96 bg-slate-400 max-h-96 p-3 rounded-2xl">
         <div className="w-full text-center text-white">Notification</div>
         <div className="w-full h-full bg-white rounded-lg px-1">
-          {/* {resData &&
+          {resData &&
             resData.ok &&
             resData.notifs.map((item: any, key: any) => {
               return (
                 item && (
                   <div key={key}>
-                    {item.id} {item.type} your post {item.postId}
+                    {item.user.name} {item.type} your post, Entitled "
+                    {item.post.title}"
                   </div>
                 )
               );
-            })} */}
+            })}
         </div>
       </div>
     </div>

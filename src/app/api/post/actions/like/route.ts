@@ -17,6 +17,14 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      const existingNotification = await prisma.notification.findFirst({
+        where: {
+          postId: postId,
+          userId: session.user.id,
+          type: "like",
+        },
+      });
+
       if (existingLike) {
         const deleteLikes = await prisma.like.delete({
           where: {
@@ -58,14 +66,22 @@ export async function POST(request: NextRequest) {
 
         if (like && post) {
           if (session.user.id !== post.user.id) {
-            await prisma.notification.create({
-              data: {
-                postId: post.id,
-                userId: session.user.id,
-                read: false,
-                type: "like",
-              },
-            });
+            if (!existingNotification) {
+              await prisma.notification.create({
+                data: {
+                  postId: post.id,
+                  userId: session.user.id,
+                  read: false,
+                  type: "like",
+                },
+              });
+            } else {
+              await prisma.notification.delete({
+                where: {
+                  id: existingNotification.id,
+                },
+              });
+            }
           }
 
           return NextResponse.json({

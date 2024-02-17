@@ -16,7 +16,18 @@ export async function POST(request: NextRequest) {
         },
 
         include: {
-          user: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+
+          post: {
+            select: {
+              title: true,
+            },
+          },
         },
       });
 
