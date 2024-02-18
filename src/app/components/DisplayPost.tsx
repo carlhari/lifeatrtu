@@ -176,7 +176,9 @@ const DisplayPost: React.FC<any> = ({
 
     setKeyword(!keyword);
     return () => {
-      socket.off("client", socketListener);
+      if (socketListener) {
+        socket.off("client_comment", socketListener);
+      }
       socket.close();
     };
   }, [session]);
@@ -206,7 +208,9 @@ const DisplayPost: React.FC<any> = ({
     }, 1000);
 
     return () => {
-      socket.off("client_comment", socketListener);
+      if (socketListener) {
+        socket.off("client_comment", socketListener);
+      }
       socket.close();
     };
   }, [session]);
