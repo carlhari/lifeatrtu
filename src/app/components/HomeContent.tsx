@@ -85,29 +85,6 @@ function HomeContent() {
     };
   }, [keyword, select, session]);
 
-  useEffect(() => {
-    const getCD = async () => {
-      if (session) {
-        try {
-          const cd = await axios.post("/api/post/get/cooldown");
-
-          const data = cd.data;
-
-          if (data.ok) {
-            setPostTime(data.postTime);
-            setDeleteTime(data.deleteTime);
-            setEditTime(data.editTime);
-            return;
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    };
-
-    getCD();
-  }, [session, keyword]);
-
   return (
     <div className="w-full h-full">
       {open && <Logout />}
