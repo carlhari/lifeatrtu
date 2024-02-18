@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { Capitalize } from "@/utils/Capitalize";
 import { CgProfile } from "react-icons/cg";
 import { AiOutlineSend } from "react-icons/ai";
+import { io } from "socket.io-client";
 
 function SpecificPost({
   postId,
@@ -54,7 +55,7 @@ function SpecificPost({
         const res = await axios.post("/api/post/actions/comment", {
           postId: postId,
           content: comment,
-          author: session?.user.id
+          author: session?.user.id,
         });
         const data = res.data;
         if (!status.includes(data.status)) {
@@ -80,9 +81,19 @@ function SpecificPost({
                 };
               });
 
+              const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
+
               setDisabled(false);
               formRef.current && formRef.current.reset();
               setComment("");
+
+              socket.emit("active_comment", {
+                userId: session?.user.id,
+                author: data.author,
+                currentName: Capitalize(session?.user.name),
+                postId: postId,
+              });
+
               resolve(data);
             }, 1500);
           } else reject(data);

@@ -28,45 +28,50 @@ export async function POST(request: NextRequest) {
               content: content,
               userId: session?.user.id,
             },
-
-          
           });
 
-
-          const post = await prisma.post.findUnique({
-            where:{
+          const post = await prisma.post.findFirst({
+            where: {
               id: postId,
             },
-            select:{
-              user: true
-            }
-          })
-
+            include: {
+              user: true,
+            },
+          });
 
           if (comment && post) {
-            const existingNotif = await prisma.notification.findFirst({
-              where:{
+            const existingNotification = await prisma.notification.findFirst({
+              where: {
                 postId: postId,
                 userId: session.user.id,
-                type:"comment"
-              }
-            })
+                type: "comment",
+              },
+            });
 
-            if(post.user.id !== author){
-              if(!existingNotif){
-                await prisma.notification.create({data:{
-                  postId: postId,
-                  userId: session.user.id,
-                  read: false,
-                  type: "comment"
-                }})
+            if (post.user.id !== author) {
+              if (!existingNotification) {
+                await prisma.notification.create({
+                  data: {
+                    postId: post.id,
+                    userId: session.user.id,
+                    read: false,
+                    type: "comment",
+                  },
+                });
+              } else {
+                await prisma.notification.delete({
+                  where: {
+                    id: existingNotification.id,
+                  },
+                });
               }
             }
-   
+
             return NextResponse.json({
               ok: true,
               msg: "Comment Added",
               comment: comment,
+              author: post.user.id,
             });
           } else
             return NextResponse.json({

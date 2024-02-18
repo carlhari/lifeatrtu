@@ -177,6 +177,37 @@ const DisplayPost: React.FC<any> = ({
     setKeyword(!keyword);
     return () => {
       socket.off("client", socketListener);
+      socket.close();
+    };
+  }, [session]);
+
+  useEffect(() => {
+    const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
+
+    const socketListener = (data: any) => {
+      if (session) {
+        if (data.author === session.user.id) {
+          if (data.by !== session.user.id) {
+            toast.success(
+              `${data.byName} Commented on your post ${data.postId}`,
+              {
+                duration: 3000,
+              }
+            );
+
+            setKeyword(!keyword);
+          }
+        }
+      }
+    };
+
+    setTimeout(() => {
+      socket.on("client_comment", socketListener);
+    }, 1000);
+
+    return () => {
+      socket.off("client_comment", socketListener);
+      socket.close();
     };
   }, [session]);
 
@@ -289,10 +320,8 @@ const DisplayPost: React.FC<any> = ({
                                         setKeyword(!keyword);
                                       }}
                                       className="flex items-center justify-start w-full hover:bg-slate-200  duration-700 rounded-md bg-white px-2"
-                                     
-                                     
                                     >
-                                     DELETE
+                                      DELETE
                                     </button>
                                   </>
                                 ) : (
