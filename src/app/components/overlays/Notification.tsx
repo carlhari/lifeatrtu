@@ -4,7 +4,7 @@ import { useRequest } from "ahooks";
 import { useSession } from "next-auth/react";
 
 function Notification() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   function getNotif() {
     return new Promise(async (resolve, reject) => {
@@ -29,9 +29,9 @@ function Notification() {
 
   return (
     <div className="absolute top-2 right-24 animate-fadeIn duration-500 z-40 sm:right-16 xxs:right-14">
-      <div className="w-96 bg-slate-400 max-h-96 p-3 rounded-2xl xs:w-80 xs:p-2 xs:rounded-lg xxs:w-64">
+      <div className="w-96 bg-slate-400 max-h-96 p-2 rounded-2xl xs:w-80 xs:p-2 xs:rounded-lg xxs:w-64">
         <div className="w-full text-center text-white">Notification</div>
-        <div className="w-full h-full bg-white rounded-lg px-1 flex items-center justify-center flex-col">
+        <div className="w-full h-full bg-white rounded-md px-1 flex items-center justify-center flex-col">
           {loading && (
             <span className="loading loading-dots w-16 xxs:w-12"></span>
           )}
@@ -39,16 +39,27 @@ function Notification() {
             resData &&
             resData.ok &&
             resData.notifs.map((item: any, key: any) => (
-              <div key={key}>
+              <div
+                key={key}
+                className="border-solid border-black border-opacity-5 w-full"
+              >
                 {item.type === "like" ? (
-                  <div className="font-semibold xxs:text-sm">
+                  <div className="w-full font-semibold xxs:text-sm">
                     {item.user.name} {item.type} your post, Entitled "
-                    {item.post.title}"
+                    {item.post.title}"<br></br>
+                    <hr
+                      className="border-t border-solid border-black"
+                      style={{ opacity: 0.25 }}
+                    ></hr>
                   </div>
                 ) : (
-                  <div className="font-semibold xxs:text-sm">
+                  <div className="w-full font-semibold xxs:text-sm">
                     {item.user.name} Commented on your post, Entitled "
-                    {item.post.title}"
+                    {item.post.title}"<br></br>
+                    <hr
+                      className="border-t border-solid border-black"
+                      style={{ opacity: 0.25 }}
+                    ></hr>
                   </div>
                 )}
               </div>

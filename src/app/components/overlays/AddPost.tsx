@@ -11,7 +11,7 @@ function AddPost() {
         <button
           type="button"
           onClick={clicked}
-          className=" text-7xl text-white animate-bounce fixed bottom-12 right-16 z-40 rounded-full bg-blue-600 border-2 border-solid border-black p-4"
+          className=" text-7xl 2xl:text-6xl lg:text-7xl xs:text-5xl text-white animate-bounce fixed bottom-12 right-16 z-40 rounded-full bg-blue-600 border border-solid border-black p-4 2xl:right-8 xs:right-4"
         >
           <BsChatLeftQuote />
         </button>

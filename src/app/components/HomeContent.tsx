@@ -110,7 +110,7 @@ function HomeContent() {
         keyword={keyword}
         postTime={postTime}
       />
-      <div className="w-p-88 m-auto flex items-center justify-end">
+      <div className="w-p-88 m-auto flex items-center justify-end 2xl:w-full 2xl:px-6">
         <div className="rounded-xl px-4 bg-white mb-2">
           <select
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -137,7 +137,10 @@ function HomeContent() {
           </div>
         </div>
       ) : (
-        <div ref={ref} className="m-auto w-p-88 h-p-90 overflow-y-auto">
+        <div
+          ref={ref}
+          className="m-auto w-p-88 h-p-90 overflow-y-auto 2xl:w-full 2xl:px-6 xs:px-2"
+        >
           <DisplayPost
             data={data}
             loading={loading}

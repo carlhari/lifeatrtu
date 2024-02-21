@@ -1,21 +1,16 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSession } from "next-auth/react";
 import LogoutButton from "./LogoutButton";
 import { Capitalize } from "@/utils/Capitalize";
-import { isOpenLogout } from "@/utils/Overlay/Logout";
+
 import { FaBell } from "react-icons/fa";
 import { isOpenNotif } from "@/utils/Overlay/Notification";
 import Notification from "@/app/components/overlays/Notification";
-import axios from "axios";
-import toast from "react-hot-toast";
-import { useRequest } from "ahooks";
 
 function Navigation() {
   const { data: session, status } = useSession();
-  const { open } = isOpenLogout();
   const notif = isOpenNotif();
-  const [resData, setResData] = useState<any>();
 
   return (
     <div className="flex items-center justify-between p-2 px-8 w-full md:px-4 sm:px-2">

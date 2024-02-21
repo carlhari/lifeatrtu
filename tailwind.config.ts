@@ -39,6 +39,8 @@ const config: Config = {
       },
       maxHeight: {
         "p-88": "88%",
+        "p-95": "98%",
+        "p-320": "290px",
       },
       width: {
         "p-88": "88%",

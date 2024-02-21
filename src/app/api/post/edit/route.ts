@@ -87,13 +87,9 @@ export async function POST(request: NextRequest) {
                 };
 
                 return NextResponse.json({
-                  msg: "Post Added",
+                  ok: true,
+                  msg: "Successfully Edited",
                   post: newPost,
-                });
-              } else {
-                return NextResponse.json({
-                  msg: "Post Added",
-                  post: post,
                 });
               }
             } else {

@@ -10,8 +10,8 @@ import Input from "@/app/components/Input";
 import { useSession } from "next-auth/react";
 import { Capitalize } from "@/utils/Capitalize";
 import { CgProfile } from "react-icons/cg";
-import { AiOutlineSend } from "react-icons/ai";
 import { io } from "socket.io-client";
+import { CiPlay1 } from "react-icons/ci";
 
 function SpecificPost({
   postId,
@@ -27,6 +27,8 @@ function SpecificPost({
   const [disabled, setDisabled] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
+
+  const [openImage, setOpenImage] = useState<boolean>(false);
 
   const { data, loading, mutate } = useRequest(() => getPost());
 
@@ -109,13 +111,33 @@ function SpecificPost({
       console.error(err);
     }
   };
-  console.log(data);
+
   return (
-    <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-400">
+    <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-400/70 animate-fadeIn">
       {!data && loading ? (
         <span className="loading loading-dots w-36"></span>
       ) : (
-        <div className="bg-white p-4 rounded-2xl w-1/2 max-h-p-88">
+        <div
+          className="bg-white p-4 rounded-2xl w-1/2 animate-fadeIn 2xl:w-8/12 lg:w-9/12 md:w-10/12 xs:w-11/12"
+          style={{ maxHeight: "98%" }}
+        >
+          {openImage && (
+            <div className="w-full h-screen fixed top-0 left-0 bg-white flex items-center flex-col justify-center animate-fadeIn">
+              <button
+                type="button"
+                className="absolute top-8 right-12 text-5xl"
+                onClick={() => setOpenImage(false)}
+              >
+                <IoClose />
+              </button>
+
+              <img
+                src={data.post.image}
+                alt="image"
+                className="object-contain border-2 border-solid border-black"
+              />
+            </div>
+          )}
           <Toaster />
           <div className="w-full flex items-center justify-end">
             <button type="button" onClick={close} className="text-3xl">
@@ -125,7 +147,7 @@ function SpecificPost({
 
           {data && data.post && data.post.user && (
             <div className="w-full flex flex-col justify-center">
-              <div className="text-2xl font-semibold break-words w-full text-justify">
+              <div className="text-3xl font-semibold break-words w-full text-justify">
                 {data.post.title}
               </div>
 
@@ -136,41 +158,65 @@ function SpecificPost({
                 </div>
               </div>
 
-              <div>{moment(data.post.createdAt).format("LLL")}</div>
+              <div className="text-sm">
+                {moment(data.post.createdAt).format("LLL")}
+              </div>
 
-              <div className="flex gap-2 items-center flex-col">
-                <div className="bg-slate-500/60 w-full p-2 rounded-xl">
+              <div className="w-full h-full flex gap-2 items-center flex-col">
+                <div className="bg-slate-300 w-full h-full p-2 rounded-xl">
                   <div className="w-full flex items-center justify-start gap-1">
                     <div className="text-4xl flex items-center">
                       <CgProfile />
                     </div>
 
                     {session && data.post.anonymous ? (
-                      <div>
+                      <div className="font-semibold">
                         {data.post.userId === session?.user.id
                           ? "Anonymous (Me)"
                           : "Anonymous"}
                       </div>
                     ) : (
-                      <div>{data.post.user.name}</div>
+                      <div className="font-semibold text-lg">
+                        {data.post.user.name}
+                      </div>
                     )}
                   </div>
 
                   <div className="text-base break-words whitespace-break-spaces text-justify px-2">
                     {data.post.content}
                   </div>
+
+                  {data.post.image && (
+                    <div
+                      className="w-full overflow-y-auto flex items-center justify-center"
+                      style={{ height: "400px" }}
+                    >
+                      <img
+                        src={data.post.image}
+                        alt={"Image"}
+                        className="cursor-pointer"
+                        onClick={() => setOpenImage(true)}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="bg-slate-500/60 w-full p-2 rounded-xl">
+                <div className="bg-slate-300 w-full p-2 rounded-xl h-full">
                   {data.post.comments.length === 0 ? (
                     <div className="text-sm">Be the first to comment.</div>
                   ) : (
-                    <div className="max-h-64 w-full overflow-y-auto">
+                    <div
+                      className="comment w-full overflow-y-auto flex flex-col gap-2 rounded-xl"
+                      style={{ maxHeight: "300px" }}
+                    >
                       {data.post.comments
                         .slice()
                         .reverse()
                         .map((item: any, key: number) => {
                           return (
-                            <div key={key}>
+                            <div
+                              key={key}
+                              className="bg-white w-full rounded-xl p-1"
+                            >
                               <div className="flex items-center justify-start gap-1">
                                 <div className="text-3xl">
                                   <CgProfile />
@@ -208,14 +254,12 @@ function SpecificPost({
               type="submit"
               disabled={disabled}
               style={{ cursor: disabled ? "not-allowed" : "" }}
-              className={`${
-                !disabled && "text-green-700"
-              }  text-3xl flex items-center`}
+              className="text-2xl flex items-center"
             >
               {disabled ? (
                 <span className="loading loading-dots loading-lg"></span>
               ) : (
-                <AiOutlineSend />
+                <CiPlay1 />
               )}
             </button>
           </form>

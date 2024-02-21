@@ -16,6 +16,7 @@ import { BiImageAdd } from "react-icons/bi";
 import { getRemainingTime } from "@/utils/CountDown";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 import { useRequest } from "ahooks";
+import { useEditPost } from "@/utils/useEditPost";
 
 const EditPost: React.FC<any> = ({
   data,
@@ -27,7 +28,6 @@ const EditPost: React.FC<any> = ({
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { data: session } = useSession();
-  const { click, clicked } = useAddPost();
   const { openAgreement, agreementT } = isOpenAgreement();
   const edit = isOpenEdit();
   const editValue = valueEdit();
@@ -43,7 +43,7 @@ const EditPost: React.FC<any> = ({
   };
 
   const [post, setPostData] = useState<any>(initialData);
-  const [states, setStates] = useState<FormType>(initialData);
+  const [states, setStates] = useState<any>(initialData);
   const [disabled, setDisabled] = useState<boolean>(false);
 
   function getPost(): Promise<any> {
@@ -55,7 +55,6 @@ const EditPost: React.FC<any> = ({
         const data = response.data;
         if (data.ok) {
           resolve(data);
-     
         } else reject(data);
       } catch (err) {
         reject(err);
@@ -71,11 +70,17 @@ const EditPost: React.FC<any> = ({
 
   useEffect(() => {
     if (postReq && postReq.data) {
+      setPostData(postReq.data.post);
       setStates(postReq.data.post);
     }
-
-    console.log(states);
   }, [postReq.data]);
+
+  useEffect(() => {
+    const isChanged = Object.keys(post).some(
+      (key: any) => post[key] !== states[key]
+    );
+    setDisabled(!isChanged);
+  }, [states]);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -132,12 +137,41 @@ const EditPost: React.FC<any> = ({
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
+    try {
+      const response = new Promise(async (resolve, reject) => {
+        const res = await axios.post("/api/post/edit", {
+          ...states,
+          postId: postId,
+        });
 
-    try{
-      const response = await axios.post("/api/post/edit", {...states, postId: postId})
-      
-    }catch(err){
-      console.error(err)
+        const resData = res.data;
+
+        if (!status.includes(resData.status)) {
+          if (
+            resData.post.title.length !== 0 &&
+            resData.post.focus.length !== 0 &&
+            resData.post.content.length !== 0
+          ) {
+            setTimeout(() => {
+              setKeyword(!keyword);
+
+              resolve(resData);
+            }, 1500);
+          } else reject(resData);
+        } else reject(resData);
+      });
+
+      toast.promise(response, {
+        loading: "Loading",
+        success: (data: any) => {
+          edit.close();
+          return `Success: ${data.msg}`;
+        },
+        error: (data: any) => `Failed[${data.status}]: ${data.msg}`,
+      });
+    } catch (err) {
+      console.error(err);
     }
   };
   return (

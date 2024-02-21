@@ -43,6 +43,8 @@ const DisplayPost: React.FC<any> = ({
   const [skeleton, setSkeleton] = useState<Array<any>>([]);
   const [skeletonMore, setSkeletonMore] = useState<Array<any>>([]);
 
+  const [windowWidth, setWindowWidth] = useState<number>(0);
+
   const { openPost, open } = usePost();
 
   const Delete = isOpenDelete();
@@ -242,6 +244,30 @@ const DisplayPost: React.FC<any> = ({
     }
   }, [selected]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [windowWidth, session]);
+
+  const handleSize = () => {
+    if (windowWidth >= 1535) {
+      return 4;
+    } else if (windowWidth >= 1279) {
+      return 3;
+    } else if (windowWidth >= 1023) {
+      return 3;
+    }
+  };
+
   return (
     hydrate && (
       <>
@@ -253,29 +279,30 @@ const DisplayPost: React.FC<any> = ({
             keyword={keyword}
           />
         )}
-
-        <Masonry gutter="5" columnsCount={3}>
-          {data &&
-            data.list &&
-            data.list.map((item: any, key: any) => {
-              for (let i = 0; i < 3; i++) {
+        <ResponsiveMasonry
+          columnsCountBreakPoints={{ 1535: 4, 1279: 3, 1023: 2, 767: 1 }}
+        >
+          <Masonry gutter="20px">
+            {data &&
+              data.list &&
+              data.list.map((item: any, key: any) => {
                 return (
                   <div
                     key={key}
-                    className={`relative break-inside-avoid mb-4 p-2 rounded-xl bg-slate-400/80 shadow-sm mx-4 animate-fadeIn`}
+                    className={`p-2 rounded-xl bg-slate-400/80 shadow-sm animate-fadeIn`}
                   >
                     {id === item.id ? (
-                      <div className="aboslute top-0 left-0 w-full h-full z-20">
+                      <div className="p-2 rounded-xl bg-slate-400/90 shadow-sm opacity-25">
                         <div className="flex w-full items-center justify-end">
                           <div className="skeleton h-4 w-6"></div>
                         </div>
 
                         <div className="flex flex-col items-start justify-center gap-2">
                           <div className="skeleton h-6 w-28"></div>
-                          <div className="skeleton h-4 w-16"></div>
-                          <div className="skeleton h-4 w-16"></div>
+                          <div className="skeleton h-3 w-16"></div>
+                          <div className="skeleton h-3 w-16"></div>
                           <div
-                            className="skeleton h-40 w-full"
+                            className="skeleton h-44 w-full"
                             style={{
                               minWidth: "100%",
                             }}
@@ -360,10 +387,12 @@ const DisplayPost: React.FC<any> = ({
 
                         {/* ----------------------------------------------------------- */}
 
-                        <div className="font-bold text-2xl break-words text-justify line-clamp-2 text-ellipsis w-full 2xl:text-3xl xl:text-3xl">
+                        <div className="font-bold text-2xl break-words text-justify line-clamp-2 text-ellipsis w-full 2xl:text-3xl xl:text-3xl xs:text-2xl xs:font-semibold">
                           {item.title}
                         </div>
-                        <div>{item.focus}</div>
+                        <div className="text-xl first-letter:uppercase">
+                          {item.focus}
+                        </div>
                         <div className="text-sm">
                           {moment(item.createdAt).format("lll")}
                         </div>
@@ -377,13 +406,13 @@ const DisplayPost: React.FC<any> = ({
                               handleEngage();
                             }
                           }}
-                          className="bg-slate-100 rounded-tl-xl rounded-tr-xl p-5 flex items-start flex-col gap-5 overflow-auto hover:cursor-pointer"
+                          className="bg-white rounded-tl-xl rounded-tr-xl p-5 flex items-start flex-col gap-5 overflow-auto hover:cursor-pointer 2xl:p-4 sm:p-2"
                         >
                           <div className="flex items-center gap-1">
-                            <div className="text-5xl">
+                            <div className="text-5xl xs:text-4xl">
                               <CgProfile />
                             </div>
-                            <div>
+                            <div className="text-lg xs:text-sm">
                               {item.user.name && item.user.name
                                 ? item.user.name
                                 : item.user.id === session?.user.id
@@ -392,7 +421,7 @@ const DisplayPost: React.FC<any> = ({
                             </div>
                           </div>
 
-                          <div className="break-words text-justify line-clamp-4 text-ellipsis w-full">
+                          <div className="text-lg break-words text-justify line-clamp-4 text-ellipsis w-full">
                             {item.content}
                           </div>
 
@@ -402,7 +431,7 @@ const DisplayPost: React.FC<any> = ({
                         </div>
 
                         {/* ----------------------------------------------------------- */}
-                        <div className="w-full flex justify-between items-center m-auto px-20 bg-slate-100 rounded-bl-xl rounded-br-xl">
+                        <div className="w-full flex justify-between items-center m-auto px-20 bg-white rounded-bl-xl rounded-br-xl">
                           <button
                             type="button"
                             onClick={() => handleLike(item.id)}
@@ -462,35 +491,35 @@ const DisplayPost: React.FC<any> = ({
                     )}
                   </div>
                 );
-              }
-            })}
+              })}
 
-          {!loading && !loadingMore && noMore ? (
-            <div className="w-full h-full flex items-center justify-center font-semibold opacity-75">
-              <div className="bg-white rounded-lg px-2 text-xl flex items-center">
-                Nothing to Load
+            {!loading && !loadingMore && noMore ? (
+              <div className="w-full h-full flex items-center justify-center font-semibold opacity-75">
+                <div className="bg-white rounded-lg px-2 text-xl flex items-center">
+                  Nothing to Load
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="relative break-inside-avoid mb-4 p-2 rounded-xl bg-slate-400/80 shadow-sm mx-4 opacity-25">
-              <div className="flex w-full items-center justify-end">
-                <div className="skeleton h-4 w-6"></div>
-              </div>
+            ) : (
+              <div className="p-2 rounded-xl bg-slate-400/80 shadow-sm opacity-25">
+                <div className="flex w-full items-center justify-end">
+                  <div className="skeleton h-4 w-6"></div>
+                </div>
 
-              <div className="flex flex-col items-start justify-center gap-2">
-                <div className="skeleton h-6 w-28"></div>
-                <div className="skeleton h-4 w-16"></div>
-                <div className="skeleton h-4 w-16"></div>
-                <div
-                  className="skeleton h-40 w-full"
-                  style={{
-                    minWidth: "100%",
-                  }}
-                ></div>
+                <div className="flex flex-col items-start justify-center gap-2">
+                  <div className="skeleton h-6 w-28"></div>
+                  <div className="skeleton h-3 w-16"></div>
+                  <div className="skeleton h-3 w-16"></div>
+                  <div
+                    className="skeleton h-44 w-full"
+                    style={{
+                      minWidth: "100%",
+                    }}
+                  ></div>
+                </div>
               </div>
-            </div>
-          )}
-        </Masonry>
+            )}
+          </Masonry>
+        </ResponsiveMasonry>
       </>
     )
   );
