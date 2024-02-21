@@ -4,7 +4,6 @@ import { prisma } from "@/utils/PrismaConfig";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { limiter_delete } from "@/utils/LimiterDelete";
-import { getRemainingTime } from "@/utils/CountDown";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,57 +12,33 @@ export async function POST(request: NextRequest) {
     const remainingCallsMin = await limiter_delete.removeTokens(1);
 
     if (session) {
-      const dt = new Date();
-      const time = dt.getTime();
-
       if (remainingCallsMin > 0) {
         const getCD = await prisma.user.findUnique({
           where: {
             id: session.user.id,
             email: session.user.email,
           },
-
-          select: {
-            cooldownDelete: true,
-          },
         });
 
         if (getCD) {
-          const remaining = getRemainingTime(getCD.cooldownDelete);
-
-          if (remaining === 0) {
-            const deletePost = await prisma.post.delete({
-              where: {
-                id: postId,
-                user: {
-                  id: session.user.id,
-                  email: session.user.email,
-                },
+          const deletePost = await prisma.post.delete({
+            where: {
+              id: postId,
+              user: {
+                id: session.user.id,
+                email: session.user.email,
               },
+            },
+          });
+
+          if (deletePost) {
+            return NextResponse.json({
+              ok: true,
+              msg: "Successfully Delete",
             });
-
-            if (deletePost) {
-              const updateTime = await prisma.user.update({
-                where: {
-                  id: session.user.id,
-                },
-                data: {
-                  cooldownDelete: time,
-                },
-              });
-
-              return NextResponse.json({
-                ok: true,
-                msg: "Successfully Delete",
-              });
-            } else
-              return NextResponse.json({
-                msg: "Failed To Delete",
-                status: "ERROR",
-              });
           } else
             return NextResponse.json({
-              msg: "Cooldown period not yet finished",
+              msg: "Failed To Delete",
               status: "ERROR",
             });
         }
