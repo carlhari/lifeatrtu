@@ -118,14 +118,14 @@ function SpecificPost({
         <span className="loading loading-dots w-36"></span>
       ) : (
         <div
-          className="bg-white p-4 rounded-2xl w-1/2 animate-fadeIn 2xl:w-8/12 lg:w-9/12 md:w-10/12 xs:w-11/12"
+          className="bg-white p-4 rounded-2xl w-1/2 animate-fadeIn 2xl:w-8/12 xl:w-9/12 lg:p-2 lg:w-10/12 md:w-11/12 sm:p-1 sm:rounded-xl xs:h-12/12"
           style={{ maxHeight: "98%" }}
         >
           {openImage && (
             <div className="w-full h-screen fixed top-0 left-0 bg-white flex items-center flex-col justify-center animate-fadeIn">
               <button
                 type="button"
-                className="absolute top-8 right-12 text-5xl"
+                className="absolute top-8 right-12 text-5xl sm:text-3xl sm:right-8 xxs:right-2"
                 onClick={() => setOpenImage(false)}
               >
                 <IoClose />
@@ -134,7 +134,7 @@ function SpecificPost({
               <img
                 src={data.post.image}
                 alt="image"
-                className="object-contain border-2 border-solid border-black"
+                className="object-cover border-2 border-solid border-black"
               />
             </div>
           )}
@@ -147,11 +147,11 @@ function SpecificPost({
 
           {data && data.post && data.post.user && (
             <div className="w-full flex flex-col justify-center">
-              <div className="text-3xl font-semibold break-words w-full text-justify">
+              <div className="text-3xl font-semibold break-words w-full text-justify xs:text-xl">
                 {data.post.title}
               </div>
 
-              <div className="flex items-center text-xl gap-2 w-full justify-start">
+              <div className="flex items-center text-xl gap-2 w-full justify-start lg:text-base">
                 Focus:{" "}
                 <div className="font-semibold first-letter:uppercase">
                   {data.post.focus}
@@ -163,50 +163,55 @@ function SpecificPost({
               </div>
 
               <div className="w-full h-full flex gap-2 items-center flex-col">
-                <div className="bg-slate-300 w-full h-full p-2 rounded-xl">
+                <div className="bg-slate-300 w-full h-1/2 p-2 rounded-xl sm:p-1">
                   <div className="w-full flex items-center justify-start gap-1">
-                    <div className="text-4xl flex items-center">
+                    <div className="text-4xl flex items-center sm:text-2xl">
                       <CgProfile />
                     </div>
 
                     {session && data.post.anonymous ? (
-                      <div className="font-semibold">
+                      <div className="font-semibold text-lg sm:text-base">
                         {data.post.userId === session?.user.id
                           ? "Anonymous (Me)"
                           : "Anonymous"}
                       </div>
                     ) : (
-                      <div className="font-semibold text-lg">
+                      <div className="font-semibold text-lg sm:text-base">
                         {data.post.user.name}
                       </div>
                     )}
                   </div>
 
-                  <div className="text-base break-words whitespace-break-spaces text-justify px-2">
+                  <div
+                    className={`${data.post.lenght <= 100 ? "text-base" : "text-sm"} break-words whitespace-break-spaces text-justify px-2 sm:px-0 xs:leading-tight`}
+                  >
                     {data.post.content}
                   </div>
 
                   {data.post.image && (
-                    <div
-                      className="w-full overflow-y-auto flex items-center justify-center"
-                      style={{ height: "400px" }}
-                    >
-                      <img
-                        src={data.post.image}
-                        alt={"Image"}
-                        className="cursor-pointer"
-                        onClick={() => setOpenImage(true)}
-                      />
-                    </div>
+                    <img
+                      src={data.post.image}
+                      alt={"Image"}
+                      style={{
+                        maxWidth: "100%",
+
+                        margin: "auto",
+                        objectFit: "contain",
+                      }}
+                      className="max-h-p-290 md:max-h-p-200"
+                      onClick={() => setOpenImage(true)}
+                    />
                   )}
                 </div>
-                <div className="bg-slate-300 w-full p-2 rounded-xl h-full">
+
+                {/* ---------------------------------------------------- */}
+                <div className="bg-slate-300 w-full h-1/2 px-2 py-1 rounded-xl">
                   {data.post.comments.length === 0 ? (
                     <div className="text-sm">Be the first to comment.</div>
                   ) : (
                     <div
                       className="comment w-full overflow-y-auto flex flex-col gap-2 rounded-xl"
-                      style={{ maxHeight: "300px" }}
+                      style={{ maxHeight: "130px" }}
                     >
                       {data.post.comments
                         .slice()
@@ -240,13 +245,13 @@ function SpecificPost({
           <form
             ref={formRef}
             onSubmit={AddComment}
-            className="flex items-center w-full gap-4 justify-center mt-2"
+            className="flex items-center w-full gap-4 justify-center mt-2 lg:mt-1"
           >
             <Input
               type="text"
               onChange={(e) => setComment(e.target.value)}
               maxLength={100}
-              className="border-2 border-slate-600 border-solid rounded-2xl text-lg px-2 w-4/6"
+              className="border-2 border-slate-600 border-solid rounded-2xl text-lg px-2 w-4/6 lg:text-lg"
             />
 
             <div>{comment.length} / 100</div>
@@ -257,7 +262,7 @@ function SpecificPost({
               className="text-2xl flex items-center"
             >
               {disabled ? (
-                <span className="loading loading-dots loading-lg"></span>
+                <span className="loading loading-dots"></span>
               ) : (
                 <CiPlay1 />
               )}
