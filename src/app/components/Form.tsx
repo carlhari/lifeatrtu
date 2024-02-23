@@ -194,17 +194,17 @@ const Form: React.FC<any> = ({
         {states.anonymous && openAgreement && (
           <Agreement setStates={setStates} states={states} />
         )}
-        <div className="flex w-full h-full flex-wrap">
-          <div className="flex flex-col justify-center w-1/2 pl-28 gap-20">
-            <div className="text-5xl font-semibold">
+        <div className="flex w-full h-full sm:flex-col">
+          <div className="flex flex-col justify-center w-1/2 pl-28 gap-20 2xl:gap-12 lg:pl-20 md:pl-8 sm:w-full sm:pl-0 sm:p-1 sm:gap-2">
+            <div className="text-5xl font-semibold md:text-4xl sm:text-center sm:w-full">
               Hello, {session && Capitalize(session?.user?.name).split(" ")[0]}
             </div>
             <div className="flex items-center flex-col justify-center w-full">
-              <div className="font-bold text-7xl leading-snug w-5/12">
+              <div className="font-bold text-7xl leading-snug w-6/12 2xl:leading-normal 2xl:w-7/12 xl:w-8/12 xl:text-6xl xl:leading-snug md:text-5xl sm:w-full sm:text-4xl sm:font-semibold sm:text-center">
                 We care about what you think
               </div>
             </div>
-            <div className=" text-justify font-medium text-xl w-10/12">
+            <div className=" text-justify font-medium text-xl w-10/12 xl:w-11/12 md:text-lg sm:text-base sm:leading-tight">
               You can share your thoughts anonymously by clicking the anonymous
               icon and you can add photo if you want *maximum 1 photo only*
             </div>
@@ -212,7 +212,7 @@ const Form: React.FC<any> = ({
           {/* ----------------------------------------------------------------------------- */}
           <form
             onSubmit={onSubmit}
-            className="w-1/2 h-full flex flex-col item-center p-2 px-10 gap-5"
+            className="w-1/2 h-full flex flex-col item-center p-2 px-10 gap-5 lg:px-2 sm:w-full"
             style={{ backgroundColor: "#DBD9D9" }}
             ref={formRef}
           >
@@ -225,14 +225,14 @@ const Form: React.FC<any> = ({
                   clicked();
                   setStates(initialData);
                 }}
-                className="text-xl font-semibold"
+                className="text-lg font-semibold"
               />
             </div>
             {/* -------------------------------------------------------------------------- */}
             <Input
               type="text"
               name="title"
-              className="outline-none text-7xl w-full bg-transparent font-bold placeholder-black"
+              className="outline-none text-7xl w-full bg-transparent font-bold placeholder-black md:text-6xl"
               placeholder="Untitled"
               onChange={handleChange}
               maxLength={50}
@@ -242,9 +242,9 @@ const Form: React.FC<any> = ({
             {/* -------------------------------------------------------------------------- */}
 
             <div className="w-full flex gap-1 items-center">
-              <div className="text-5xl">Focus: </div>
+              <div className="text-5xl md:text-4xl">Focus: </div>
               <select
-                className="w-full text-3xl outline-none rounded-xl p-2 bg-transparent text-left"
+                className="w-full text-3xl outline-none rounded-xl p-2 bg-transparent text-left md:text-2xl"
                 name="focus"
                 onChange={handleChange}
                 value={states.focus}
@@ -284,7 +284,7 @@ const Form: React.FC<any> = ({
             </div>
             {/* -------------------------------------------------------------------------- */}
 
-            <div className="w-full flex items-center justify-end gap-4">
+            <div className="w-full flex items-center justify-end gap-4 lg:justify-center">
               {/* -------------------------------------------------------------------------- */}
               <input
                 ref={fileRef}
@@ -326,11 +326,8 @@ const Form: React.FC<any> = ({
               </button>
 
               {/* -------------------------------------------------------------------------- */}
-              <button
-                type="submit"
-                className="text-2xl font-semibold"
-              >
-               Post
+              <button type="submit" className="text-2xl font-semibold">
+                Post
               </button>
             </div>
 

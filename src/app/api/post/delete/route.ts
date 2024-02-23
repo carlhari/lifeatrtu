@@ -32,6 +32,12 @@ export async function POST(request: NextRequest) {
           });
 
           if (deletePost) {
+            await prisma.notification.deleteMany({
+              where: {
+                postId: postId,
+              },
+            });
+
             return NextResponse.json({
               ok: true,
               msg: "Successfully Delete",

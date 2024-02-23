@@ -14,6 +14,7 @@
     "@prisma/client": "^5.7.0",
     "ahooks": "^3.7.8",
     "axios": "^1.6.2",
+    "browser-dtector": "^4.1.0",
     "crowd-sentiment": "^1.1.7",
     "limiter": "^2.1.0",
     "moment": "^2.29.4",

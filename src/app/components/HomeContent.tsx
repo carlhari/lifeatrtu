@@ -110,7 +110,7 @@ function HomeContent() {
         keyword={keyword}
         postTime={postTime}
       />
-      <div className="w-p-88 m-auto flex items-center justify-end 2xl:w-full 2xl:px-6">
+      <div className="w-p-88 m-auto flex items-center justify-end 2xl:w-full 2xl:px-6 xs:px-2">
         <div className="rounded-xl px-4 bg-white mb-2">
           <select
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
