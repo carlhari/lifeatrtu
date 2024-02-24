@@ -35,7 +35,6 @@ function HomeContent() {
   const edit = valueEdit();
 
   const { data: session } = useSession();
-  const router = useRouter();
 
   const getPosts = async (skip: any, take: number, order: any) => {
     try {
@@ -48,16 +47,16 @@ function HomeContent() {
       const data = response.data;
       const newSkip = skip + take;
 
-      if (!status.includes(data)) {
-        return {
-          list: data,
-          skip: data && data.length < 10 ? undefined : newSkip,
-        };
-      } else {
-        throw data;
+      if (status.includes(data)) {
+        throw new Error("Failed to fetch posts: " + data);
       }
+
+      return {
+        list: data,
+        skip: data && data.length < 10 ? undefined : newSkip,
+      };
     } catch (err) {
-      console.log(err);
+      console.error("Error fetching posts:", err);
       throw err;
     }
   };
@@ -65,16 +64,13 @@ function HomeContent() {
   const { data, mutate, loading, loadMore, noMore, loadingMore, reload } =
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10, select), {
       target: ref,
-      isNoMore: (d) => {
-        if (d?.skip === undefined) return true;
-        else return false;
-      },
+      isNoMore: (d) => d?.skip === undefined,
       reloadDeps: [keyword],
     });
 
   useEffect(() => {
     const handleFocus = () => {
-      setKeyword(!keyword);
+      setKeyword((prevKeyword) => !prevKeyword);
     };
 
     window.addEventListener("focus", handleFocus);
@@ -83,7 +79,7 @@ function HomeContent() {
     return () => {
       window.removeEventListener("focus", handleFocus);
     };
-  }, [keyword, select, session]);
+  }, [session]);
 
   return (
     <div className="w-full h-full">

@@ -56,8 +56,11 @@ function Report({ reload }: any) {
   };
   return (
     <div className="fixed top-0 left-0 w-full h-screen overflow-hidden flex items-center justify-center animate-fadeIn duration-700 z-50 bg-slate-500/60">
-      <div className="bg-white w-1/3 p-4 flex items-center flex-col rounded-xl gap-4">
-        <div className="w-full flex items-center justify-end">
+      <div className="bg-white w-1/3 p-2 flex items-center flex-col rounded-xl gap-4 2xl:w-5/12 lg:w-7/12 md:w-10/12 xs:w-11/12 xs:p-1 xxs:w-full xxs:h-full xxs:rounded-none xxs:p-3">
+        <div className="w-full flex items-center justify-between">
+          <span></span>
+
+          <div className="uppercase text-2xl font-semibold">Report</div>
           <button
             type="button"
             className="text-3xl"
@@ -70,9 +73,9 @@ function Report({ reload }: any) {
           </button>
         </div>
 
-        <div>
-          <div>Please Select a problem</div>
-          <div>
+        <div className="w-full">
+          <div className="text-xl">Please Select a problem</div>
+          <div className="text-sm">
             If someone is in immediate danger, get help before reporting to
             admins. Don't Wait.
           </div>
@@ -99,8 +102,20 @@ function Report({ reload }: any) {
             );
           })}
 
-          <button type="submit">Report</button>
+          <div className="w-full flex items-center justify-center">
+            <button
+              type="submit"
+              className="bg-blue-800 uppercase text-base text-white rounded-xl px-2"
+            >
+              SUBMIT
+            </button>
+          </div>
         </form>
+
+        <div className="text-sm text-center">
+          Our admins & moderators will investigate this feedback. Thank you.
+        </div>
+        <div className="text-base pt-6">We Care About What You Think.</div>
       </div>
     </div>
   );

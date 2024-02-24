@@ -38,6 +38,24 @@ export async function POST(request: NextRequest) {
               },
             });
 
+            await prisma.like.deleteMany({
+              where: {
+                postId: postId,
+              },
+            });
+
+            await prisma.comment.deleteMany({
+              where: {
+                postId: postId,
+              },
+            });
+
+            await prisma.engage.deleteMany({
+              where: {
+                postId: postId,
+              },
+            });
+
             return NextResponse.json({
               ok: true,
               msg: "Successfully Delete",

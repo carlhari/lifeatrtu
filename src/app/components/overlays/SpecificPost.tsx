@@ -117,7 +117,7 @@ function SpecificPost({
       {!data && loading ? (
         <span className="loading loading-dots w-36"></span>
       ) : (
-        <div className="bg-white p-4 rounded-2xl w-1/2 animate-fadeIn 2xl:w-8/12 xl:w-9/12 lg:p-2 lg:w-10/12 md:w-11/12 sm:p-1 sm:w-full sm:h-full sm:rounded-none sm:max-h-full max-h-p-95">
+        <div className="bg-white p-4 rounded-2xl w-1/2 animate-fadeIn 2xl:w-8/12 xl:w-9/12 lg:p-2 lg:w-10/12 md:w-11/12  sm:w-full sm:h-full sm:rounded-none sm:max-h-full max-h-p-95 sm:p-4">
           {openImage && (
             <div className="w-full h-screen fixed top-0 left-0 bg-white flex items-center flex-col justify-center animate-fadeIn">
               <button
