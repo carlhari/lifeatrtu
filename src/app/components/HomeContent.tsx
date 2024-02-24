@@ -79,7 +79,7 @@ function HomeContent() {
     return () => {
       window.removeEventListener("focus", handleFocus);
     };
-  }, [session]);
+  }, [keyword, select, session]);
 
   return (
     <div className="w-full h-full">
