@@ -117,10 +117,7 @@ function SpecificPost({
       {!data && loading ? (
         <span className="loading loading-dots w-36"></span>
       ) : (
-        <div
-          className="bg-white p-4 rounded-2xl w-1/2 animate-fadeIn 2xl:w-8/12 xl:w-9/12 lg:p-2 lg:w-10/12 md:w-11/12 sm:p-1 sm:rounded-xl xs:h-12/12"
-          style={{ maxHeight: "98%" }}
-        >
+        <div className="bg-white p-4 rounded-2xl w-1/2 animate-fadeIn 2xl:w-8/12 xl:w-9/12 lg:p-2 lg:w-10/12 md:w-11/12 sm:p-1 sm:w-full sm:h-full sm:rounded-none sm:max-h-full max-h-p-95">
           {openImage && (
             <div className="w-full h-screen fixed top-0 left-0 bg-white flex items-center flex-col justify-center animate-fadeIn">
               <button
@@ -163,7 +160,7 @@ function SpecificPost({
               </div>
 
               <div className="w-full h-full flex gap-2 items-center flex-col">
-                <div className="bg-slate-300 w-full h-1/2 p-2 rounded-xl sm:p-1">
+                <div className="bg-slate-300 w-full h-1/2 p-2 rounded-xl sm:p-1 sm:rounded-md flex flex-col gap-2">
                   <div className="w-full flex items-center justify-start gap-1">
                     <div className="text-4xl flex items-center sm:text-2xl">
                       <CgProfile />
@@ -183,7 +180,7 @@ function SpecificPost({
                   </div>
 
                   <div
-                    className={`${data.post.lenght <= 100 ? "text-base" : "text-sm"} break-words whitespace-break-spaces text-justify px-2 sm:px-0 xs:leading-tight`}
+                    className={`${data.post.lenght <= 100 ? "text-base" : "text-sm"} break-words whitespace-break-spaces text-justify px-2 sm:px-0 xs:leading-tight xs:overflow-y-auto xs:h-36`}
                   >
                     {data.post.content}
                   </div>
@@ -205,12 +202,12 @@ function SpecificPost({
                 </div>
 
                 {/* ---------------------------------------------------- */}
-                <div className="bg-slate-300 w-full h-1/2 px-2 py-1 rounded-xl">
+                <div className="bg-slate-300 w-full h-1/2 px-2 py-1 rounded-xl sm:p-1 sm:rounded-md">
                   {data.post.comments.length === 0 ? (
                     <div className="text-sm">Be the first to comment.</div>
                   ) : (
                     <div
-                      className="comment w-full overflow-y-auto flex flex-col gap-2 rounded-xl"
+                      className="w-full overflow-y-auto flex flex-col gap-2 rounded-xl"
                       style={{ maxHeight: "130px" }}
                     >
                       {data.post.comments
@@ -220,17 +217,19 @@ function SpecificPost({
                           return (
                             <div
                               key={key}
-                              className="bg-white w-full rounded-xl p-1"
+                              className="bg-white w-full rounded-xl p-1 sm:rounded-md"
                             >
                               <div className="flex items-center justify-start gap-1">
-                                <div className="text-3xl">
+                                <div className="text-3xl xs:text-2xl">
                                   <CgProfile />
                                 </div>
                                 <div>
-                                  <div>{item.user.name}</div>
+                                  <div className="text-2xl xl:text-xl sm:text-sm">
+                                    {item.user.name}
+                                  </div>
                                 </div>
                               </div>
-                              <div className="break-words whitespace-break-spaces text-justify w-full px-2 sm:text-sm xs:text-xs">
+                              <div className="text-2xl xl:text-xl break-words whitespace-break-spaces text-justify w-full px-2 sm:text-sm">
                                 {item.content}
                               </div>
                             </div>
@@ -245,7 +244,7 @@ function SpecificPost({
           <form
             ref={formRef}
             onSubmit={AddComment}
-            className="flex items-center w-full gap-4 justify-center mt-2 lg:mt-1"
+            className="flex items-center w-full gap-4 justify-center mt-2 lg:mt-1 sm:mt-2"
           >
             <Input
               type="text"
