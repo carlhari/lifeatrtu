@@ -35,6 +35,7 @@ function Notification() {
           {loading && (
             <span className="loading loading-dots w-16 xxs:w-12"></span>
           )}
+          {!loading && resData && resData.notifs.length === 0 && "Empty"}
           {!loading &&
             resData &&
             resData.ok &&

@@ -38,8 +38,6 @@ function Delete({ reload }: any) {
           { position: "top-center" }
         );
 
-
-        
         if (!status.includes(data.status)) {
           setTimeout(() => {
             clear();
@@ -52,7 +50,6 @@ function Delete({ reload }: any) {
           }, 2000);
         } else reject(data);
       });
-
     } catch (err) {
       console.error(err);
     }
@@ -80,7 +77,8 @@ function Delete({ reload }: any) {
 
       <div className="bg-white w-1/3 p-4 flex items-center flex-col rounded-xl gap-4">
         <div className="text-2xl font-medium text-center w-full">
-          Are you sure you want to <strong>DELETE</strong> your post ?
+          Are you sure you want to{" "}
+          <strong className="text-red-600">DELETE</strong> your post ?
         </div>
         <div className="text-2xl flex items-center w-full gap-2 justify-center">
           <div>Entitled: </div>

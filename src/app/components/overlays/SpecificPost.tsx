@@ -224,12 +224,12 @@ function SpecificPost({
                                   <CgProfile />
                                 </div>
                                 <div>
-                                  <div className="text-2xl xl:text-xl sm:text-sm">
+                                  <div className="text-lg sm:text-sm">
                                     {item.user.name}
                                   </div>
                                 </div>
                               </div>
-                              <div className="text-2xl xl:text-xl break-words whitespace-break-spaces text-justify w-full px-2 sm:text-sm">
+                              <div className="text-lg  break-words whitespace-break-spaces text-justify w-full px-2 sm:text-sm">
                                 {item.content}
                               </div>
                             </div>

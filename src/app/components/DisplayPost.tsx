@@ -131,7 +131,7 @@ const DisplayPost: React.FC<any> = ({
 
   const engage = async (postId: string) => {
     try {
-      await axios.post(
+      const response = await axios.post(
         "/api/post/actions/engages",
         {
           postId: postId,
@@ -142,6 +142,25 @@ const DisplayPost: React.FC<any> = ({
           },
         }
       );
+
+      if (response.data.ok) {
+        mutate((prev: any) => {
+          return {
+            ...prev,
+            list: prev.list.map((item: any) => {
+              if (item.id === selected) {
+                return {
+                  ...item,
+                  _count: {
+                    ...item._count,
+                    engages: item._count.engages + 1,
+                  },
+                };
+              } else return item;
+            }),
+          };
+        });
+      }
     } catch (err) {
       console.error(err);
     }
@@ -180,8 +199,7 @@ const DisplayPost: React.FC<any> = ({
     return () => {
       if (socketListener) {
         socket.off("client_comment", socketListener);
-      }
-      socket.close();
+      } else socket.close();
     };
   }, [session]);
 
@@ -225,22 +243,6 @@ const DisplayPost: React.FC<any> = ({
     if (selected !== "") {
       open();
       engage(selected);
-      mutate((prev: any) => {
-        return {
-          ...prev,
-          list: prev.list.map((item: any) => {
-            if (item.id === selected) {
-              return {
-                ...item,
-                _count: {
-                  ...item._count,
-                  engages: item._count.engages + 1,
-                },
-              };
-            } else return item;
-          }),
-        };
-      });
     }
   }, [selected]);
 
@@ -406,7 +408,7 @@ const DisplayPost: React.FC<any> = ({
                               handleEngage();
                             }
                           }}
-                          className="bg-white rounded-tl-xl rounded-tr-xl p-5 flex items-start flex-col gap-5 overflow-auto hover:cursor-pointer 2xl:p-4 sm:p-2"
+                          className="bg-white rounded-tl-xl rounded-tr-xl p-5 flex items-start flex-col gap-5 overflow-auto hover:cursor-pointer 2xl:p-4 sm:p-2 sm:gap-2"
                         >
                           <div className="flex items-center gap-1">
                             <div className="text-5xl xs:text-4xl">
@@ -421,7 +423,7 @@ const DisplayPost: React.FC<any> = ({
                             </div>
                           </div>
 
-                          <div className="text-lg break-words text-justify line-clamp-4 text-ellipsis w-full">
+                          <div className="text-lg break-words text-justify line-clamp-4 text-ellipsis w-full sm:text-md xs:text-sm">
                             {item.content}
                           </div>
 
