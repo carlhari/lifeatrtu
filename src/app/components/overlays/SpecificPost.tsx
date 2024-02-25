@@ -51,7 +51,7 @@ function SpecificPost({
   const AddComment = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     setDisabled(true);
-    setKeyword(!keyword);
+
     try {
       const response = new Promise(async (resolve, reject) => {
         const res = await axios.post("/api/post/actions/comment", {
@@ -82,6 +82,8 @@ function SpecificPost({
                   },
                 };
               });
+
+              setKeyword(!keyword);
 
               const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
 
@@ -253,7 +255,7 @@ function SpecificPost({
               className="border-2 border-slate-600 border-solid rounded-2xl text-lg px-2 w-4/6 lg:text-lg"
             />
 
-            <div>{comment.length} / 100</div>
+            <div className="text-sm">{comment.length} / 100</div>
             <button
               type="submit"
               disabled={disabled}

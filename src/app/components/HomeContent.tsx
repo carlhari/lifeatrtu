@@ -12,7 +12,6 @@ import { isOpenDelete } from "@/utils/Overlay/Delete";
 import Delete from "@/app/components/overlays/Delete";
 import { isOpenReport } from "@/utils/Overlay/Report";
 import Report from "@/app/components/overlays/Report";
-import { useRouter } from "next/navigation";
 import EditPost from "./overlays/EditPost";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 
@@ -65,7 +64,7 @@ function HomeContent() {
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10, select), {
       target: ref,
       isNoMore: (d) => d?.skip === undefined,
-      reloadDeps: [keyword],
+      reloadDeps: [keyword, select, session],
     });
 
   useEffect(() => {

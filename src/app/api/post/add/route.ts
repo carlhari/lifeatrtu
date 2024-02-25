@@ -53,50 +53,84 @@ export async function POST(request: NextRequest) {
             },
           });
           if (addPost) {
-            const post = await prisma.post.findUnique({
+            const userData = await prisma.user.findUnique({
               where: {
-                id: addPost.id,
-                user: {
-                  id: addPost.user.id,
-                },
-              },
-              include: {
-                _count: {
-                  select: {
-                    likes: true,
-                    reports: true,
-                    comments: true,
-                    engages: true,
-                  },
-                },
-                likes: true,
-                comments: true,
-                engages: true,
-                user: true,
+                id: session.user.id,
               },
             });
-            if (post) {
-              if (post.anonymous !== true) {
-                const newPost = {
-                  ...post,
-                  user: { ...post.user, name: null, email: null },
-                };
-                return NextResponse.json({
-                  msg: "Post Added",
-                  post: newPost,
-                });
+
+            const dt = new Date();
+            const startingTime = dt.getTime();
+
+            const postTime = await prisma.user.update({
+              where: {
+                id: session.user.id,
+              },
+              data: {
+                postTime: startingTime,
+              },
+            });
+
+            const remaining = getRemainingTime(postTime.postTime);
+
+            if (remaining === 0) {
+              await prisma.user.update({
+                where: {
+                  id: session.user.id,
+                },
+                data: {
+                  postTime: 0,
+                },
+              });
+              const post = await prisma.post.findUnique({
+                where: {
+                  id: addPost.id,
+                  user: {
+                    id: addPost.user.id,
+                  },
+                },
+                include: {
+                  _count: {
+                    select: {
+                      likes: true,
+                      reports: true,
+                      comments: true,
+                      engages: true,
+                    },
+                  },
+                  likes: true,
+                  comments: true,
+                  engages: true,
+                  user: true,
+                },
+              });
+              if (post) {
+                if (post.anonymous !== true) {
+                  const newPost = {
+                    ...post,
+                    user: { ...post.user, name: null, email: null },
+                  };
+                  return NextResponse.json({
+                    msg: "Post Added",
+                    post: newPost,
+                  });
+                } else {
+                  return NextResponse.json({
+                    msg: "Post Added",
+                    post: post,
+                  });
+                }
               } else {
                 return NextResponse.json({
-                  msg: "Post Added",
-                  post: post,
+                  msg: "Failed to retrieve the newly added post",
+                  status: "FAILED",
                 });
               }
-            } else {
+            } else
               return NextResponse.json({
-                msg: "Failed to retrieve the newly added post",
-                status: "FAILED",
+                ok: false,
+                msg: "Please Wait to cooldown",
               });
-            }
           } else {
             return NextResponse.json({
               msg: "Failed to add post",

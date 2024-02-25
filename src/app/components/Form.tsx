@@ -7,13 +7,13 @@ import axios from "axios";
 import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
-import { formatTime } from "@/utils/FormatTime";
 import { isOpenAgreement } from "@/utils/Overlay/Agreement";
 import Agreement from "./overlays/Agreement";
 import { Capitalize } from "@/utils/Capitalize";
 import { useSession } from "next-auth/react";
 import { BiImageAdd } from "react-icons/bi";
-import { getRemainingTime } from "@/utils/CountDown";
+
+import { usePostCountDown } from "@/utils/Timer";
 
 const Form: React.FC<any> = ({
   data,
@@ -29,8 +29,10 @@ const Form: React.FC<any> = ({
   const fileRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // const [remainingPost, setRemainingPost] = useState<any>();
-  // const [disabled, setDisabled] = useState<boolean>(false);
+  const { startingTime, remainingTime, countdown, setStarting } =
+    usePostCountDown();
+
+  const [disabled, setDisabled] = useState<boolean>(false);
 
   const initialData = {
     title: "",
@@ -45,37 +47,6 @@ const Form: React.FC<any> = ({
   useEffect(() => {
     setHydrate(true);
   }, []);
-
-  // useEffect(() => {
-  //   const resetPostTime = async () => {
-  //     await axios.post("/api/post/get/cooldown/reset", {
-  //       cdField: "cooldownPost",
-  //     });
-  //   };
-
-  //   const remaining = () => {
-  //     const getRemaining = getRemainingTime(postTime);
-  //     setRemainingPost(getRemaining);
-  //   };
-
-  //   remaining();
-
-  //   const intervalId = setInterval(() => {
-  //     setRemainingPost((prev: any) => {
-  //       if (prev > 0) {
-  //         setDisabled(true);
-  //         return prev - 1;
-  //       } else {
-  //         clearInterval(intervalId);
-  //         resetPostTime();
-  //         setDisabled(false);
-  //         return prev;
-  //       }
-  //     });
-  //   }, 1000);
-
-  //   return () => clearInterval(intervalId);
-  // }, [postTime, keyword, session]);
 
   const convertToBase64 = async (file: File) => {
     return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
@@ -129,6 +100,36 @@ const Form: React.FC<any> = ({
     const { name, value } = e.target;
     setStates({ ...states, [name]: value });
   };
+
+  //should be on home
+  useEffect(() => {
+    const getPostRemaining = async () => {
+      try {
+        const response = await axios.post("/api/post/get/cooldown/post");
+        const data = response.data;
+
+        if (data.ok) {
+          setStarting(data.startingTime);
+          countdown();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getPostRemaining();
+  }, [session]);
+
+  useEffect(() => {
+    if (session) {
+      if (
+        (startingTime === 0 || startingTime === null) &&
+        (remainingTime === 0 || remainingTime === null)
+      ) {
+        setDisabled(false);
+      } else setDisabled(true);
+    }
+  }, [remainingTime, session]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -326,8 +327,12 @@ const Form: React.FC<any> = ({
               </button>
 
               {/* -------------------------------------------------------------------------- */}
-              <button type="submit" className="text-2xl font-semibold">
-                Post
+              <button
+                type="submit"
+                className={`text-2xl font-semibold ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+                disabled={disabled}
+              >
+                Post {`${remainingTime}`}
               </button>
             </div>
 
