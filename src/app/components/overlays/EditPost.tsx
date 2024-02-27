@@ -72,17 +72,6 @@ const EditPost: React.FC<any> = ({
   };
 
   useEffect(() => {
-    if (session) {
-      if (
-        (Edit.startingTime === 0 || Edit.startingTime === null) &&
-        (Edit.remainingTime === 0 || Edit.remainingTime === null)
-      ) {
-        setDisabled(false);
-      } else setDisabled(true);
-    }
-  }, [Edit.remainingTime, session]);
-
-  useEffect(() => {
     setHydrate(true);
   }, []);
 

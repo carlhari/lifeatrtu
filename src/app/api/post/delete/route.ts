@@ -13,14 +13,23 @@ export async function POST(request: NextRequest) {
 
     if (session) {
       if (remainingCallsMin > 0) {
-        const getCD = await prisma.user.findUnique({
+        const userData = await prisma.user.findFirst({
           where: {
             id: session.user.id,
-            email: session.user.email,
+          },
+          select: {
+            deleteTime: true,
           },
         });
 
-        if (getCD) {
+        const dt = new Date();
+        const startingTime = dt.getTime();
+
+        if (
+          userData?.deleteTime === 0 ||
+          userData?.deleteTime === null ||
+          userData?.deleteTime === undefined
+        ) {
           const deletePost = await prisma.post.delete({
             where: {
               id: postId,
@@ -56,6 +65,15 @@ export async function POST(request: NextRequest) {
               },
             });
 
+            const timeUpdate = await prisma.user.update({
+              where: {
+                id: session.user.id,
+              },
+              data: {
+                deleteTime: startingTime,
+              },
+            });
+
             return NextResponse.json({
               ok: true,
               msg: "Successfully Delete",
@@ -69,7 +87,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             ok: false,
             status: "ERROR",
-            msg: "ERROR",
+            msg: "Please wait to Cooldown",
           });
       } else
         return NextResponse.json({ msg: "Server is Busy", status: "BUSY" });
@@ -80,5 +98,6 @@ export async function POST(request: NextRequest) {
       });
   } catch (err) {
     console.error(err);
+    return NextResponse.json({ ok: false, msg: "ERROR", status: "ERROR" });
   }
 }

@@ -19,10 +19,13 @@ import { isOpenDelete, valueDelete } from "@/utils/Overlay/Delete";
 import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FiEdit } from "react-icons/fi";
-import { getRemainingTimeEdit } from "@/utils/CountDown";
+import {
+  getRemainingTimeDelete,
+  getRemainingTimeEdit,
+} from "@/utils/CountDown";
 import { formatTime, formatTimeHours } from "@/utils/FormatTime";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
-import { useEditCountDown } from "@/utils/Timer";
+import { useDeleteCountDown, useEditCountDown } from "@/utils/Timer";
 
 const DisplayPost: React.FC<any> = ({
   data,
@@ -41,8 +44,9 @@ const DisplayPost: React.FC<any> = ({
   const [hydrate, setHydrate] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-  const [windowWidth, setWindowWidth] = useState<number>(0);
   const [disabledEdit, setDisabledEdit] = useState<boolean>(false);
+  const [disabledDelete, setDisabledDelete] = useState<boolean>(false);
+
   const { openPost, open } = usePost();
 
   const Delete = isOpenDelete();
@@ -55,7 +59,7 @@ const DisplayPost: React.FC<any> = ({
   const editValue = valueEdit();
 
   const EditTimer = useEditCountDown();
-
+  const DeleteTimer = useDeleteCountDown();
   const handleLike = async (postId: string) => {
     try {
       mutate((prev: any) => {
@@ -243,23 +247,9 @@ const DisplayPost: React.FC<any> = ({
     }
   }, [selected]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [windowWidth, session]);
-
-  const reset = async () => {
+  const reset = async (type: string) => {
     try {
-      await axios.post("/api/post/get/cooldown/reset", { type: "editTime" });
+      await axios.post("/api/post/get/cooldown/reset", { type: type });
     } catch (err) {
       console.error(err);
     }
@@ -278,7 +268,7 @@ const DisplayPost: React.FC<any> = ({
             EditTimer.countdown();
           } else {
             EditTimer.setStarting(0);
-            reset();
+            reset("editTime");
           }
         }
       } catch (err) {
@@ -288,6 +278,33 @@ const DisplayPost: React.FC<any> = ({
 
     getPostRemaining();
   }, [session, keyword]);
+
+  useEffect(() => {
+    const getPostRemaining = async () => {
+      try {
+        const response = await axios.post("/api/post/get/cooldown/delete");
+        const data = response.data;
+
+        if (data.ok) {
+          const remaining = getRemainingTimeDelete(data.startingTime);
+
+          console.log("delete ito", remaining);
+          if (remaining !== 0) {
+            DeleteTimer.setStarting(data.startingTime);
+            DeleteTimer.countdown();
+          } else {
+            DeleteTimer.setStarting(0);
+            reset("deleteTime");
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getPostRemaining();
+  }, [session, keyword]);
+
   useEffect(() => {
     if (session) {
       if (
@@ -298,6 +315,18 @@ const DisplayPost: React.FC<any> = ({
       } else setDisabledEdit(true);
     }
   }, [EditTimer.remainingTime, session]);
+
+  useEffect(() => {
+    if (session) {
+      if (
+        (DeleteTimer.startingTime === 0 || DeleteTimer.startingTime === null) &&
+        (DeleteTimer.remainingTime === 0 || DeleteTimer.remainingTime === null)
+      ) {
+        setDisabledDelete(false);
+      } else setDisabledDelete(true);
+    }
+  }, [DeleteTimer.remainingTime, session]);
+
   return (
     hydrate && (
       <>
@@ -385,9 +414,14 @@ const DisplayPost: React.FC<any> = ({
                                           Delete.open();
                                           setKeyword(!keyword);
                                         }}
-                                        className="flex items-center justify-start w-full hover:bg-slate-200  duration-700 rounded-md bg-white px-2"
+                                        className={`flex items-center justify-start w-full ${disabledDelete ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white px-2 ${disabledDelete ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                        disabled={disabledDelete}
                                       >
-                                        DELETE
+                                        {disabledDelete
+                                          ? formatTimeHours(
+                                              DeleteTimer.remainingTime
+                                            )
+                                          : "DELETE"}
                                       </button>
                                     </>
                                   ) : (

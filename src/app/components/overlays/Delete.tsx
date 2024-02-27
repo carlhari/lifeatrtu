@@ -5,6 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Button from "../Button";
 import { isOpenDelete, valueDelete } from "@/utils/Overlay/Delete";
 import { useRequest } from "ahooks";
+import { useDeleteCountDown } from "@/utils/Timer";
 
 let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 function Delete({ reload }: any) {
@@ -12,6 +13,15 @@ function Delete({ reload }: any) {
   const { id, clear } = valueDelete();
 
   const { data, loading } = useRequest(() => getPost());
+  const Delete = useDeleteCountDown();
+
+  const reset = async () => {
+    try {
+      await axios.post("/api/post/get/cooldown/reset", { type: "deleteTime" });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const HandleDelete = async (postId: string) => {
     try {
@@ -28,28 +38,34 @@ function Delete({ reload }: any) {
 
         const data = res.data;
 
-        toast.promise(
-          response,
-          {
-            loading: "Deleting Post",
-            success: (data: any) => `Success: ${data.msg} `,
-            error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
-          },
-          { position: "top-center" }
-        );
-
         if (!status.includes(data.status)) {
           setTimeout(() => {
             clear();
             reload();
 
             setTimeout(() => {
-              useDelete.close();
               resolve(data);
             }, 1500);
           }, 2000);
         } else reject(data);
       });
+
+      toast.promise(
+        response,
+        {
+          loading: "Deleting Post",
+          success: (data: any) => {
+            useDelete.close();
+            return `Success: ${data.msg} `;
+          },
+          error: (data: any) => {
+            Delete.setStarting(0);
+            reset();
+            return `Failed [${data.status}]: ${data.msg}`;
+          },
+        },
+        { position: "top-center" }
+      );
     } catch (err) {
       console.error(err);
     }
