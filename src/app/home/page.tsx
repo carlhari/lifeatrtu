@@ -21,5 +21,6 @@ export default async function page() {
         <HomeContent />
       </div>
     );
-  } else return redirect("/");
+  }
+  return redirect("/");
 }

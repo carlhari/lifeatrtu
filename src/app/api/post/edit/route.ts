@@ -40,25 +40,39 @@ export async function POST(request: NextRequest) {
         );
 
         if (sentimentResult !== "n" && sentimentResultTitle !== "n") {
-          const dt = new Date();
-
-          const time = dt.getTime();
-
-          const addPost = await prisma.post.update({
+          const userData = await prisma.user.findFirst({
             where: {
-              id: postId,
+              id: session.user.id,
             },
-            data: {
-              title: title,
-              focus: focus,
-              content: content,
-              anonymous: anonymous,
-              image: image,
-              userId: session.user.id,
+
+            select: {
+              editTime: true,
             },
           });
 
-          if (addPost) {
+          const dt = new Date();
+
+          const startingTime = dt.getTime();
+
+          if (
+            userData?.editTime === 0 ||
+            userData?.editTime === null ||
+            userData?.editTime === undefined
+          ) {
+            const addPost = await prisma.post.update({
+              where: {
+                id: postId,
+              },
+              data: {
+                title: title,
+                focus: focus,
+                content: content,
+                anonymous: anonymous,
+                image: image,
+                userId: session.user.id,
+              },
+            });
+
             const post = await prisma.post.findUnique({
               where: {
                 id: addPost.id,
@@ -80,6 +94,15 @@ export async function POST(request: NextRequest) {
             });
 
             if (post) {
+              const timeUpdate = await prisma.user.update({
+                where: {
+                  id: session.user.id,
+                },
+                data: {
+                  editTime: startingTime,
+                },
+              });
+
               if (post.anonymous !== true) {
                 const newPost = {
                   ...post,
@@ -94,25 +117,27 @@ export async function POST(request: NextRequest) {
               }
             } else {
               return NextResponse.json({
+                ok: false,
                 msg: "Failed to retrieve the newly added post",
                 status: "FAILED",
               });
             }
-          } else {
-            return NextResponse.json({
-              msg: "Failed to add post",
-              status: "FAILED",
-            });
           }
         } else
           return NextResponse.json({
+            ok: false,
             msg: "Negative Post.",
             status: "NEGATIVE",
           });
       } else
-        return NextResponse.json({ msg: "Server is Busy", status: "BUSY" });
+        return NextResponse.json({
+          ok: false,
+          msg: "Server is Busy",
+          status: "BUSY",
+        });
     } else
       return NextResponse.json({
+        ok: false,
         msg: "UNAUTHORIZED ACCESS",
         status: "UNAUTHORIZED",
       });

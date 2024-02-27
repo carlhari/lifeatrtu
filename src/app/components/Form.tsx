@@ -14,14 +14,10 @@ import { useSession } from "next-auth/react";
 import { BiImageAdd } from "react-icons/bi";
 
 import { usePostCountDown } from "@/utils/Timer";
+import { getRemainingTime } from "@/utils/CountDown";
+import { formatTime } from "@/utils/FormatTime";
 
-const Form: React.FC<any> = ({
-  data,
-  mutate,
-  setKeyword,
-  keyword,
-  postTime,
-}) => {
+const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { data: session } = useSession();
   const { click, clicked } = useAddPost();
@@ -101,7 +97,14 @@ const Form: React.FC<any> = ({
     setStates({ ...states, [name]: value });
   };
 
-  //should be on home
+  const reset = async () => {
+    try {
+      await axios.post("/api/post/get/cooldown/reset", { type: "postTime" });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     const getPostRemaining = async () => {
       try {
@@ -109,8 +112,15 @@ const Form: React.FC<any> = ({
         const data = response.data;
 
         if (data.ok) {
-          setStarting(data.startingTime);
-          countdown();
+          const remaining = getRemainingTime(data.startingTime);
+
+          if (remaining !== 0) {
+            setStarting(data.startingTime);
+            countdown();
+          } else {
+            setStarting(0);
+            reset();
+          }
         }
       } catch (err) {
         console.error(err);
@@ -118,7 +128,7 @@ const Form: React.FC<any> = ({
     };
 
     getPostRemaining();
-  }, [session]);
+  }, [session, keyword]);
 
   useEffect(() => {
     if (session) {
@@ -148,14 +158,16 @@ const Form: React.FC<any> = ({
             states.focus.length !== 0 &&
             states.content.length !== 0
           ) {
-            setTimeout(() => {
-              setKeyword(!keyword);
-              mutate({
-                list: [...data.list, resData.post],
-              });
+            if (resData.ok) {
+              setTimeout(() => {
+                setKeyword(!keyword);
+                mutate({
+                  list: [...data.list, resData.post],
+                });
 
-              resolve(resData);
-            }, 1500);
+                resolve(resData);
+              }, 1500);
+            } else reject(resData);
           } else reject(resData);
         } else reject(resData);
       });
@@ -168,7 +180,11 @@ const Form: React.FC<any> = ({
             clicked();
             return `Success: ${data.msg}`;
           },
-          error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
+          error: (data: any) => {
+            setStarting(0);
+            reset();
+            return `Failed [${data.status}]: ${data.msg}`;
+          },
         },
         { position: "top-center" }
       );
@@ -332,7 +348,7 @@ const Form: React.FC<any> = ({
                 className={`text-2xl font-semibold ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
                 disabled={disabled}
               >
-                Post {`${remainingTime}`}
+                {disabled ? formatTime(remainingTime) : "Post"}
               </button>
             </div>
 

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         },
 
         select: {
-          postTime: true,
+          editTime: true,
         },
       });
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           ok: true,
           msg: "existing user",
-          startingTime: existingUser.postTime,
+          startingTime: existingUser.editTime,
         });
       } else return NextResponse.json({ ok: false, msg: "not existing user" });
     } else

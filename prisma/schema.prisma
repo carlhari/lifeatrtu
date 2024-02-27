@@ -8,22 +8,19 @@ datasource db {
 }
 
 model User {
-  id              String         @id @map("_id") @db.String
-  email           String         @unique
-  name            String
-  posts           Post[]
-  comments        Comment[]
-  likes           Like[]
-  reports         Report[]
-  engages         Engage[]
-  createdAt       DateTime       @default(now())
-  notifications   Notification[]
-  postTime        Int?
-  deleteTime      Int?
-  editTime        Int?
-  postRemaining   Int?
-  deleteRemaining Int?
-  editRemaining   Int?
+  id            String         @id @map("_id") @db.String
+  email         String         @unique
+  name          String
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  reports       Report[]
+  engages       Engage[]
+  createdAt     DateTime       @default(now())
+  notifications Notification[]
+  postTime      Int?
+  deleteTime    Int?
+  editTime      Int?
 }
 
 model Post {

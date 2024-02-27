@@ -19,9 +19,10 @@ import { isOpenDelete, valueDelete } from "@/utils/Overlay/Delete";
 import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FiEdit } from "react-icons/fi";
-import { getRemainingTime } from "@/utils/CountDown";
-import { formatTime } from "@/utils/FormatTime";
+import { getRemainingTimeEdit } from "@/utils/CountDown";
+import { formatTime, formatTimeHours } from "@/utils/FormatTime";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
+import { useEditCountDown } from "@/utils/Timer";
 
 const DisplayPost: React.FC<any> = ({
   data,
@@ -40,11 +41,8 @@ const DisplayPost: React.FC<any> = ({
   const [hydrate, setHydrate] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-  const [skeleton, setSkeleton] = useState<Array<any>>([]);
-  const [skeletonMore, setSkeletonMore] = useState<Array<any>>([]);
-
   const [windowWidth, setWindowWidth] = useState<number>(0);
-
+  const [disabledEdit, setDisabledEdit] = useState<boolean>(false);
   const { openPost, open } = usePost();
 
   const Delete = isOpenDelete();
@@ -56,9 +54,8 @@ const DisplayPost: React.FC<any> = ({
   const reportValue = valueReport();
   const editValue = valueEdit();
 
-  const [remainingDelete, setRemainingDelete] = useState<any>();
+  const EditTimer = useEditCountDown();
 
-  let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const handleLike = async (postId: string) => {
     try {
       mutate((prev: any) => {
@@ -260,16 +257,47 @@ const DisplayPost: React.FC<any> = ({
     };
   }, [windowWidth, session]);
 
-  const handleSize = () => {
-    if (windowWidth >= 1535) {
-      return 4;
-    } else if (windowWidth >= 1279) {
-      return 3;
-    } else if (windowWidth >= 1023) {
-      return 3;
+  const reset = async () => {
+    try {
+      await axios.post("/api/post/get/cooldown/reset", { type: "editTime" });
+    } catch (err) {
+      console.error(err);
     }
   };
+  useEffect(() => {
+    const getPostRemaining = async () => {
+      try {
+        const response = await axios.post("/api/post/get/cooldown/edit");
+        const data = response.data;
 
+        if (data.ok) {
+          const remaining = getRemainingTimeEdit(data.startingTime);
+
+          if (remaining !== 0) {
+            EditTimer.setStarting(data.startingTime);
+            EditTimer.countdown();
+          } else {
+            EditTimer.setStarting(0);
+            reset();
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getPostRemaining();
+  }, [session, keyword]);
+  useEffect(() => {
+    if (session) {
+      if (
+        (EditTimer.startingTime === 0 || EditTimer.startingTime === null) &&
+        (EditTimer.remainingTime === 0 || EditTimer.remainingTime === null)
+      ) {
+        setDisabledEdit(false);
+      } else setDisabledEdit(true);
+    }
+  }, [EditTimer.remainingTime, session]);
   return (
     hydrate && (
       <>
@@ -335,15 +363,19 @@ const DisplayPost: React.FC<any> = ({
                                     <>
                                       <button
                                         type="button"
-                                        className="flex items-center justify-start w-full hover:bg-slate-300  duration-700 rounded-md bg-white px-2"
+                                        className={`flex items-center justify-start w-full ${disabledEdit ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white px-2 ${disabledEdit ? "cursor-not-allowed" : "cursor-pointer"}`}
                                         onClick={() => {
                                           editValue.setId(item.id);
                                           Edit.open();
                                           setKeyword(!keyword);
                                         }}
+                                        disabled={disabledEdit}
                                       >
-                                        <FiEdit />
-                                        EDIT
+                                        {disabledEdit
+                                          ? formatTimeHours(
+                                              EditTimer.remainingTime
+                                            )
+                                          : "EDIT"}
                                       </button>
 
                                       <button

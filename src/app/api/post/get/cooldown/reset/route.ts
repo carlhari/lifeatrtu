@@ -6,27 +6,24 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(request: NextRequest) {
   try {
+    const { type } = await request.json();
     const session = await getServerSession(authOptions);
 
     if (session) {
-      const existingUser = await prisma.user.findUnique({
+      const update = await prisma.user.update({
         where: {
           id: session.user.id,
-          email: session.user.email,
         },
-
-        select: {
-          postTime: true,
+        data: {
+          [type]: 0,
         },
       });
 
-      if (existingUser) {
+      if (update) {
         return NextResponse.json({
           ok: true,
-          msg: "existing user",
-          startingTime: existingUser.postTime,
         });
-      } else return NextResponse.json({ ok: false, msg: "not existing user" });
+      } else return NextResponse.json({ ok: false });
     } else
       return NextResponse.json({
         msg: "UNAUTHORIZED ACCESS",
@@ -34,6 +31,6 @@ export async function POST(request: NextRequest) {
       });
   } catch (err) {
     console.log(err);
-    return NextResponse.json({ ok: false, msg: "error", status: "ERROR" });
+    return NextResponse.json({ msg: "error", status: "ERROR" });
   }
 }

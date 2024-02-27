@@ -2,21 +2,18 @@
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Input from "@/app/components/Input";
 import Button from "@/app/components/Button";
-import { FormType } from "@/types/form";
 import axios from "axios";
-import { useAddPost } from "@/utils/useAddPost";
 import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
-import { formatTime } from "@/utils/FormatTime";
 import { isOpenAgreement } from "@/utils/Overlay/Agreement";
 import Agreement from "@/app/components/overlays/Agreement";
 import { Capitalize } from "@/utils/Capitalize";
 import { useSession } from "next-auth/react";
 import { BiImageAdd } from "react-icons/bi";
-import { getRemainingTime } from "@/utils/CountDown";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 import { useRequest } from "ahooks";
-import { useEditPost } from "@/utils/useEditPost";
+import { useEditCountDown } from "@/utils/Timer";
+import { getRemainingTime } from "@/utils/CountDown";
 
 const EditPost: React.FC<any> = ({
   data,
@@ -46,6 +43,8 @@ const EditPost: React.FC<any> = ({
   const [states, setStates] = useState<any>(initialData);
   const [disabled, setDisabled] = useState<boolean>(false);
 
+  const Edit = useEditCountDown();
+
   function getPost(): Promise<any> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -63,6 +62,25 @@ const EditPost: React.FC<any> = ({
   }
 
   const postReq = useRequest(() => getPost());
+
+  const reset = async () => {
+    try {
+      await axios.post("/api/post/get/cooldown/reset", { type: "editTime" });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (session) {
+      if (
+        (Edit.startingTime === 0 || Edit.startingTime === null) &&
+        (Edit.remainingTime === 0 || Edit.remainingTime === null)
+      ) {
+        setDisabled(false);
+      } else setDisabled(true);
+    }
+  }, [Edit.remainingTime, session]);
 
   useEffect(() => {
     setHydrate(true);
@@ -137,7 +155,7 @@ const EditPost: React.FC<any> = ({
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
+
     try {
       const response = new Promise(async (resolve, reject) => {
         const res = await axios.post("/api/post/edit", {
@@ -168,7 +186,11 @@ const EditPost: React.FC<any> = ({
           edit.close();
           return `Success: ${data.msg}`;
         },
-        error: (data: any) => `Failed[${data.status}]: ${data.msg}`,
+        error: (data: any) => {
+          Edit.setStarting(0);
+          reset();
+          return `Failed[${data.status}]: ${data.msg}`;
+        },
       });
     } catch (err) {
       console.error(err);

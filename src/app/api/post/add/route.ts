@@ -6,7 +6,6 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import translate from "@iamtraction/google-translate";
 import { limiter_min } from "@/utils/LimiterEach";
 import { sentimentAnalyzer } from "@/utils/sentiment";
-import { getRemainingTime } from "@/utils/CountDown";
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,113 +38,116 @@ export async function POST(request: NextRequest) {
         );
 
         if (sentimentResult !== "n" && sentimentResultTitle !== "n") {
-          const addPost = await prisma.post.create({
-            data: {
-              title: title,
-              focus: focus,
-              content: content,
-              anonymous: anonymous,
-              image: image,
-              userId: session.user.id,
+          const userData = await prisma.user.findFirst({
+            where: {
+              id: session.user.id,
             },
-            include: {
-              user: true,
+
+            select: {
+              postTime: true,
             },
           });
-          if (addPost) {
-            const userData = await prisma.user.findUnique({
-              where: {
-                id: session.user.id,
-              },
-            });
 
-            const dt = new Date();
-            const startingTime = dt.getTime();
+          const dt = new Date();
+          const startingTime = dt.getTime();
 
-            const postTime = await prisma.user.update({
-              where: {
-                id: session.user.id,
-              },
+          if (
+            userData?.postTime === 0 ||
+            userData?.postTime === null ||
+            userData?.postTime === undefined
+          ) {
+            const addPost = await prisma.post.create({
               data: {
-                postTime: startingTime,
+                title: title,
+                focus: focus,
+                content: content,
+                anonymous: anonymous,
+                image: image,
+                userId: session.user.id,
+              },
+              include: {
+                user: true,
               },
             });
 
-            const remaining = getRemainingTime(postTime.postTime);
+            const post = await prisma.post.findUnique({
+              where: {
+                id: addPost.id,
+                user: {
+                  id: addPost.user.id,
+                },
+              },
+              include: {
+                _count: {
+                  select: {
+                    likes: true,
+                    reports: true,
+                    comments: true,
+                    engages: true,
+                  },
+                },
+                likes: true,
+                comments: true,
+                engages: true,
+                user: true,
+              },
+            });
 
-            if (remaining === 0) {
-              await prisma.user.update({
+            if (post) {
+              const timeUpdate = await prisma.user.update({
                 where: {
                   id: session.user.id,
                 },
                 data: {
-                  postTime: 0,
+                  postTime: startingTime,
                 },
               });
-              const post = await prisma.post.findUnique({
-                where: {
-                  id: addPost.id,
-                  user: {
-                    id: addPost.user.id,
-                  },
-                },
-                include: {
-                  _count: {
-                    select: {
-                      likes: true,
-                      reports: true,
-                      comments: true,
-                      engages: true,
-                    },
-                  },
-                  likes: true,
-                  comments: true,
-                  engages: true,
-                  user: true,
-                },
-              });
-              if (post) {
-                if (post.anonymous !== true) {
-                  const newPost = {
-                    ...post,
-                    user: { ...post.user, name: null, email: null },
-                  };
-                  return NextResponse.json({
-                    msg: "Post Added",
-                    post: newPost,
-                  });
-                } else {
-                  return NextResponse.json({
-                    msg: "Post Added",
-                    post: post,
-                  });
-                }
+
+              if (post.anonymous !== true) {
+                const newPost = {
+                  ...post,
+                  user: { ...post.user, name: null, email: null },
+                };
+
+                return NextResponse.json({
+                  ok: true,
+                  msg: "Post Added",
+                  post: newPost,
+                });
               } else {
                 return NextResponse.json({
-                  msg: "Failed to retrieve the newly added post",
-                  status: "FAILED",
+                  ok: true,
+                  msg: "Post Added",
+                  post: post,
                 });
               }
             } else
               return NextResponse.json({
                 ok: false,
-                msg: "Please Wait to cooldown",
+                msg: "Failed to retrieve the newly added post",
+                status: "FAILED",
               });
-          } else {
+          } else
             return NextResponse.json({
-              msg: "Failed to add post",
-              status: "FAILED",
+              ok: false,
+              msg: "Please wait to cooldown",
+              status: "ERROR",
             });
-          }
         } else
           return NextResponse.json({
+            ok: false,
             msg: "Negative Post.",
             status: "NEGATIVE",
           });
       } else
-        return NextResponse.json({ msg: "Server is Busy", status: "BUSY" });
+        return NextResponse.json({
+          ok: false,
+          msg: "Server is Busy",
+          status: "BUSY",
+        });
     } else
       return NextResponse.json({
+        ok: false,
         msg: "UNAUTHORIZED ACCESS",
         status: "UNAUTHORIZED",
       });
@@ -154,77 +156,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ msg: "error", status: "ERROR" });
   }
 }
-
-// if (user) {
-//   const getCD = await prisma.user.findUnique({
-//     where: {
-//       id: session.user.id,
-//     },
-
-//     select: {
-//       cooldownPost: true,
-//     },
-//   });
-
-//   const addPost = await prisma.post.create({
-//     data: {
-//       title: title,
-//       focus: focus,
-//       content: content,
-//       anonymous: anonymous,
-//       image: image,
-//       userId: session.user.id,
-//     },
-//   });
-// const post = await prisma.post.findUnique({
-//   where: {
-//     id: addPost.id,
-//   },
-//   include: {
-//     _count: {
-//       select: {
-//         likes: true,
-//         reports: true,
-//         comments: true,
-//         engages: true,
-//       },
-//     },
-//     likes: true,
-//     comments: true,
-//     engages: true,
-//     user: true,
-//   },
-// });
-
-//   if () {
-//     const currentTime = new Date().getTime();
-
-//     const remaining = Math.max(
-//       0,
-//       Math.floor(
-//         getCD.cooldownPost + 1 * 60 * 60 * 1000 - currentTime
-//       ) / 1000
-//     );
-
-//     if (post.anonymous !== true) {
-//       const newPost = {
-//         ...post,
-//         user: { ...post.user, name: null, email: null },
-//       };
-
-//       return NextResponse.json({
-//         msg: "Post Added",
-//         post: newPost,
-//         remaining: remaining,
-//       });
-//     } else
-//       return NextResponse.json({
-//         msg: "Failed to Process Post",
-//         status: "FAILED",
-//       });
-//   }
-// } else
-//   return NextResponse.json({
-//     msg: "Failed to Add Post",
-//     status: "FAILED",
-//   });

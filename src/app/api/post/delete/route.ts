@@ -65,7 +65,12 @@ export async function POST(request: NextRequest) {
               msg: "Failed To Delete",
               status: "ERROR",
             });
-        }
+        } else
+          return NextResponse.json({
+            ok: false,
+            status: "ERROR",
+            msg: "ERROR",
+          });
       } else
         return NextResponse.json({ msg: "Server is Busy", status: "BUSY" });
     } else
