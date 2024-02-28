@@ -30,7 +30,14 @@ function Login() {
   }, []);
 
   return hydrate && isSupported ? (
-    <div className="relative w-full h-screen overflow-hidden flex items-center justify-center outline-none">
+    <div
+      className="relative w-full h-screen overflow-hidden flex items-center justify-center outline-none"
+      style={{
+        backgroundImage: `url("/landingbg.png")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <div className="bg-white shadow-xl p-4 z-50 w-4/12 flex flex-col items-center justify-center rounded-2xl lg:w-8/12 md:w-9/12 sm:w-11/12">
         <div className="flex items-center justify-center w-full h-full flex-wrap">
           <div className="text-8xl xs:text-7xl">Life@</div>
@@ -57,13 +64,6 @@ function Login() {
           <LoginButton />
         </div>
       </div>
-
-      <img
-        src="/landingbg.png"
-        alt="image"
-        loading="lazy"
-        className="image absolute top-0 left-0 w-full h-full bg-cover z-10"
-      />
     </div>
   ) : (
     hydrate && (
