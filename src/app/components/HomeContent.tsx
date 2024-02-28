@@ -134,7 +134,7 @@ function HomeContent() {
       ) : (
         <div
           ref={ref}
-          className="m-auto w-p-88 h-p-90 overflow-y-auto 2xl:w-full 2xl:px-6 xs:px-2"
+          className="m-auto w-p-88 h-p-90 overflow-y-auto 2xl:w-full 2xl:px-14 xl:px-6 md:px-2 xs:px-2"
         >
           <DisplayPost
             data={data}

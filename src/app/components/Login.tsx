@@ -37,6 +37,8 @@ function Login() {
           <div
             style={{
               backgroundImage: "url('/textbg.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
             }}
             className="text-img font-extrabold text-center bg-clip-text text-transparent text-9xl xs:text-8xl"
           >

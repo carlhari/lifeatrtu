@@ -29,7 +29,6 @@ const config: Config = {
     },
 
     extend: {
-      fontFamily: {},
       fontSize: {
         "250": "250px",
         "p-85": "99px",

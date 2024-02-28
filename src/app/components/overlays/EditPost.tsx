@@ -14,6 +14,7 @@ import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 import { useRequest } from "ahooks";
 import { useEditCountDown } from "@/utils/Timer";
 import { getRemainingTime } from "@/utils/CountDown";
+import { formatTimeHours } from "@/utils/FormatTime";
 
 const EditPost: React.FC<any> = ({
   data,
@@ -185,15 +186,16 @@ const EditPost: React.FC<any> = ({
       console.error(err);
     }
   };
+
   return (
     hydrate &&
     (postReq.loading ? (
-      <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-400">
+      <div className="w-full h-screen z-50 fixed top-0 left-0 flex justify-center items-center flex-col bg-slate-400/70">
         <span className="loading loading-dots w-20"></span>
       </div>
     ) : (
       <div
-        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden"
+        className="absolute top-0 left-0 w-full h-screen z-50 flex items-center justify-center overflow-hidden animate-fadeIn"
         style={{
           backgroundImage: `url("/bg.png")`,
           backgroundSize: "cover",
@@ -204,17 +206,17 @@ const EditPost: React.FC<any> = ({
         {states.anonymous && openAgreement && (
           <Agreement setStates={setStates} states={states} />
         )}
-        <div className="flex w-full h-full flex-wrap">
-          <div className="flex flex-col justify-center w-1/2 pl-28 gap-20">
-            <div className="text-5xl font-semibold">
+        <div className="flex w-full h-full md:flex-col">
+          <div className="flex flex-col justify-center w-1/2 md:w-full pl-28 gap-20 2xl:gap-12 2xl:pl-20 xl:pl-8 md:px-2 md:gap-4">
+            <div className="text-5xl font-bold md:text-4xl xs:text-3xl xxs:text-2xl">
               Hello, {session && Capitalize(session?.user?.name).split(" ")[0]}
             </div>
             <div className="flex items-center flex-col justify-center w-full">
-              <div className="font-bold text-7xl leading-snug w-5/12">
+              <div className="font-bold text-p-85 leading-snug w-10/12 text-7xl text-start 2xl:w-full lg:text-7xl md:text-3xl xs:text-2xl md:text-center">
                 We care about what you think
               </div>
             </div>
-            <div className=" text-justify font-medium text-xl w-10/12">
+            <div className="text-justify font-medium text-xl w-10/12 xl:w-11/12 md:w-full 2xl:text-lg md:text-base md:text-center sm:leading-tight xs:text-sm">
               You can share your thoughts anonymously by clicking the anonymous
               icon and you can add photo if you want *maximum 1 photo only*
             </div>
@@ -222,28 +224,30 @@ const EditPost: React.FC<any> = ({
           {/* ----------------------------------------------------------------------------- */}
           <form
             onSubmit={onSubmit}
-            className="w-1/2 h-full flex flex-col item-center p-2 px-10 gap-5"
+            className="w-1/2 md:w-full h-full flex flex-col p-2 px-8 gap-5 lg:px-2 md:gap-2"
             style={{ backgroundColor: "#DBD9D9" }}
             ref={formRef}
           >
             {/* -------------------------------------------------------------------------- */}
             <div className="w-full flex justify-end items-center">
-              <Button
-                label="Cancel"
+              <button
                 type="button"
                 onClick={() => {
                   edit.close();
                   editValue.clear();
                   setStates(initialData);
                 }}
-                className="text-xl font-semibold"
-              />
+                className="text-lg font-semibold px-2 rounded-lg md:absolute md:right-2 md:top-1 xs:text-base xxs:text-sm"
+                style={{ backgroundColor: "#FFB000" }}
+              >
+                Cancel
+              </button>
             </div>
             {/* -------------------------------------------------------------------------- */}
             <Input
               type="text"
               name="title"
-              className="outline-none text-7xl w-full bg-transparent font-bold placeholder-black"
+              className="outline-none text-7xl w-full bg-transparent font-bold placeholder-black md:text-6xl xs:text-4xl"
               placeholder="Untitled"
               onChange={handleChange}
               maxLength={50}
@@ -254,9 +258,9 @@ const EditPost: React.FC<any> = ({
             {/* -------------------------------------------------------------------------- */}
 
             <div className="w-full flex gap-1 items-center">
-              <div className="text-5xl">Focus: </div>
+              <div className="text-5xl md:text-4xl xs:text-xl">Focus: </div>
               <select
-                className="w-full text-3xl outline-none rounded-xl p-2 bg-transparent text-left"
+                className="w-full text-3xl outline-none rounded-xl p-2 bg-transparent text-left md:text-2xl xs:text-lg"
                 name="focus"
                 onChange={handleChange}
                 value={states.focus}
@@ -277,7 +281,7 @@ const EditPost: React.FC<any> = ({
                 maxLength={500}
                 onChange={handleChange}
                 value={states.content}
-                className="resize-none w-full h-96 outline-none rounded-t-xl text-xl text-justify p-4"
+                className="resize-none w-full h-96 outline-none rounded-t-xl text-xl text-justify p-4 xs:p-2 xs:text-base"
                 required
               />
 
@@ -296,7 +300,7 @@ const EditPost: React.FC<any> = ({
             </div>
             {/* -------------------------------------------------------------------------- */}
 
-            <div className="w-full flex items-center justify-end gap-4">
+            <div className="w-full flex items-center justify-end gap-4 lg:justify-center xs:gap-10">
               {/* -------------------------------------------------------------------------- */}
               <input
                 ref={fileRef}
@@ -339,16 +343,28 @@ const EditPost: React.FC<any> = ({
 
               {/* -------------------------------------------------------------------------- */}
               {disabled ? (
-                "No changes"
+                <div
+                  className={`${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+                >
+                  No changes
+                </div>
               ) : (
                 <button
                   type="submit"
-                  className="text-2xl font-semibold"
+                  className={`text-2xl font-semibold ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
                   style={{ cursor: disabled ? "not-allowed" : "pointer" }}
                   disabled={disabled}
                 >
-                  {disabled ? "time limit" : "Post"}
-                  {`${disabled}`}
+                  {disabled ? (
+                    formatTimeHours(Edit.remainingTime)
+                  ) : (
+                    <div
+                      className="text-xl rounded-lg px-2"
+                      style={{ backgroundColor: "#3085C3" }}
+                    >
+                      Submit
+                    </div>
+                  )}
                 </button>
               )}
             </div>
