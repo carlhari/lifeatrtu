@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -19,6 +19,7 @@ import { isOpenDelete, valueDelete } from "@/utils/Overlay/Delete";
 import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FiEdit } from "react-icons/fi";
+import { useRequest } from "ahooks";
 import {
   getRemainingTimeDelete,
   getRemainingTimeEdit,
@@ -254,8 +255,9 @@ const DisplayPost: React.FC<any> = ({
       console.error(err);
     }
   };
-  useEffect(() => {
-    const getPostRemaining = async () => {
+
+  const getCooldownEdit = () => {
+    return new Promise(async (resolve, reject) => {
       try {
         const response = await axios.post("/api/post/get/cooldown/edit");
         const data = response.data;
@@ -270,17 +272,25 @@ const DisplayPost: React.FC<any> = ({
             EditTimer.setStarting(0);
             reset("editTime");
           }
+          resolve(data);
+        } else {
+          reject();
         }
       } catch (err) {
         console.error(err);
+        reject();
       }
-    };
+    });
+  };
 
-    getPostRemaining();
-  }, [session, keyword]);
+  const EditCooldown = useRequest(getCooldownEdit, {
+    refreshDeps: [session, keyword],
+    refreshOnWindowFocus: true,
+    retryCount: 2,
+  });
 
-  useEffect(() => {
-    const getPostRemaining = async () => {
+  const getCooldownDelete = () => {
+    return new Promise(async (resolve, reject) => {
       try {
         const response = await axios.post("/api/post/get/cooldown/delete");
         const data = response.data;
@@ -288,7 +298,6 @@ const DisplayPost: React.FC<any> = ({
         if (data.ok) {
           const remaining = getRemainingTimeDelete(data.startingTime);
 
-          console.log("delete ito", remaining);
           if (remaining !== 0) {
             DeleteTimer.setStarting(data.startingTime);
             DeleteTimer.countdown();
@@ -296,14 +305,23 @@ const DisplayPost: React.FC<any> = ({
             DeleteTimer.setStarting(0);
             reset("deleteTime");
           }
+
+          resolve(data);
+        } else {
+          reject();
         }
       } catch (err) {
         console.error(err);
+        reject();
       }
-    };
+    });
+  };
 
-    getPostRemaining();
-  }, [session, keyword]);
+  const DeleteCooldown = useRequest(getCooldownDelete, {
+    refreshOnWindowFocus: true,
+    refreshDeps: [session, keyword],
+    retryCount: 2,
+  });
 
   useEffect(() => {
     if (session) {
@@ -392,19 +410,23 @@ const DisplayPost: React.FC<any> = ({
                                     <>
                                       <button
                                         type="button"
-                                        className={`flex items-center justify-start w-full ${disabledEdit ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white px-2 ${disabledEdit ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                        className={`flex items-center justify-start w-full ${disabledEdit || EditCooldown.loading ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white px-2 ${disabledEdit || EditCooldown.loading ? "cursor-not-allowed" : "cursor-pointer"}`}
                                         onClick={() => {
                                           editValue.setId(item.id);
                                           Edit.open();
                                           setKeyword(!keyword);
                                         }}
-                                        disabled={disabledEdit}
+                                        disabled={
+                                          disabledEdit || EditCooldown.loading
+                                        }
                                       >
-                                        {disabledEdit
-                                          ? formatTimeHours(
-                                              EditTimer.remainingTime
-                                            )
-                                          : "EDIT"}
+                                        {EditCooldown.loading ? (
+                                          <span className="loading loading-dots w-8"></span>
+                                        ) : disabledEdit ? (
+                                          formatTime(EditTimer.remainingTime)
+                                        ) : (
+                                          "EDIT"
+                                        )}
                                       </button>
 
                                       <button
@@ -414,25 +436,34 @@ const DisplayPost: React.FC<any> = ({
                                           Delete.open();
                                           setKeyword(!keyword);
                                         }}
-                                        className={`flex items-center justify-start w-full ${disabledDelete ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white px-2 ${disabledDelete ? "cursor-not-allowed" : "cursor-pointer"}`}
-                                        disabled={disabledDelete}
+                                        className={`flex items-center justify-start w-full ${disabledDelete || DeleteCooldown.loading ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white px-2 ${disabledDelete || DeleteCooldown.loading ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                        disabled={
+                                          disabledDelete ||
+                                          DeleteCooldown.loading
+                                        }
                                       >
-                                        {disabledDelete
-                                          ? formatTimeHours(
-                                              DeleteTimer.remainingTime
-                                            )
-                                          : "DELETE"}
+                                        {DeleteCooldown.loading ? (
+                                          <span className="loading loading-dots w-8"></span>
+                                        ) : disabledDelete ? (
+                                          formatTimeHours(
+                                            DeleteTimer.remainingTime
+                                          )
+                                        ) : (
+                                          "DELETE"
+                                        )}
                                       </button>
                                     </>
                                   ) : (
-                                    <Button
-                                      label="Report"
+                                    <button
                                       type="button"
                                       onClick={() => {
                                         reportValue.setId(item.id);
                                         Report.open();
                                       }}
-                                    />
+                                      className="flex items-center justify-start w-full hover:bg-slate-300 duration-700 rounded-md bg-white px-2 cursor-pointer"
+                                    >
+                                      Report
+                                    </button>
                                   )}
                                 </div>
                               </>

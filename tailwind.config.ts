@@ -32,6 +32,7 @@ const config: Config = {
       fontFamily: {},
       fontSize: {
         "250": "250px",
+        "p-85": "99px",
       },
 
       height: {
@@ -64,5 +65,8 @@ const config: Config = {
     },
   },
   plugins: [require("daisyui")],
+  daisyui: {
+    themes: [],
+  },
 };
 export default config;

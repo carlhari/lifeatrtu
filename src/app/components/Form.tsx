@@ -16,6 +16,7 @@ import { BiImageAdd } from "react-icons/bi";
 import { usePostCountDown } from "@/utils/Timer";
 import { getRemainingTime } from "@/utils/CountDown";
 import { formatTime } from "@/utils/FormatTime";
+import { useRequest } from "ahooks";
 
 const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [hydrate, setHydrate] = useState<boolean>(false);
@@ -105,12 +106,11 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     }
   };
 
-  useEffect(() => {
-    const getPostRemaining = async () => {
+  const getCooldownPost = () => {
+    return new Promise(async (resolve, reject) => {
       try {
         const response = await axios.post("/api/post/get/cooldown/post");
         const data = response.data;
-
         if (data.ok) {
           const remaining = getRemainingTime(data.startingTime);
 
@@ -121,14 +121,47 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             setStarting(0);
             reset();
           }
+          resolve(data);
+        } else {
+          reject();
         }
       } catch (err) {
         console.error(err);
+        reject(err);
       }
-    };
+    });
+  };
 
-    getPostRemaining();
-  }, [session, keyword]);
+  const post = useRequest(getCooldownPost, {
+    refreshOnWindowFocus: true,
+    refreshDeps: [session, keyword],
+    retryCount: 2,
+  });
+
+  // useEffect(() => {
+  //   const getPostRemaining = async () => {
+  //     try {
+  //       const response = await axios.post("/api/post/get/cooldown/post");
+  //       const data = response.data;
+
+  //       if (data.ok) {
+  //         const remaining = getRemainingTime(data.startingTime);
+
+  //         if (remaining !== 0) {
+  //           setStarting(data.startingTime);
+  //           countdown();
+  //         } else {
+  //           setStarting(0);
+  //           reset();
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+
+  //   getPostRemaining();
+  // }, [session, keyword]);
 
   useEffect(() => {
     if (session) {
@@ -213,12 +246,15 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
         )}
         <div className="flex w-full h-full sm:flex-col">
           <div className="flex flex-col justify-center w-1/2 pl-28 gap-20 2xl:gap-12 lg:pl-20 md:pl-8 sm:w-full sm:pl-0 sm:p-1 sm:gap-2">
-            <div className="text-5xl font-semibold md:text-4xl sm:text-center sm:w-full">
+            <div
+              className="text-5xl font-bold md:text-4xl sm:text-center sm:w-full"
+              style={{ fontFamily: "semibold-pop" }}
+            >
               Hello, {session && Capitalize(session?.user?.name).split(" ")[0]}
             </div>
             <div className="flex items-center flex-col justify-center w-full">
-              <div className="font-bold text-7xl leading-snug w-6/12 2xl:leading-normal 2xl:w-7/12 xl:w-8/12 xl:text-6xl xl:leading-snug md:text-5xl sm:w-full sm:text-4xl sm:font-semibold sm:text-center">
-                We care about what you think
+              <div className="font-bold text-p-85 leading-snug w-10/12 text-start">
+                We care<br></br> about what<br></br> you think
               </div>
             </div>
             <div className=" text-justify font-medium text-xl w-10/12 xl:w-11/12 md:text-lg sm:text-base sm:leading-tight">
@@ -229,21 +265,23 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
           {/* ----------------------------------------------------------------------------- */}
           <form
             onSubmit={onSubmit}
-            className="w-1/2 h-full flex flex-col item-center p-2 px-10 gap-5 lg:px-2 sm:w-full"
+            className="w-1/2 h-full flex flex-col item-center p-2 px-8 gap-5 lg:px-2 sm:w-full"
             style={{ backgroundColor: "#DBD9D9" }}
             ref={formRef}
           >
             {/* -------------------------------------------------------------------------- */}
             <div className="w-full flex justify-end items-center">
-              <Button
-                label="Cancel"
+              <button
                 type="button"
                 onClick={() => {
                   clicked();
                   setStates(initialData);
                 }}
-                className="text-lg font-semibold"
-              />
+                className="text-lg font-semibold px-2 rounded-lg"
+                style={{ backgroundColor: "#FFB000" }}
+              >
+                Cancel
+              </button>
             </div>
             {/* -------------------------------------------------------------------------- */}
             <Input
@@ -348,7 +386,24 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
                 className={`text-2xl font-semibold ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
                 disabled={disabled}
               >
-                {disabled ? formatTime(remainingTime) : "Post"}
+                <button
+                  type="submit"
+                  className={`text-2xl font-semibold ${disabled ? "cursor-not-allowed" : "cursor-pointer"} flex items-center justify-center`}
+                  disabled={disabled || post.loading}
+                >
+                  {post.loading ? (
+                    <span className="loading loading-dots w-10"></span>
+                  ) : disabled ? (
+                    formatTime(remainingTime)
+                  ) : (
+                    <div
+                      className="rounded-lg px-2"
+                      style={{ backgroundColor: "#3085C3" }}
+                    >
+                      Submit
+                    </div>
+                  )}
+                </button>
               </button>
             </div>
 

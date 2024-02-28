@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "regular-pop";
+  src: url("/regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "semibold-pop";
+  src: url("/semibold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "medium-pop";
+  src: url("/medium.ttf") format("truetype");
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -9,6 +24,10 @@
 }
 *:focus {
   outline: none !important;
+}
+
+* {
+  font-family: "regular-pop";
 }
 
 .image,
