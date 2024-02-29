@@ -133,7 +133,7 @@ function SpecificPost({
               <img
                 src={data.post.image}
                 alt="image"
-                className="object-cover border-2 border-solid border-black"
+                className="object-cover border-2 border-solid border-black max-h-full max-w-full"
               />
             </div>
           )}
@@ -208,10 +208,7 @@ function SpecificPost({
                   {data.post.comments.length === 0 ? (
                     <div className="text-sm">Be the first to comment.</div>
                   ) : (
-                    <div
-                      className="w-full overflow-y-auto flex flex-col gap-2 rounded-xl"
-                      style={{ maxHeight: "130px" }}
-                    >
+                    <div className="w-full overflow-y-auto flex flex-col gap-2 rounded-xl max-h-p-130 sm:max-h-p-250">
                       {data.post.comments
                         .slice()
                         .reverse()

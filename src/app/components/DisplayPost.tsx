@@ -423,7 +423,9 @@ const DisplayPost: React.FC<any> = ({
                                         {EditCooldown.loading ? (
                                           <span className="loading loading-dots w-8"></span>
                                         ) : disabledEdit ? (
-                                          formatTime(EditTimer.remainingTime)
+                                          formatTimeHours(
+                                            EditTimer.remainingTime
+                                          )
                                         ) : (
                                           "EDIT"
                                         )}

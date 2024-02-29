@@ -5,16 +5,19 @@
 @font-face {
   font-family: "regular-pop";
   src: url("/regular.ttf") format("truetype");
+  font-display: block;
 }
 
 @font-face {
   font-family: "semibold-pop";
   src: url("/semibold.ttf") format("truetype");
+  font-display: block;
 }
 
 @font-face {
   font-family: "medium-pop";
   src: url("/medium.ttf") format("truetype");
+  font-display: block;
 }
 
 * {
