@@ -56,14 +56,16 @@ function Report({ reload }: any) {
   };
   return (
     <div className="fixed top-0 left-0 w-full h-screen overflow-hidden flex items-center justify-center animate-fadeIn duration-700 z-50 bg-slate-500/60">
-      <div className="bg-white w-1/3 p-2 flex items-center flex-col rounded-xl gap-4 2xl:w-5/12 lg:w-7/12 md:w-10/12 xs:w-11/12 xs:p-1 xxs:w-full xxs:h-full xxs:rounded-none xxs:p-3">
+      <div className="bg-white w-1/3 p-2 flex items-center flex-col rounded-xl gap-4 2xl:w-5/12 lg:w-7/12 md:w-10/12  xs:w-full xs:h-full xs:rounded-none xs:p-3">
         <div className="w-full flex items-center justify-between">
-          <span></span>
+          <div className="w-1/3"></div>
 
-          <div className="uppercase text-2xl font-semibold">Report</div>
+          <div className="uppercase text-2xl font-semibold w-1/3 flex items-center justify-center">
+            Report
+          </div>
           <button
             type="button"
-            className="text-3xl"
+            className="text-3xl w-1/3 flex items-center justify-end"
             onClick={() => {
               setReportCategory("");
               Report.close();

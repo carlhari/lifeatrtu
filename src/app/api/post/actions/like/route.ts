@@ -32,7 +32,14 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        if (deleteLikes) return NextResponse.json({ ok: true, msg: "unliked" });
+        const notifDelete = await prisma.notification.deleteMany({
+          where: {
+            postId: postId,
+          },
+        });
+
+        if (deleteLikes && notifDelete)
+          return NextResponse.json({ ok: true, msg: "unliked" });
         else return NextResponse.json({ ok: true, msg: "not found" });
       } else {
         const like = await prisma.like.create({
@@ -75,12 +82,6 @@ export async function POST(request: NextRequest) {
                   type: "like",
                 },
               });
-            } else {
-              await prisma.notification.delete({
-                where: {
-                  id: existingNotification.id,
-                },
-              });
             }
           }
 
@@ -88,6 +89,7 @@ export async function POST(request: NextRequest) {
             ok: true,
             msg: "liked",
             author: post.user.id,
+            title: post.title,
           });
         } else
           return NextResponse.json({

@@ -17,16 +17,16 @@ import { BsPeopleFill } from "react-icons/bs";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { isOpenDelete, valueDelete } from "@/utils/Overlay/Delete";
 import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { FiEdit } from "react-icons/fi";
 import { useRequest } from "ahooks";
 import {
   getRemainingTimeDelete,
   getRemainingTimeEdit,
 } from "@/utils/CountDown";
-import { formatTime, formatTimeHours } from "@/utils/FormatTime";
+import { formatTimeHours } from "@/utils/FormatTime";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 import { useDeleteCountDown, useEditCountDown } from "@/utils/Timer";
+import { FaRegEdit } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 
 const DisplayPost: React.FC<any> = ({
   data,
@@ -38,7 +38,7 @@ const DisplayPost: React.FC<any> = ({
   keyword,
   deleteTime,
 }) => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [selected, setSelect] = useState<string>("");
   const [selectedMenu, setSelectMenu] = useState<string>("");
 
@@ -121,6 +121,7 @@ const DisplayPost: React.FC<any> = ({
 
         socket.emit("active", {
           userId: session?.user.id,
+          title: data.title,
           author: data.author,
           currentName: Capitalize(session?.user.name),
           postId: postId,
@@ -181,7 +182,7 @@ const DisplayPost: React.FC<any> = ({
         if (data.author === session.user.id) {
           if (data.whoLiked !== session?.user.id) {
             toast.success(
-              `${data.whoLikedName} Like your post ${data.postId}`,
+              `${data.whoLikedName} Like your post Entitled "${data.title}" `,
               {
                 duration: 3000,
               }
@@ -197,10 +198,9 @@ const DisplayPost: React.FC<any> = ({
       socket.on("client", socketListener);
     }, 1000);
 
-    setKeyword(!keyword);
     return () => {
       if (socketListener) {
-        socket.off("client_comment", socketListener);
+        socket.off("client", socketListener);
       } else socket.close();
     };
   }, [session]);
@@ -213,7 +213,7 @@ const DisplayPost: React.FC<any> = ({
         if (data.author === session.user.id) {
           if (data.by !== session.user.id) {
             toast.success(
-              `${data.byName} Commented on your post ${data.postId}`,
+              `${data.byName} Commented on your post Entitled "${data.title}"`,
               {
                 duration: 3000,
               }
@@ -410,7 +410,7 @@ const DisplayPost: React.FC<any> = ({
                                     <>
                                       <button
                                         type="button"
-                                        className={`flex items-center justify-start w-full ${disabledEdit || EditCooldown.loading ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white px-2 ${disabledEdit || EditCooldown.loading ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                        className={`flex items-center justify-start w-full ${disabledEdit || EditCooldown.loading ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white ${disabledEdit || EditCooldown.loading ? "cursor-not-allowed" : "cursor-pointer"}`}
                                         onClick={() => {
                                           editValue.setId(item.id);
                                           Edit.open();
@@ -423,11 +423,23 @@ const DisplayPost: React.FC<any> = ({
                                         {EditCooldown.loading ? (
                                           <span className="loading loading-dots w-8"></span>
                                         ) : disabledEdit ? (
-                                          formatTimeHours(
-                                            EditTimer.remainingTime
-                                          )
+                                          <>
+                                            <div className="text-lg w-1/4 justify-center flex items-center">
+                                              <FaRegEdit />
+                                            </div>
+                                            <div>
+                                              {formatTimeHours(
+                                                EditTimer.remainingTime
+                                              )}
+                                            </div>
+                                          </>
                                         ) : (
-                                          "EDIT"
+                                          <>
+                                            <div className="text-base flex items-center">
+                                              <FaRegEdit />
+                                            </div>
+                                            <div>EDIT</div>
+                                          </>
                                         )}
                                       </button>
 
@@ -438,7 +450,7 @@ const DisplayPost: React.FC<any> = ({
                                           Delete.open();
                                           setKeyword(!keyword);
                                         }}
-                                        className={`flex items-center justify-start w-full ${disabledDelete || DeleteCooldown.loading ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white px-2 ${disabledDelete || DeleteCooldown.loading ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                        className={`flex items-center justify-start w-full ${disabledDelete || DeleteCooldown.loading ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white ${disabledDelete || DeleteCooldown.loading ? "cursor-not-allowed" : "cursor-pointer"}`}
                                         disabled={
                                           disabledDelete ||
                                           DeleteCooldown.loading
@@ -447,11 +459,23 @@ const DisplayPost: React.FC<any> = ({
                                         {DeleteCooldown.loading ? (
                                           <span className="loading loading-dots w-8"></span>
                                         ) : disabledDelete ? (
-                                          formatTimeHours(
-                                            DeleteTimer.remainingTime
-                                          )
+                                          <>
+                                            <div className="text-base flex items-center text-red-500">
+                                              <MdDelete />
+                                            </div>
+                                            <div>
+                                              {formatTimeHours(
+                                                DeleteTimer.remainingTime
+                                              )}
+                                            </div>
+                                          </>
                                         ) : (
-                                          "DELETE"
+                                          <>
+                                            <div className="text-xl w-1/4 justify-center flex items-center text-red-500">
+                                              <MdDelete />
+                                            </div>
+                                            <div>DELETE</div>
+                                          </>
                                         )}
                                       </button>
                                     </>
@@ -537,7 +561,10 @@ const DisplayPost: React.FC<any> = ({
                             <button
                               type="button"
                               onClick={() => handleLike(item.id)}
-                              className="flex items-center gap-1 text-2xl"
+                              className={`flex items-center gap-1 text-2xl ${loading || status === "loading" ? "cursor-not-allowed" : "cursor-pointer"}`}
+                              disabled={
+                                loading || status === "loading" ? true : false
+                              }
                             >
                               <BsHeartFill
                                 fill={
@@ -567,7 +594,10 @@ const DisplayPost: React.FC<any> = ({
                                   engage(selected);
                                 }
                               }}
-                              className="flex items-center justify-center gap-1 text-2xl"
+                              className={`flex items-center justify-center gap-1 text-2xl ${loading || status === "loading" ? "cursor-not-allowed" : "cursor-pointer"}`}
+                              disabled={
+                                loading || status === "loading" ? true : false
+                              }
                             >
                               <div className="text-3xl">
                                 <HiOutlineChatBubbleOvalLeftEllipsis />
@@ -580,7 +610,10 @@ const DisplayPost: React.FC<any> = ({
                             {/* ----------------------------------------------------------- */}
                             <button
                               type="button"
-                              className="flex items-center justify-center gap-1 text-2xl"
+                              className={`flex items-center justify-center gap-1 text-2xl ${loading || status === "loading" ? "cursor-not-allowed" : "cursor-pointer"}`}
+                              disabled={
+                                loading || status === "loading" ? true : false
+                              }
                             >
                               <BsPeopleFill />
                               {item._count.engages &&

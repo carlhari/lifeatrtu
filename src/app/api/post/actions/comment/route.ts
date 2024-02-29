@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
               msg: "Comment Added",
               comment: comment,
               author: post.user.id,
+              title: post.title,
             });
           } else
             return NextResponse.json({

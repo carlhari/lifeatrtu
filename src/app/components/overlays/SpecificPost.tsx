@@ -1,8 +1,7 @@
 import { usePost } from "@/utils/usePost";
 import { useRequest } from "ahooks";
-import Button from "@/app/components/Button";
 import axios from "axios";
-import React, { ChangeEvent, useState, useRef, useEffect } from "react";
+import React, { ChangeEvent, useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import moment from "moment";
@@ -96,6 +95,7 @@ function SpecificPost({
                 author: data.author,
                 currentName: Capitalize(session?.user.name),
                 postId: postId,
+                title: data.title,
               });
 
               resolve(data);
@@ -208,7 +208,7 @@ function SpecificPost({
                   {data.post.comments.length === 0 ? (
                     <div className="text-sm">Be the first to comment.</div>
                   ) : (
-                    <div className="w-full overflow-y-auto flex flex-col gap-2 rounded-xl max-h-p-130 sm:max-h-p-250">
+                    <div className="w-full overflow-y-auto flex flex-col gap-2 rounded-xl max-h-p-130 sm:max-h-p-200">
                       {data.post.comments
                         .slice()
                         .reverse()
@@ -243,7 +243,7 @@ function SpecificPost({
           <form
             ref={formRef}
             onSubmit={AddComment}
-            className="flex items-center w-full gap-4 justify-center mt-2 lg:mt-1 sm:mt-2"
+            className="flex items-center w-full gap-4 justify-center mt-2 lg:mt-1 sm:mt-2 xs:gap-2"
           >
             <Input
               type="text"
@@ -252,7 +252,7 @@ function SpecificPost({
               className="border-2 border-slate-600 border-solid rounded-2xl text-lg px-2 w-4/6 lg:text-lg"
             />
 
-            <div className="text-sm">{comment.length} / 100</div>
+            <div className="text-sm sm:text-xs">{comment.length}/100</div>
             <button
               type="submit"
               disabled={disabled}
