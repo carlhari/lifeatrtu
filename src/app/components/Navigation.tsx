@@ -3,7 +3,6 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import LogoutButton from "./LogoutButton";
 import { Capitalize } from "@/utils/Capitalize";
-
 import { FaBell } from "react-icons/fa";
 import { isOpenNotif } from "@/utils/Overlay/Notification";
 import Notification from "@/app/components/overlays/Notification";
@@ -22,12 +21,14 @@ function Navigation() {
       </div>
       <div className=" relative flex items-center justify-center gap-4 sm:gap-2">
         {notif.value && <Notification />}
-        <div
+        <button
+          type="button"
           className="text-3xl cursor-pointer flex items-center sm:text-2xl -mt-1 xs:text-xl"
           onClick={() => notif.change()}
+          disabled={status === "loading" ? true : false}
         >
           <FaBell />
-        </div>
+        </button>
         <div>
           <LogoutButton />
         </div>

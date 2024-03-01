@@ -21,8 +21,9 @@ function Notification() {
     });
   }
 
-  const { data, loading, mutate } = useRequest(() => getNotif(), {
+  const { data, loading } = useRequest(() => getNotif(), {
     refreshDeps: [session],
+    refreshOnWindowFocus: true,
   });
 
   const resData = data as any;

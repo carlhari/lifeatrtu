@@ -22,10 +22,6 @@ function HomeContent() {
   const [keyword, setKeyword] = useState<boolean>(false);
   const [select, setSelect] = useState<string>("desc");
 
-  const [postTime, setPostTime] = useState<number>(0);
-  const [deleteTime, setDeleteTime] = useState<number>(0);
-  const [editTime, setEditTime] = useState<number>(0);
-
   const { open } = isOpenLogout();
   const useDelete = isOpenDelete();
   const useReport = isOpenReport();
@@ -103,7 +99,6 @@ function HomeContent() {
         loadMore={loadMore}
         setKeyword={setKeyword}
         keyword={keyword}
-        postTime={postTime}
       />
       <div className="w-p-88 m-auto flex items-center justify-end 2xl:w-full 2xl:px-6 xs:px-2">
         <div className="rounded-xl px-4 bg-white mb-2">
@@ -116,6 +111,7 @@ function HomeContent() {
           >
             <option value="desc">Recently</option>
             <option value="asc">Oldest</option>
+            <option value="posts">My Posts</option>
             <option value="likes">Most Liked</option>
             <option value="engages">Most Engaged</option>
             <option value="comments">Most Commented</option>
@@ -145,7 +141,6 @@ function HomeContent() {
             setKeyword={setKeyword}
             keyword={keyword}
             noMore={noMore}
-            deleteTime={deleteTime}
           />
         </div>
       )}

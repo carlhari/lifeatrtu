@@ -1,7 +1,6 @@
 "use client";
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Input from "./Input";
-import Button from "./Button";
 import { FormType } from "@/types/form";
 import axios from "axios";
 import { useAddPost } from "@/utils/useAddPost";
@@ -12,7 +11,6 @@ import Agreement from "./overlays/Agreement";
 import { Capitalize } from "@/utils/Capitalize";
 import { useSession } from "next-auth/react";
 import { BiImageAdd } from "react-icons/bi";
-
 import { usePostCountDown } from "@/utils/Timer";
 import { getRemainingTime } from "@/utils/CountDown";
 import { formatTime } from "@/utils/FormatTime";

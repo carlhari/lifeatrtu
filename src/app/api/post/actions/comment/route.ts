@@ -22,14 +22,6 @@ export async function POST(request: NextRequest) {
         const result = await sentimentAnalyzer(translated.text, content);
 
         if (result !== "n") {
-          const comment = await prisma.comment.create({
-            data: {
-              postId: postId,
-              content: content,
-              userId: session?.user.id,
-            },
-          });
-
           const post = await prisma.post.findFirst({
             where: {
               id: postId,
@@ -39,12 +31,20 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          if (comment && post) {
+          if (post) {
             const existingNotification = await prisma.notification.findFirst({
               where: {
                 postId: postId,
                 userId: session.user.id,
                 type: "comment",
+              },
+            });
+
+            const comment = await prisma.comment.create({
+              data: {
+                postId: postId,
+                content: content,
+                userId: session?.user.id,
               },
             });
 
@@ -56,12 +56,6 @@ export async function POST(request: NextRequest) {
                     userId: session.user.id,
                     read: false,
                     type: "comment",
-                  },
-                });
-              } else {
-                await prisma.notification.delete({
-                  where: {
-                    id: existingNotification.id,
                   },
                 });
               }

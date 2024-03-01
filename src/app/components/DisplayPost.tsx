@@ -25,7 +25,7 @@ import {
 import { formatTimeHours } from "@/utils/FormatTime";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 import { useDeleteCountDown, useEditCountDown } from "@/utils/Timer";
-import { FaRegEdit } from "react-icons/fa";
+import { LiaEdit } from "react-icons/lia";
 import { MdDelete } from "react-icons/md";
 
 const DisplayPost: React.FC<any> = ({
@@ -36,7 +36,6 @@ const DisplayPost: React.FC<any> = ({
   noMore,
   setKeyword,
   keyword,
-  deleteTime,
 }) => {
   const { data: session, status } = useSession();
   const [selected, setSelect] = useState<string>("");
@@ -424,8 +423,8 @@ const DisplayPost: React.FC<any> = ({
                                           <span className="loading loading-dots w-8"></span>
                                         ) : disabledEdit ? (
                                           <>
-                                            <div className="text-lg w-1/4 justify-center flex items-center">
-                                              <FaRegEdit />
+                                            <div className="text-2xl w-1/4 justify-center flex items-center">
+                                              <LiaEdit />
                                             </div>
                                             <div>
                                               {formatTimeHours(
@@ -435,8 +434,8 @@ const DisplayPost: React.FC<any> = ({
                                           </>
                                         ) : (
                                           <>
-                                            <div className="text-base flex items-center">
-                                              <FaRegEdit />
+                                            <div className="text-2xl flex items-center justify-center">
+                                              <LiaEdit />
                                             </div>
                                             <div>EDIT</div>
                                           </>
@@ -460,7 +459,7 @@ const DisplayPost: React.FC<any> = ({
                                           <span className="loading loading-dots w-8"></span>
                                         ) : disabledDelete ? (
                                           <>
-                                            <div className="text-base flex items-center text-red-500">
+                                            <div className="text-2xl flex items-center text-red-500">
                                               <MdDelete />
                                             </div>
                                             <div>
@@ -471,7 +470,7 @@ const DisplayPost: React.FC<any> = ({
                                           </>
                                         ) : (
                                           <>
-                                            <div className="text-xl w-1/4 justify-center flex items-center text-red-500">
+                                            <div className="text-2xl w-1/4 justify-center flex items-center text-red-500">
                                               <MdDelete />
                                             </div>
                                             <div>DELETE</div>

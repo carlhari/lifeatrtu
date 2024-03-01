@@ -1,7 +1,6 @@
 import AuthProvider from "@/utils/AuthProvider";
 import "./globals.css";
 import type { Metadata } from "next";
-
 import { Inter } from "next/font/google";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";

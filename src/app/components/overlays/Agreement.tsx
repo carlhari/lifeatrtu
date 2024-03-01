@@ -14,7 +14,7 @@ function Agreement({
   const { agreementF } = isOpenAgreement();
   return (
     <div className="animate-fadeIn fixed top-0 left-0 w-full h-screen overflow-hidden bg-slate-600/50 z-50 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-5 bg-white w-5/12 rounded-xl p-4 md:p-2 sm:w-11/12">
+      <div className="flex flex-col items-center gap-5 bg-white w-5/12 rounded-xl p-4 md:p-2 lg:w-8/12 sm:w-11/12">
         <p className="text-2xl font-bold">Anonymous Post</p>
         <p className="text-lg md:text-base text-center sm:text-sm">
           Anonymous posts published in the website do not include your name
