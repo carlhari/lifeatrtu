@@ -18,6 +18,7 @@ let reports = [
 
 function Report({ reload }: any) {
   const [reportCategory, setReportCategory] = useState<string>("");
+  const [disabled, setDisabled] = useState<boolean>(false);
   const Report = isOpenReport();
   const reportValue = valueReport();
 
@@ -25,6 +26,7 @@ function Report({ reload }: any) {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setDisabled(true);
     try {
       const addReport = new Promise(async (resolve, reject) => {
         const response = await axios.post("/api/post/actions/report", {
@@ -44,9 +46,15 @@ function Report({ reload }: any) {
       toast.promise(
         addReport,
         {
-          loading: "loading",
-          success: (data: any) => `Success: ${data.msg}`,
-          error: (data: any) => `Failed: ${data.msg}`,
+          loading: "Loading",
+          success: (data: any) => {
+            setDisabled(false);
+            return `Success: ${data.msg}`;
+          },
+          error: (data: any) => {
+            setDisabled(false);
+            return `Failed: ${data.msg}`;
+          },
         },
         { position: "top-center" }
       );
@@ -79,7 +87,7 @@ function Report({ reload }: any) {
           <div className="text-xl">Please Select a problem</div>
           <div className="text-sm">
             If someone is in immediate danger, get help before reporting to
-            admins. Don't Wait.
+            admins. {"Don't"} Wait.
           </div>
         </div>
 
@@ -107,7 +115,8 @@ function Report({ reload }: any) {
           <div className="w-full flex items-center justify-center">
             <button
               type="submit"
-              className="bg-blue-800 uppercase text-base text-white rounded-xl px-2"
+              className={`bg-blue-800 uppercase text-base text-white rounded-xl px-2 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+              disabled={disabled}
             >
               SUBMIT
             </button>
