@@ -99,13 +99,13 @@ function Delete({ reload }: any) {
         <div className="text-2xl flex items-center w-full gap-2 justify-center">
           <div>Entitled: </div>
           <div className="font-semibold">
-            "
+            {`"`}
             {loading ? (
               <span className="loading loading-dots loading-lg"></span>
             ) : (
               data && data.post.title
             )}
-            "
+            {`"`}
           </div>
         </div>
         {!loading && (

@@ -121,7 +121,7 @@ function HomeContent() {
 
       {data && data.list.length === 0 ? (
         <div className="m-auto w-p-88 h-p-90 overflow-hidden flex items-center justify-start">
-          <div className="-mt-20 text-8xl leading-snug font-semibold">
+          <div className="-mt-20 text-8xl leading-snug font-semibold sm:text-7xl">
             We Care <br />
             about what <br />
             you think.

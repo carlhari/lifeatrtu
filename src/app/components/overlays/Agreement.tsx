@@ -37,7 +37,7 @@ function Agreement({
             </div>
             <p className="text-justify sm:text-sm">
               Admins and moderators may reach out to you personally once your
-              feedback is highly alarming of someone's privacy or safety.
+              feedback is highly alarming of {"someone's"} privacy or safety.
             </p>
           </div>
         </div>

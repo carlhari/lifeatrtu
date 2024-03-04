@@ -49,10 +49,12 @@ function Report({ reload }: any) {
           loading: "Loading",
           success: (data: any) => {
             setDisabled(false);
+            Report.close();
             return `Success: ${data.msg}`;
           },
           error: (data: any) => {
             setDisabled(false);
+            Report.close();
             return `Failed: ${data.msg}`;
           },
         },
@@ -62,6 +64,7 @@ function Report({ reload }: any) {
       console.error(err);
     }
   };
+
   return (
     <div className="fixed top-0 left-0 w-full h-screen overflow-hidden flex items-center justify-center animate-fadeIn duration-700 z-50 bg-slate-500/60">
       <div className="bg-white w-1/3 p-2 flex items-center flex-col rounded-xl gap-4 2xl:w-5/12 lg:w-7/12 md:w-10/12  xs:w-full xs:h-full xs:rounded-none xs:p-3">
