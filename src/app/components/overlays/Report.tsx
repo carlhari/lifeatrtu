@@ -10,7 +10,7 @@ let reports = [
   "Spam",
   "False Information",
   "Suicidal or Self Injury",
-  "Harrasment",
+  "Harassment",
   "Violence",
   "Nudity",
   "Something Else",
