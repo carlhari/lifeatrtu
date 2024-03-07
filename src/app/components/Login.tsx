@@ -1,7 +1,6 @@
 "use client";
 import LoginButton from "@/app/components/LoginButton";
 import { useEffect, useState } from "react";
-import BrowserDetector from "browser-dtector";
 
 function Login() {
   const [hydrate, setHydrate] = useState<boolean>(false);
