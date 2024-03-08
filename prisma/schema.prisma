@@ -21,6 +21,15 @@ model User {
   postTime      Int?
   deleteTime    Int?
   editTime      Int?
+  blacklists    Blacklist[]
+}
+
+model Blacklist {
+  id     String @id @default(uuid()) @map("_id")
+  reason String
+  email  String
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.String
 }
 
 model Post {

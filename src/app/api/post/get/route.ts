@@ -53,6 +53,16 @@ export async function POST(request: NextRequest) {
         const posts = await prisma.post.findMany({
           skip: skip,
           take: take,
+          where: {
+            user: {
+              NOT: {
+                blacklists: {
+                  some: {},
+                },
+              },
+            },
+          },
+
           include: {
             _count: {
               select: {

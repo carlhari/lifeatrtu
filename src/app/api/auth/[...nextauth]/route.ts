@@ -40,6 +40,17 @@ export const authOptions: NextAuthOptions = {
         },
       });
 
+      const checkBan = await prisma.blacklist.findFirst({
+        where: {
+          id: user.id,
+          email: user.email as string,
+        },
+      });
+
+      if (checkBan) {
+        return Promise.reject(false);
+      }
+
       if (!user || !profile) {
         return Promise.reject(false);
       } else {
