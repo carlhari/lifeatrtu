@@ -3,11 +3,11 @@ import React, { useEffect, useRef, useState } from "react";
 import AddPost from "./overlays/AddPost";
 import Form from "./Form";
 import DisplayPost from "./DisplayPost";
-import { useInfiniteScroll } from "ahooks";
+import { useInfiniteScroll, useRequest } from "ahooks";
 import axios from "axios";
 import { isOpenLogout } from "@/utils/Overlay/Logout";
 import Logout from "@/app/components/overlays/Logout";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { isOpenDelete } from "@/utils/Overlay/Delete";
 import Delete from "@/app/components/overlays/Delete";
 import { isOpenReport } from "@/utils/Overlay/Report";
@@ -63,20 +63,31 @@ function HomeContent() {
       reloadDeps: [keyword, select, session],
     });
 
-  useEffect(() => {
-    const handleFocus = () => {
-      setKeyword((prevKeyword) => !prevKeyword);
-    };
+  const checkUser = async () => {
+    try {
+      const response = await axios.post("/api/check/user");
 
-    window.addEventListener("focus", handleFocus);
+      const data = response.data;
 
-    reload();
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, [keyword, select, session]);
+      if (data.ok && data.msg === "ban") {
+        signOut({ callbackUrl: "/" });
+        return data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  return (
+  const verifyUser = useRequest(checkUser, {
+    refreshDeps: [session, keyword, select],
+  });
+
+  return verifyUser.loading ? (
+    <div className="flex items-center justify-center gap-4 text-4xl font-semibold">
+      <span className="loading loading-spinner w-20"></span>
+      Verifying User
+    </div>
+  ) : (
     <div className="w-full h-full">
       {open && <Logout />}
       {useDelete.value && <Delete reload={reload} />}

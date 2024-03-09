@@ -34,38 +34,41 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     async signIn({ user, profile }) {
-      const existingUser = await prisma.user.findUnique({
-        where: {
-          id: user.id,
-        },
-      });
+      try {
+        if (!user || !profile) {
+          throw new Error("User or profile data is missing.");
+        }
 
-      const checkBan = await prisma.blacklist.findFirst({
-        where: {
-          id: user.id,
-          email: user.email as string,
-        },
-      });
+        const existingUser = await prisma.user.findUnique({
+          where: {
+            id: user.id,
+          },
+        });
 
-      if (checkBan) {
-        return Promise.reject(false);
-      }
-
-      if (!user || !profile) {
-        return Promise.reject(false);
-      } else {
         if (!existingUser) {
           await prisma.user.create({
             data: {
-              id: user.id as string,
+              id: user.id,
               email: user.email as string,
               name: Capitalize(user.name) as string,
             },
           });
-
-          return Promise.resolve(true);
         }
-        return Promise.resolve(true);
+
+        const checkBan = await prisma.blacklist.findFirst({
+          where: {
+            OR: [{ userId: user.id }, { email: user.email as string }],
+          },
+        });
+
+        if (checkBan) {
+          throw new Error("User is blacklisted.");
+        }
+
+        return true;
+      } catch (error: any) {
+        console.error("Error signing in:", error.message);
+        return false;
       }
     },
   },

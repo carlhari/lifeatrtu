@@ -16,6 +16,17 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      const checkBan = await prisma.blacklist.findFirst({
+        where: {
+          userId: session.user.id,
+          email: session.user.email,
+        },
+      });
+
+      if (checkBan) {
+        return NextResponse.json({ ok: true, msg: "ban" });
+      }
+
       if (existingUser) {
         return NextResponse.json({ ok: true, msg: "existing user" });
       } else return NextResponse.json({ ok: false, msg: "not existing user" });
