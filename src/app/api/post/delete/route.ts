@@ -47,12 +47,6 @@ export async function POST(request: NextRequest) {
               },
             });
 
-            await prisma.report.deleteMany({
-              where: {
-                postId: postId,
-              },
-            });
-
             await prisma.like.deleteMany({
               where: {
                 postId: postId,
