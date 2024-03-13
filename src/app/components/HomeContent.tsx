@@ -82,12 +82,7 @@ function HomeContent() {
     refreshDeps: [session, keyword, select],
   });
 
-  return verifyUser.loading ? (
-    <div className="flex items-center justify-center gap-4 text-4xl font-semibold">
-      <span className="loading loading-spinner w-20"></span>
-      Verifying User
-    </div>
-  ) : (
+  return (
     <div className="w-full h-full">
       {open && <Logout />}
       {useDelete.value && <Delete reload={reload} />}
@@ -141,7 +136,7 @@ function HomeContent() {
       ) : (
         <div
           ref={ref}
-          className="m-auto w-p-88 h-p-90 overflow-y-auto 2xl:w-full 2xl:px-14 xl:px-6 md:px-2 xs:px-2"
+          className="m-auto w-p-88 h-[85%] overflow-y-auto 2xl:w-full pb-2 2xl:px-14 xl:px-6 md:px-2 xs:px-2"
         >
           <DisplayPost
             data={data}

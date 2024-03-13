@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { usePost } from "@/utils/usePost";
 import { useRequest } from "ahooks";
 import axios from "axios";
@@ -29,7 +30,9 @@ function SpecificPost({
 
   const [openImage, setOpenImage] = useState<boolean>(false);
 
-  const { data, loading, mutate } = useRequest(() => getPost());
+  const { data, loading, mutate } = useRequest(() => getPost(), {
+    refreshDeps: [session],
+  });
 
   function getPost(): Promise<any> {
     return new Promise(async (resolve, reject) => {
@@ -46,6 +49,7 @@ function SpecificPost({
       }
     });
   }
+
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const AddComment = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -100,8 +104,14 @@ function SpecificPost({
 
               resolve(data);
             }, 1500);
-          } else reject(data);
-        } else reject(data);
+          } else {
+            setDisabled(false);
+            reject(data);
+          }
+        } else {
+          setDisabled(false);
+          reject(data);
+        }
       });
 
       toast.promise(response, {
