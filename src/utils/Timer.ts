@@ -1,6 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { getRemainingTime } from "./CountDown";
 
 interface CountDownType {
   startingTime: number;
@@ -104,6 +102,35 @@ export const useDeleteCountDown = create<CountDownType>((set, get) => ({
         set(() => ({ remainingTime: 0 }));
       }
     }, 1000);
+
+    return () => clearInterval(interval);
+  },
+
+  setStarting: (data) => {
+    return set(() => ({ startingTime: data ? data : 0 }));
+  },
+}));
+
+export const useBanCountDown = create<CountDownType>((set, get) => ({
+  startingTime: 0,
+  remainingTime: 0,
+  countdown: () => {
+    const interval = setInterval(() => {
+      const { startingTime } = get();
+      if (startingTime && startingTime > 0) {
+        const currentTime = new Date().getTime();
+        const remaining = Math.max(0, (startingTime - currentTime) / 1000);
+        if (remaining === 0) {
+          clearInterval(interval);
+          set(() => ({ startingTime: 0, remainingTime: 0 }));
+        } else {
+          set((state: any) => ({ ...state, remainingTime: remaining }));
+        }
+      } else {
+        clearInterval(interval);
+        set(() => ({ remainingTime: 0 }));
+      }
+    }, 100); // interval in milliseconds
 
     return () => clearInterval(interval);
   },

@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/role-supports-aria-props */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Input from "./Input";
@@ -135,31 +137,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     refreshDeps: [session, keyword],
     retryCount: 2,
   });
-
-  // useEffect(() => {
-  //   const getPostRemaining = async () => {
-  //     try {
-  //       const response = await axios.post("/api/post/get/cooldown/post");
-  //       const data = response.data;
-
-  //       if (data.ok) {
-  //         const remaining = getRemainingTime(data.startingTime);
-
-  //         if (remaining !== 0) {
-  //           setStarting(data.startingTime);
-  //           countdown();
-  //         } else {
-  //           setStarting(0);
-  //           reset();
-  //         }
-  //       }
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-
-  //   getPostRemaining();
-  // }, [session, keyword]);
 
   useEffect(() => {
     if (session) {

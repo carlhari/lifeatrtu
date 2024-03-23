@@ -25,11 +25,13 @@ model User {
 }
 
 model Blacklist {
-  id     String @id @default(uuid()) @map("_id")
-  reason String
-  email  String
-  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @db.String
+  id         String  @id @default(uuid()) @map("_id")
+  reason     String
+  email      String
+  User       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String  @db.String
+  periodTime Int
+  permanent  Boolean
 }
 
 model Post {
@@ -83,7 +85,7 @@ model Report {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId    String   @db.String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reason    String
+  reasons   String[]
   createdAt DateTime @default(now())
 }
 

@@ -105,6 +105,7 @@ export const tlWords = [
   "tarub",
   "t4nga",
   "tang4",
+  "t4ng4",
   "pepe",
   "kiffy",
   "kiki",
@@ -118,6 +119,13 @@ export const tlWords = [
   "n1g3r",
   "niggalacion",
   "nigs",
+  "mongoloid",
+  "nigertarian",
+  "n1ggertarian",
+  "etits",
+  "jabol",
+  "jabolero",
+  "kipay",
 ];
 
 export const tlGood = ["opo", "po"];

@@ -56,7 +56,7 @@ function Delete({ reload }: any) {
           loading: "Deleting Post",
           success: (data: any) => {
             useDelete.close();
-            return `Success: ${data.msg} `;
+            return `${data.msg}`;
           },
           error: (data: any) => {
             Delete.setStarting(0);
@@ -91,12 +91,12 @@ function Delete({ reload }: any) {
     <div className="fixed top-0 left-0 w-full h-screen overflow-hidden flex items-center justify-center animate-fadeIn duration-700 z-50 bg-slate-500/60">
       <Toaster />
 
-      <div className="bg-white w-1/3 p-4 flex items-center flex-col rounded-xl gap-4">
-        <div className="text-2xl font-medium text-center w-full">
+      <div className="bg-white w-1/3 p-4 flex items-center flex-col rounded-xl gap-4 2xl:w-7/12 md:w-9/12 sm:w-11/12 xs:w-[97%]">
+        <div className="text-2xl font-medium text-center w-full sm:text-xl">
           Are you sure you want to{" "}
           <strong className="text-red-600">DELETE</strong> your post ?
         </div>
-        <div className="text-2xl flex items-center w-full gap-2 justify-center">
+        <div className="text-2xl sm:text-xl flex items-center w-full gap-2 justify-center">
           <div>Entitled: </div>
           <div className="font-semibold">
             {`"`}
@@ -116,7 +116,7 @@ function Delete({ reload }: any) {
               onClick={() => {
                 HandleDelete(id);
               }}
-              className="p-1 px-3 rounded-xl text-2xl bg-green-600 text-white hover:scale-125 duration-500"
+              className="p-1 px-3 rounded-xl text-2xl sm:text-lg bg-green-600 text-white hover:scale-125 duration-500"
             />
             <Button
               label="No"
@@ -125,7 +125,7 @@ function Delete({ reload }: any) {
                 clear();
                 useDelete.close();
               }}
-              className="p-1 px-3 rounded-xl text-2xl bg-red-600 text-white hover:scale-125 duration-500"
+              className="p-1 px-3 rounded-xl text-2xl sm:text-lg bg-red-600 text-white hover:scale-125 duration-500"
             />
           </div>
         )}

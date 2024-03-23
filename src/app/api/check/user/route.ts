@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
       }
 
       if (existingUser) {
-        return NextResponse.json({ ok: true, msg: "existing user" });
-      } else return NextResponse.json({ ok: false, msg: "not existing user" });
+        return NextResponse.json({ ok: true, msg: "existing" });
+      } else return NextResponse.json({ ok: false, msg: "not" });
     } else
       return NextResponse.json({
         msg: "UNAUTHORIZED ACCESS",

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
           data: {
             postId: postId,
             userId: session.user.id,
-            reason: reason,
+            reasons: reason,
           },
         });
 

@@ -17,7 +17,7 @@ let reports = [
 ];
 
 function Report({ reload }: any) {
-  const [reportCategory, setReportCategory] = useState<string>("");
+  const [reportCategory, setReportCategory] = useState<string[]>([]);
   const [disabled, setDisabled] = useState<boolean>(false);
   const Report = isOpenReport();
   const reportValue = valueReport();
@@ -65,6 +65,23 @@ function Report({ reload }: any) {
     }
   };
 
+  console.log(reportCategory);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target;
+    if (checked) {
+      if (reportCategory.length < 3) {
+        setReportCategory((prevCategories) => [...prevCategories, value]);
+      } else {
+        e.target.checked = false;
+      }
+    } else {
+      setReportCategory((prevCategories) =>
+        prevCategories.filter((category) => category !== value)
+      );
+    }
+  };
+
   return (
     <div className="fixed top-0 left-0 w-full h-screen overflow-hidden flex items-center justify-center animate-fadeIn duration-700 z-50 bg-slate-500/60">
       <div className="bg-white w-1/3 p-2 flex items-center flex-col rounded-xl gap-4 2xl:w-5/12 lg:w-7/12 md:w-10/12  xs:w-full xs:h-full xs:rounded-none xs:p-3">
@@ -78,7 +95,7 @@ function Report({ reload }: any) {
             type="button"
             className="text-3xl w-1/3 flex items-center justify-end"
             onClick={() => {
-              setReportCategory("");
+              setReportCategory([]);
               Report.close();
             }}
           >
@@ -98,22 +115,20 @@ function Report({ reload }: any) {
           className="w-full flex flex-col items-start justify-center gap-2"
           onSubmit={handleSubmit}
         >
-          {reports.map((item, key) => {
-            return (
-              <button
-                key={key}
-                onClick={() => {
-                  setReportCategory(item.toLowerCase());
-                }}
-                type="button"
-                className={`font-semibold text-lg w-full flex items-center justify-start rounded-xl px-4 ${
-                  reportCategory === item.toLowerCase() && "bg-slate-200"
-                }`}
-              >
+          {reports.map((item, key) => (
+            <div key={key} className="w-11/12 m-auto">
+              <label className="font-semibold text-lg w-full flex items-center justify-start rounded-xl px-4 gap-1">
+                <input
+                  type="checkbox"
+                  value={item.toLowerCase()}
+                  checked={reportCategory.includes(item.toLowerCase())}
+                  onChange={handleChange}
+                  className="w-4 h-4"
+                />
                 {item}
-              </button>
-            );
-          })}
+              </label>
+            </div>
+          ))}
 
           <div className="w-full flex items-center justify-center">
             <button

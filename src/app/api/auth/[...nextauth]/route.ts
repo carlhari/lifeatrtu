@@ -3,7 +3,6 @@ import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { Capitalize } from "@/utils/Capitalize";
-import { signIn } from "next-auth/react";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -62,7 +61,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (checkBan) {
-          throw new Error("User is blacklisted.");
+          return `/unauthorized/${checkBan.userId}`;
         }
 
         return true;

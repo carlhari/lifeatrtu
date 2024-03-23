@@ -30,3 +30,11 @@ export const getRemainingTimeDelete = (startingTime: any) => {
 
   return remaining;
 };
+
+export const getRemainingTimeBan = (targetTime: number) => {
+  const currentTime = new Date().getTime();
+
+  const remaining = Math.max(0, Math.floor((targetTime - currentTime) / 1000));
+
+  return remaining;
+};

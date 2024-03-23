@@ -14,6 +14,7 @@ import { isOpenReport } from "@/utils/Overlay/Report";
 import Report from "@/app/components/overlays/Report";
 import EditPost from "./overlays/EditPost";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
+import toast from "react-hot-toast";
 
 let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 
@@ -70,8 +71,11 @@ function HomeContent() {
       const data = response.data;
 
       if (data.ok && data.msg === "ban") {
+        toast.error("You are Banned");
         signOut({ callbackUrl: "/" });
-        return data;
+      } else if (!data.ok && data.msg === "not") {
+        toast.error("User Does Not Exist!");
+        signOut({ callbackUrl: "/" });
       }
     } catch (err) {
       console.error(err);
