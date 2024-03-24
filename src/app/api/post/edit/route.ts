@@ -111,17 +111,23 @@ export async function POST(request: NextRequest) {
 
                 return NextResponse.json({
                   ok: true,
-                  msg: "Successfully Edited",
+                  msg: "Post Edited",
                   post: newPost,
                 });
               }
             } else {
               return NextResponse.json({
                 ok: false,
-                msg: "Failed to retrieve the newly added post",
+                msg: "Failed",
                 status: "FAILED",
               });
             }
+          } else {
+            return NextResponse.json({
+              ok: false,
+              msg: "Wait to Cooldown",
+              status: "UNAUTHORIZED",
+            });
           }
         } else
           return NextResponse.json({

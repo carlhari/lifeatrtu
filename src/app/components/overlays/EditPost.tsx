@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable jsx-a11y/role-supports-aria-props */
 "use client";
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Input from "@/app/components/Input";
