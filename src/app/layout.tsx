@@ -8,7 +8,7 @@ import { authOptions } from "./api/auth/[...nextauth]/route";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  icons: "",
+  icons: "/logoicon.png",
   title: "Life@RTU: An Online Feedback",
   description:
     "Life@RTU: An Online Feedback Website using Lexicon Based Sentiment Analysis",

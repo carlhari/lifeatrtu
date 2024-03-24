@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import AddPost from "./overlays/AddPost";
 import Form from "./Form";
 import DisplayPost from "./DisplayPost";
