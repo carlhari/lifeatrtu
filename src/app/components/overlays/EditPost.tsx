@@ -145,47 +145,41 @@ const EditPost: React.FC<any> = ({
     setStates({ ...states, [name]: value });
   };
 
+  const abortControllerRef = useRef<AbortController>(new AbortController());
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+    const loadingId = toast.loading("Editing...");
     try {
-      const response = new Promise(async (resolve, reject) => {
-        const res = await axios.post("/api/post/edit", {
+      const res = await axios.post(
+        "/api/post/edit",
+        {
           ...states,
           postId: postId,
-        });
+        },
+        { signal: abortControllerRef.current.signal }
+      );
 
-        const resData = res.data;
+      const resData = res.data;
 
-        if (!status.includes(resData.status)) {
-          if (
-            resData.post.title.length !== 0 &&
-            resData.post.focus.length !== 0 &&
-            resData.post.content.length !== 0
-          ) {
-            setTimeout(() => {
-              setKeyword(!keyword);
-
-              resolve(resData);
-            }, 1500);
-          } else reject(resData);
-        } else reject(resData);
-      });
-
-      toast.promise(response, {
-        loading: "Loading",
-        success: (data: any) => {
+      if (!status.includes(resData.status)) {
+        if (
+          resData.post.title.length !== 0 &&
+          resData.post.focus.length !== 0 &&
+          resData.post.content.length !== 0 &&
+          resData.ok
+        ) {
+          setKeyword(!keyword);
           edit.close();
-          return `Success: ${data.msg}`;
-        },
-        error: (data: any) => {
-          Edit.setStarting(0);
-          reset();
-          return `Failed[${data.status}]: ${data.msg}`;
-        },
-      });
-    } catch (err) {
+          toast.success(`Success ${resData.msg}`);
+        } else toast.error(`Failed[${data.status}]: ${data.msg}`);
+      } else toast.error(`Failed[${data.status}]: ${data.msg}`);
+    } catch (err: any) {
+      toast.dismiss(loadingId);
       console.error(err);
+      if (err.message === "canceled") {
+        toast.error("Cancelled");
+      }
     }
   };
 
@@ -235,6 +229,7 @@ const EditPost: React.FC<any> = ({
               <button
                 type="button"
                 onClick={() => {
+                  abortControllerRef.current.abort();
                   edit.close();
                   editValue.clear();
                   setStates(initialData);
