@@ -30,6 +30,8 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     usePostCountDown();
 
   const [disabled, setDisabled] = useState<boolean>(false);
+  const controllerRef = useRef(new AbortController());
+  const [isDisabled, setDisabledCancel] = useState<boolean>(false);
 
   const initialData = {
     title: "",
@@ -39,6 +41,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     image: "",
   };
 
+  let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const [states, setStates] = useState<FormType>(initialData);
 
   useEffect(() => {
@@ -149,59 +152,116 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     }
   }, [remainingTime, session]);
 
-  const onSubmit = async (e: FormEvent) => {
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
+
+  // const onSubmit = async (e: FormEvent) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     const response = new Promise(async (resolve, reject) => {
+  //       const res = await axios.post(
+  //         "/api/post/add",
+  //         {
+  //           ...states,
+  //         },
+  //         { signal: controller.signal }
+  //       );
+
+  //       const resData = res.data;
+
+  //       if (!status.includes(resData.status)) {
+  //         if (
+  //           states.title.length !== 0 &&
+  //           states.focus.length !== 0 &&
+  //           states.content.length !== 0
+  //         ) {
+  //           if (resData.ok) {
+  //             setKeyword(!keyword);
+  //             mutate({
+  //               list: [...data.list, resData.post],
+  //             });
+
+  //             resolve(resData);
+  //           } else reject(resData);
+  //         } else reject(resData);
+  //       } else reject(resData);
+  //     });
+
+  //     toast.promise(
+  //       response,
+  //       {
+  //         loading: "loading",
+  //         success: (data: any) => {
+  //           clicked();
+  //           return `Success: ${data.msg}`;
+  //         },
+  //         error: (data: any) => {
+  //           setStarting(0);
+  //           reset();
+  //           return `Failed [${data.status}]: ${data.msg}`;
+  //         },
+  //       },
+  //       { position: "top-center" }
+  //     );
+
+  //     formRef.current && formRef.current.reset();
+  //     setStates(initialData);
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   }
+  // };
+
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
-
-    try {
-      const response = new Promise(async (resolve, reject) => {
-        const res = await axios.post("/api/post/add", { ...states });
-
-        const resData = res.data;
-
-        if (!status.includes(resData.status)) {
-          if (
-            states.title.length !== 0 &&
-            states.focus.length !== 0 &&
-            states.content.length !== 0
-          ) {
-            if (resData.ok) {
-              setTimeout(() => {
+    const loadingId = toast.loading("Processing...");
+    const { signal } = controllerRef.current;
+    setTimeout(() => {
+      setDisabledCancel(true);
+      axios
+        .post("/api/post/add", { ...states }, { signal: signal })
+        .then((response) => {
+          if (!status.includes(response.data.status)) {
+            if (
+              states.title.length !== 0 &&
+              states.focus.length !== 0 &&
+              states.content.length !== 0
+            ) {
+              if (response.data.ok) {
                 setKeyword(!keyword);
                 mutate({
-                  list: [...data.list, resData.post],
+                  list: [...data.list, response.data.post],
                 });
-
-                resolve(resData);
-              }, 1500);
-            } else reject(resData);
-          } else reject(resData);
-        } else reject(resData);
-      });
-
-      toast.promise(
-        response,
-        {
-          loading: "loading",
-          success: (data: any) => {
-            clicked();
-            return `Success: ${data.msg}`;
-          },
-          error: (data: any) => {
-            setStarting(0);
-            reset();
-            return `Failed [${data.status}]: ${data.msg}`;
-          },
-        },
-        { position: "top-center" }
-      );
-
-      formRef.current && formRef.current.reset();
-      setStates(initialData);
-    } catch (error) {
-      console.error("Error:", error);
-    }
+                clicked();
+                toast.success(response.data.msg);
+              } else {
+                toast.error(response.data.msg);
+              }
+            } else {
+              toast.error("Empty Field Detected.");
+            }
+          } else {
+            toast.error(response.data.msg);
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          formRef.current && formRef.current.reset();
+          setStates(initialData);
+        });
+    }, 1000);
   };
 
   return (
@@ -236,7 +296,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
           </div>
           {/* ----------------------------------------------------------------------------- */}
           <form
-            onSubmit={onSubmit}
+            onSubmit={handleSubmit}
             className="w-1/2 md:w-full h-full flex flex-col p-2 px-8 gap-5 lg:px-2 md:gap-2"
             style={{ backgroundColor: "#DBD9D9" }}
             ref={formRef}
@@ -247,10 +307,12 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
                 type="button"
                 onClick={() => {
                   clicked();
+                  controllerRef.current.abort();
                   setStates(initialData);
                 }}
-                className="text-lg font-semibold px-2 rounded-lg md:absolute md:right-2 md:top-1 xs:text-base xxs:text-sm"
+                className={`text-lg font-semibold px-2 rounded-lg md:absolute md:right-2 md:top-1 xs:text-base xxs:text-sm ${isDisabled && "hidden"}`}
                 style={{ backgroundColor: "#FFB000" }}
+                disabled={isDisabled}
               >
                 Cancel
               </button>

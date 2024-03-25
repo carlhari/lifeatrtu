@@ -6,7 +6,6 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import translate from "@iamtraction/google-translate";
 import { limiter_min } from "@/utils/LimiterEach";
 import { sentimentAnalyzer } from "@/utils/sentiment";
-import { getRemainingTime } from "@/utils/CountDown";
 
 export async function POST(request: NextRequest) {
   try {

@@ -91,7 +91,7 @@ function HomeContent() {
       {open && <Logout />}
       {useDelete.value && <Delete reload={reload} />}
       {useReport.value && <Report reload={reload} />}
-      {useEdit.value && (
+      {useEdit.value && edit.id && data && (
         <EditPost
           postId={edit.id}
           data={data}

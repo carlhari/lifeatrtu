@@ -2,7 +2,7 @@
 import { usePost } from "@/utils/usePost";
 import { useRequest } from "ahooks";
 import axios from "axios";
-import React, { ChangeEvent, useState, useRef } from "react";
+import React, { ChangeEvent, useState, useRef, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import moment from "moment";
@@ -25,6 +25,7 @@ function SpecificPost({
   const { close } = usePost();
   const [comment, setComment] = useState<string>("");
   const [disabled, setDisabled] = useState<boolean>(false);
+  const [isDisabled, setDisabledCancel] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
 
@@ -33,6 +34,10 @@ function SpecificPost({
   const { data, loading, mutate } = useRequest(() => getPost(), {
     refreshDeps: [session],
   });
+
+  const controllerRef = useRef(new AbortController());
+
+  let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 
   function getPost(): Promise<any> {
     return new Promise(async (resolve, reject) => {
@@ -50,22 +55,111 @@ function SpecificPost({
     });
   }
 
-  let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
-  const AddComment = async (e: ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setDisabled(true);
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
 
-    try {
-      const response = new Promise(async (resolve, reject) => {
-        const res = await axios.post("/api/post/actions/comment", {
-          postId: postId,
-          content: comment,
-          author: session?.user.id,
-        });
-        const data = res.data;
-        if (!status.includes(data.status)) {
-          if (data.ok) {
-            setTimeout(() => {
+  // const AddComment = async (e: ChangeEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   setDisabled(true);
+
+  //   try {
+  //     const response = new Promise(async (resolve, reject) => {
+  //       const res = await axios.post(
+  //         "/api/post/actions/comment",
+  //         {
+  //           postId: postId,
+  //           content: comment,
+  //           author: session?.user.id,
+  //         },
+  //         { signal: controller.signal }
+  //       );
+  //       const data = res.data;
+  //       if (!status.includes(data.status)) {
+  //         if (data.ok) {
+  //           mutate((prev: any) => {
+  //             return {
+  //               ...prev,
+  //               post: {
+  //                 ...prev.post,
+  //                 comments: [
+  //                   ...prev.post.comments,
+  //                   {
+  //                     content: comment,
+  //                     postId: postId,
+  //                     user: {
+  //                       id: session?.user.id,
+  //                       name: Capitalize(session?.user.name),
+  //                     },
+  //                   },
+  //                 ],
+  //               },
+  //             };
+  //           });
+
+  //           setKeyword(!keyword);
+
+  //           const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
+
+  //           setDisabled(false);
+  //           formRef.current && formRef.current.reset();
+  //           setComment("");
+
+  //           socket.emit("active_comment", {
+  //             userId: session?.user.id,
+  //             author: data.author,
+  //             currentName: Capitalize(session?.user.name),
+  //             postId: postId,
+  //             title: data.title,
+  //           });
+
+  //           resolve(data);
+  //         } else {
+  //           setDisabled(false);
+  //           reject(data);
+  //         }
+  //       } else {
+  //         setDisabled(false);
+  //         reject(data);
+  //       }
+  //     });
+
+  //     toast.promise(response, {
+  //       loading: "loading",
+  //       success: (data: any) => `Success: ${data.msg}`,
+  //       error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
+  //     });
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
+
+  const handleAddComment = (e: ChangeEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const loadingId = toast.loading("Processing...");
+
+    const { signal } = controllerRef.current;
+
+    setTimeout(() => {
+      setDisabledCancel(true);
+      axios
+        .post(
+          "/api/post/actions/comment",
+          {
+            postId: postId,
+            content: comment,
+            author: session?.user.id,
+          },
+          { signal: signal }
+        )
+        .then((response) => {
+          if (!status.includes(response.data.status)) {
+            if (response.data.ok) {
               mutate((prev: any) => {
                 return {
                   ...prev,
@@ -87,13 +181,11 @@ function SpecificPost({
               });
 
               setKeyword(!keyword);
-
-              const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
-
               setDisabled(false);
               formRef.current && formRef.current.reset();
               setComment("");
 
+              const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
               socket.emit("active_comment", {
                 userId: session?.user.id,
                 author: data.author,
@@ -102,26 +194,25 @@ function SpecificPost({
                 title: data.title,
               });
 
-              resolve(data);
-            }, 1500);
+              toast.success(response.data.msg);
+            } else {
+              toast.error(`Failed [${data.status}]: ${data.msg}`);
+            }
           } else {
-            setDisabled(false);
-            reject(data);
+            toast.error(`Failed [${data.status}]: ${data.msg}`);
           }
-        } else {
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
           setDisabled(false);
-          reject(data);
-        }
-      });
-
-      toast.promise(response, {
-        loading: "loading",
-        success: (data: any) => `Success: ${data.msg}`,
-        error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
-      });
-    } catch (err) {
-      console.error(err);
-    }
+          setDisabledCancel(false);
+        });
+    }, 1000);
   };
 
   return (
@@ -134,8 +225,10 @@ function SpecificPost({
             <div className="w-full h-screen fixed top-0 left-0 bg-white flex items-center flex-col justify-center animate-fadeIn">
               <button
                 type="button"
-                className="absolute top-8 right-12 text-5xl sm:text-3xl sm:right-8 xxs:right-2"
-                onClick={() => setOpenImage(false)}
+                className={`absolute top-8 right-12 text-5xl sm:text-3xl sm:right-8 xxs:right-2`}
+                onClick={() => {
+                  setOpenImage(false);
+                }}
               >
                 <IoClose />
               </button>
@@ -149,7 +242,15 @@ function SpecificPost({
           )}
           <Toaster />
           <div className="w-full flex items-center justify-end">
-            <button type="button" onClick={close} className="text-3xl">
+            <button
+              type="button"
+              onClick={() => {
+                controllerRef.current.abort();
+                close();
+              }}
+              className={`text-3xl ${isDisabled && "hidden"}`}
+              disabled={isDisabled}
+            >
               <IoClose />
             </button>
           </div>
@@ -192,7 +293,7 @@ function SpecificPost({
                   </div>
 
                   <div
-                    className={`${data.post.lenght <= 100 ? "text-base" : "text-sm"} break-words whitespace-break-spaces text-justify px-2 sm:px-0 xs:leading-tight xs:overflow-y-auto xs:h-36`}
+                    className={`${data.post.lenght <= 100 ? "text-base" : "text-sm"} break-words whitespace-break-spaces text-justify px-2 sm:px-0 xs:leading-tight xs:overflow-y-auto`}
                   >
                     {data.post.content}
                   </div>
@@ -252,7 +353,7 @@ function SpecificPost({
           )}
           <form
             ref={formRef}
-            onSubmit={AddComment}
+            onSubmit={handleAddComment}
             className="flex items-center w-full gap-4 justify-center mt-2 lg:mt-1 sm:mt-2 xs:gap-2"
           >
             <Input
@@ -265,9 +366,8 @@ function SpecificPost({
             <div className="text-sm sm:text-xs">{comment.length}/100</div>
             <button
               type="submit"
-              disabled={disabled}
-              style={{ cursor: disabled ? "not-allowed" : "" }}
-              className="text-2xl flex items-center"
+              disabled={disabled || isDisabled}
+              className={`text-2xl flex items-center ${disabled || isDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
             >
               {disabled ? (
                 <span className="loading loading-dots"></span>

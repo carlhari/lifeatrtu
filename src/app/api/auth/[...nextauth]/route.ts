@@ -50,6 +50,9 @@ export const authOptions: NextAuthOptions = {
               id: user.id,
               email: user.email as string,
               name: Capitalize(user.name) as string,
+              deleteTime: 0,
+              postTime: 0,
+              editTime: 0,
             },
           });
         }

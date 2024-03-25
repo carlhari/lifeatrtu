@@ -3,7 +3,6 @@
 "use client";
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Input from "@/app/components/Input";
-import Button from "@/app/components/Button";
 import axios from "axios";
 import { BsIncognito } from "react-icons/bs";
 import toast, { Toaster } from "react-hot-toast";
@@ -15,16 +14,11 @@ import { BiImageAdd } from "react-icons/bi";
 import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 import { useRequest } from "ahooks";
 import { useEditCountDown } from "@/utils/Timer";
-import { getRemainingTime } from "@/utils/CountDown";
 import { formatTimeHours } from "@/utils/FormatTime";
+import { useDebounceFn } from "ahooks";
+import { abort } from "process";
 
-const EditPost: React.FC<any> = ({
-  data,
-  mutate,
-  setKeyword,
-  keyword,
-  postId,
-}) => {
+const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
   const [hydrate, setHydrate] = useState<boolean>(false);
   const { data: session } = useSession();
@@ -45,6 +39,7 @@ const EditPost: React.FC<any> = ({
   const [post, setPostData] = useState<any>(initialData);
   const [states, setStates] = useState<any>(initialData);
   const [disabled, setDisabled] = useState<boolean>(false);
+  const [isDisabled, setDisabledCancel] = useState<boolean>(false);
 
   const Edit = useEditCountDown();
 
@@ -144,43 +139,70 @@ const EditPost: React.FC<any> = ({
     const { name, value } = e.target;
     setStates({ ...states, [name]: value });
   };
+  const controllerRef = useRef<AbortController>(new AbortController());
 
-  const abortControllerRef = useRef<AbortController>(new AbortController());
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
+
+  const handleCancel = () => {
+    controllerRef.current.abort();
+    edit.close();
+    editValue.clear();
+    setStates(initialData);
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const loadingId = toast.loading("Editing...");
-    try {
-      const res = await axios.post(
-        "/api/post/edit",
-        {
-          ...states,
-          postId: postId,
-        },
-        { signal: abortControllerRef.current.signal }
-      );
 
-      const resData = res.data;
-
-      if (!status.includes(resData.status)) {
-        if (
-          resData.post.title.length !== 0 &&
-          resData.post.focus.length !== 0 &&
-          resData.post.content.length !== 0 &&
-          resData.ok
-        ) {
-          setKeyword(!keyword);
-          edit.close();
-          toast.success(`Success ${resData.msg}`);
-        } else toast.error(`Failed[${data.status}]: ${data.msg}`);
-      } else toast.error(`Failed[${data.status}]: ${data.msg}`);
-    } catch (err: any) {
-      toast.dismiss(loadingId);
-      console.error(err);
-      if (err.message === "canceled") {
-        toast.error("Cancelled");
-      }
-    }
+    const { signal } = controllerRef.current;
+    setTimeout(() => {
+      setDisabledCancel(true);
+      axios
+        .post(
+          "/api/post/edit",
+          { ...states, postId: postId },
+          { signal: signal }
+        )
+        .then((response) => {
+          if (!status.includes(response.data.status)) {
+            if (
+              response.data.ok &&
+              response.data.post.title.length !== 0 &&
+              response.data.post.focus.length !== 0 &&
+              response.data.post.content.length !== 0
+            ) {
+              setKeyword(!keyword);
+              edit.close();
+              toast.success(`Success ${response.data.msg}`);
+            } else {
+              Edit.setStarting(0);
+              reset();
+              toast.error(
+                `Failed[${response.data.status}]: ${response.data.msg}`
+              );
+            }
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+            Edit.setStarting(0);
+            editValue.clear();
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabledCancel(false);
+          formRef.current && formRef.current.reset();
+          reset();
+        });
+    }, 1000);
   };
 
   return (
@@ -228,14 +250,10 @@ const EditPost: React.FC<any> = ({
             <div className="w-full flex justify-end items-center">
               <button
                 type="button"
-                onClick={() => {
-                  abortControllerRef.current.abort();
-                  edit.close();
-                  editValue.clear();
-                  setStates(initialData);
-                }}
-                className="text-lg font-semibold px-2 rounded-lg md:absolute md:right-2 md:top-1 xs:text-base xxs:text-sm"
+                onClick={handleCancel}
+                className={`text-lg font-semibold px-2 rounded-lg md:absolute md:right-2 md:top-1 xs:text-base xxs:text-sm ${isDisabled && "hidden"}`}
                 style={{ backgroundColor: "#FFB000" }}
+                disabled={disabled || isDisabled}
               >
                 Cancel
               </button>

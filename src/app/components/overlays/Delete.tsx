@@ -1,19 +1,24 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import Button from "../Button";
 import { isOpenDelete, valueDelete } from "@/utils/Overlay/Delete";
 import { useRequest } from "ahooks";
 import { useDeleteCountDown } from "@/utils/Timer";
+import { useSession } from "next-auth/react";
 
 let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 function Delete({ reload }: any) {
   const useDelete = isOpenDelete();
   const { id, clear } = valueDelete();
+  const { data: session } = useSession();
 
   const { data, loading } = useRequest(() => getPost());
   const Delete = useDeleteCountDown();
+
+  const controllerRef = useRef(new AbortController());
+  const [disabled, setDisabled] = useState<boolean>(false);
 
   const reset = async () => {
     try {
@@ -23,52 +28,47 @@ function Delete({ reload }: any) {
     }
   };
 
-  const HandleDelete = async (postId: string) => {
-    try {
-      const response = new Promise(async (resolve, reject) => {
-        const res = await axios.post(
-          "/api/post/delete",
-          { postId: postId },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
 
-        const data = res.data;
+  const handleDelete = (postId: string) => {
+    const loadingId = toast.loading("Deleting...");
 
-        if (!status.includes(data.status)) {
-          setTimeout(() => {
+    const { signal } = controllerRef.current;
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/post/delete", { postId: postId }, { signal: signal })
+        .then((response) => {
+          if (!status.includes(response.data.status) && response.data.ok) {
             clear();
             reload();
-
-            setTimeout(() => {
-              resolve(data);
-            }, 1500);
-          }, 2000);
-        } else reject(data);
-      });
-
-      toast.promise(
-        response,
-        {
-          loading: "Deleting Post",
-          success: (data: any) => {
             useDelete.close();
-            return `${data.msg}`;
-          },
-          error: (data: any) => {
+            toast.success(response.data.msg);
+          } else {
             Delete.setStarting(0);
             reset();
-            return `Failed [${data.status}]: ${data.msg}`;
-          },
-        },
-        { position: "top-center" }
-      );
-    } catch (err) {
-      console.error(err);
-    }
+            toast.error(
+              `Failed[${response.data.status}]: ${response.data.msg}`
+            );
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+        });
+    }, 1000);
   };
 
   function getPost(): Promise<any> {
@@ -114,18 +114,21 @@ function Delete({ reload }: any) {
               label="Yes"
               type="button"
               onClick={() => {
-                HandleDelete(id);
+                handleDelete(id);
               }}
-              className="p-1 px-3 rounded-xl text-2xl sm:text-lg bg-green-600 text-white hover:scale-125 duration-500"
+              className={`p-1 px-3 rounded-xl text-2xl sm:text-lg bg-green-600 text-white hover:scale-125 duration-500 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+              disabled={disabled}
             />
             <Button
               label="No"
               type="button"
               onClick={() => {
+                controllerRef.current.abort();
                 clear();
                 useDelete.close();
               }}
-              className="p-1 px-3 rounded-xl text-2xl sm:text-lg bg-red-600 text-white hover:scale-125 duration-500"
+              disabled={disabled}
+              className={`p-1 px-3 rounded-xl text-2xl sm:text-lg bg-red-600 text-white hover:scale-125 duration-500 ${disabled && "hidden"}`}
             />
           </div>
         )}
