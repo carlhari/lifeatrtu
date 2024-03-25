@@ -32,6 +32,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const [disabled, setDisabled] = useState<boolean>(false);
   const controllerRef = useRef(new AbortController());
   const [isDisabled, setDisabledCancel] = useState<boolean>(false);
+  const [disabledBtn, setDisabledBTN] = useState<boolean>(false);
 
   const initialData = {
     title: "",
@@ -160,66 +161,14 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     return () => controllerRef.current?.abort();
   }, [session]);
 
-  // const onSubmit = async (e: FormEvent) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const response = new Promise(async (resolve, reject) => {
-  //       const res = await axios.post(
-  //         "/api/post/add",
-  //         {
-  //           ...states,
-  //         },
-  //         { signal: controller.signal }
-  //       );
-
-  //       const resData = res.data;
-
-  //       if (!status.includes(resData.status)) {
-  //         if (
-  //           states.title.length !== 0 &&
-  //           states.focus.length !== 0 &&
-  //           states.content.length !== 0
-  //         ) {
-  //           if (resData.ok) {
-  //             setKeyword(!keyword);
-  //             mutate({
-  //               list: [...data.list, resData.post],
-  //             });
-
-  //             resolve(resData);
-  //           } else reject(resData);
-  //         } else reject(resData);
-  //       } else reject(resData);
-  //     });
-
-  //     toast.promise(
-  //       response,
-  //       {
-  //         loading: "loading",
-  //         success: (data: any) => {
-  //           clicked();
-  //           return `Success: ${data.msg}`;
-  //         },
-  //         error: (data: any) => {
-  //           setStarting(0);
-  //           reset();
-  //           return `Failed [${data.status}]: ${data.msg}`;
-  //         },
-  //       },
-  //       { position: "top-center" }
-  //     );
-
-  //     formRef.current && formRef.current.reset();
-  //     setStates(initialData);
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
-
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
+    if (isDisabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
     const loadingId = toast.loading("Processing...");
     const { signal } = controllerRef.current;
     setTimeout(() => {
@@ -258,6 +207,8 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
         .finally(() => {
           toast.dismiss(loadingId);
           setDisabled(false);
+          setDisabledCancel(false);
+          setDisabledBTN(false);
           formRef.current && formRef.current.reset();
           setStates(initialData);
         });
@@ -419,7 +370,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
               <button
                 type="submit"
                 className={`text-2xl font-semibold ${disabled ? "cursor-not-allowed" : "cursor-pointer"} flex items-center justify-center`}
-                disabled={disabled || post.loading}
+                disabled={disabled || post.loading || isDisabled || disabledBtn}
               >
                 {post.loading ? (
                   <span className="loading loading-dots w-10"></span>

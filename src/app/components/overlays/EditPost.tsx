@@ -15,8 +15,6 @@ import { isOpenEdit, valueEdit } from "@/utils/Overlay/EditPost";
 import { useRequest } from "ahooks";
 import { useEditCountDown } from "@/utils/Timer";
 import { formatTimeHours } from "@/utils/FormatTime";
-import { useDebounceFn } from "ahooks";
-import { abort } from "process";
 
 const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
@@ -40,6 +38,7 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
   const [states, setStates] = useState<any>(initialData);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [isDisabled, setDisabledCancel] = useState<boolean>(false);
+  const [disabledBtn, setDisabledBTN] = useState<boolean>(false);
 
   const Edit = useEditCountDown();
 
@@ -158,6 +157,12 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (isDisabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
     const loadingId = toast.loading("Editing...");
 
     const { signal } = controllerRef.current;
@@ -192,15 +197,13 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
         .catch((err) => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
-            Edit.setStarting(0);
-            editValue.clear();
           }
         })
         .finally(() => {
           toast.dismiss(loadingId);
           setDisabledCancel(false);
+          setDisabledBTN(false);
           formRef.current && formRef.current.reset();
-          reset();
         });
     }, 1000);
   };
@@ -253,7 +256,7 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
                 onClick={handleCancel}
                 className={`text-lg font-semibold px-2 rounded-lg md:absolute md:right-2 md:top-1 xs:text-base xxs:text-sm ${isDisabled && "hidden"}`}
                 style={{ backgroundColor: "#FFB000" }}
-                disabled={disabled || isDisabled}
+                disabled={isDisabled}
               >
                 Cancel
               </button>
@@ -368,7 +371,7 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
                   type="submit"
                   className={`text-2xl font-semibold ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
                   style={{ cursor: disabled ? "not-allowed" : "pointer" }}
-                  disabled={disabled}
+                  disabled={disabled || isDisabled || disabledBtn}
                 >
                   {disabled ? (
                     formatTimeHours(Edit.remainingTime)

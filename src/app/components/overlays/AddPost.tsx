@@ -1,17 +1,31 @@
 "use client";
 import { useAddPost } from "@/utils/useAddPost";
-import React from "react";
+import { useSession } from "next-auth/react";
+import React, { useEffect, useState } from "react";
 import { BiMessageDetail } from "react-icons/bi";
 
 function AddPost() {
   const { clicked, click } = useAddPost();
+  const { data: session } = useSession();
+  const [disabled, setDisabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (session) {
+      setDisabled(false);
+    }
+  }, [session]);
   return (
     !click && (
       <div className="w-full">
         <button
           type="button"
-          onClick={clicked}
+          onClick={() => {
+            if (!disabled) {
+              clicked();
+            }
+          }}
           className="animate-bounce fixed bottom-0 right-16 z-40 text-9xl lg:right-4 md:text-8xl"
+          disabled={disabled}
         >
           <BiMessageDetail />
         </button>

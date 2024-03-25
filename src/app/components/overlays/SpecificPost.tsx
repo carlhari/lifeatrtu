@@ -26,6 +26,7 @@ function SpecificPost({
   const [comment, setComment] = useState<string>("");
   const [disabled, setDisabled] = useState<boolean>(false);
   const [isDisabled, setDisabledCancel] = useState<boolean>(false);
+  const [disabledBtn, setDisabledBTN] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
 
@@ -63,84 +64,14 @@ function SpecificPost({
     return () => controllerRef.current?.abort();
   }, [session]);
 
-  // const AddComment = async (e: ChangeEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   setDisabled(true);
-
-  //   try {
-  //     const response = new Promise(async (resolve, reject) => {
-  //       const res = await axios.post(
-  //         "/api/post/actions/comment",
-  //         {
-  //           postId: postId,
-  //           content: comment,
-  //           author: session?.user.id,
-  //         },
-  //         { signal: controller.signal }
-  //       );
-  //       const data = res.data;
-  //       if (!status.includes(data.status)) {
-  //         if (data.ok) {
-  //           mutate((prev: any) => {
-  //             return {
-  //               ...prev,
-  //               post: {
-  //                 ...prev.post,
-  //                 comments: [
-  //                   ...prev.post.comments,
-  //                   {
-  //                     content: comment,
-  //                     postId: postId,
-  //                     user: {
-  //                       id: session?.user.id,
-  //                       name: Capitalize(session?.user.name),
-  //                     },
-  //                   },
-  //                 ],
-  //               },
-  //             };
-  //           });
-
-  //           setKeyword(!keyword);
-
-  //           const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
-
-  //           setDisabled(false);
-  //           formRef.current && formRef.current.reset();
-  //           setComment("");
-
-  //           socket.emit("active_comment", {
-  //             userId: session?.user.id,
-  //             author: data.author,
-  //             currentName: Capitalize(session?.user.name),
-  //             postId: postId,
-  //             title: data.title,
-  //           });
-
-  //           resolve(data);
-  //         } else {
-  //           setDisabled(false);
-  //           reject(data);
-  //         }
-  //       } else {
-  //         setDisabled(false);
-  //         reject(data);
-  //       }
-  //     });
-
-  //     toast.promise(response, {
-  //       loading: "loading",
-  //       success: (data: any) => `Success: ${data.msg}`,
-  //       error: (data: any) => `Failed [${data.status}]: ${data.msg}`,
-  //     });
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
-
   const handleAddComment = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (isDisabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
     const loadingId = toast.loading("Processing...");
 
     const { signal } = controllerRef.current;
@@ -211,6 +142,7 @@ function SpecificPost({
           toast.dismiss(loadingId);
           setDisabled(false);
           setDisabledCancel(false);
+          setDisabledBTN(false);
         });
     }, 1000);
   };
@@ -366,7 +298,7 @@ function SpecificPost({
             <div className="text-sm sm:text-xs">{comment.length}/100</div>
             <button
               type="submit"
-              disabled={disabled || isDisabled}
+              disabled={disabled || isDisabled || disabledBtn}
               className={`text-2xl flex items-center ${disabled || isDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
             >
               {disabled ? (

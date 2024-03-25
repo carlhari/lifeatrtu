@@ -19,6 +19,7 @@ function Delete({ reload }: any) {
 
   const controllerRef = useRef(new AbortController());
   const [disabled, setDisabled] = useState<boolean>(false);
+  const [disabledBtn, setDisabledBTN] = useState<boolean>(false);
 
   const reset = async () => {
     try {
@@ -37,6 +38,11 @@ function Delete({ reload }: any) {
   }, [session]);
 
   const handleDelete = (postId: string) => {
+    if (disabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
     const loadingId = toast.loading("Deleting...");
 
     const { signal } = controllerRef.current;
@@ -67,6 +73,7 @@ function Delete({ reload }: any) {
         .finally(() => {
           toast.dismiss(loadingId);
           setDisabled(false);
+          setDisabledBTN(false);
         });
     }, 1000);
   };
@@ -114,10 +121,12 @@ function Delete({ reload }: any) {
               label="Yes"
               type="button"
               onClick={() => {
-                handleDelete(id);
+                if (!disabledBtn) {
+                  handleDelete(id);
+                }
               }}
-              className={`p-1 px-3 rounded-xl text-2xl sm:text-lg bg-green-600 text-white hover:scale-125 duration-500 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
-              disabled={disabled}
+              className={`p-1 px-3 rounded-xl text-2xl sm:text-lg bg-green-600 text-white hover:scale-125 duration-500 ${disabled || disabledBtn ? "cursor-not-allowed" : "cursor-pointer"}`}
+              disabled={disabled || disabledBtn}
             />
             <Button
               label="No"
