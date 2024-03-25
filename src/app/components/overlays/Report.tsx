@@ -1,7 +1,7 @@
 "use client";
 import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
 import axios from "axios";
-import { useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 
@@ -19,53 +19,60 @@ let reports = [
 function Report({ reload }: any) {
   const [reportCategory, setReportCategory] = useState<string[]>([]);
   const [disabled, setDisabled] = useState<boolean>(false);
+  const [isDisabledBtn, setDisabledBTN] = useState<boolean>(false);
+  const controllerRef = useRef(new AbortController());
   const Report = isOpenReport();
   const reportValue = valueReport();
 
   let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setDisabled(true);
-    try {
-      const addReport = new Promise(async (resolve, reject) => {
-        const response = await axios.post("/api/post/actions/report", {
-          postId: reportValue.id,
-          reason: reportCategory,
-        });
 
-        const data = response.data;
-
-        if (!status.includes(data.status)) {
-          if (data.ok) {
-            resolve(data);
-          } else reject(data);
-        } else reject(data);
-      });
-
-      toast.promise(
-        addReport,
-        {
-          loading: "Loading",
-          success: (data: any) => {
-            setDisabled(false);
-            Report.close();
-            return `Success: ${data.msg}`;
-          },
-          error: (data: any) => {
-            setDisabled(false);
-            Report.close();
-            return `Failed: ${data.msg}`;
-          },
-        },
-        { position: "top-center" }
-      );
-    } catch (err) {
-      console.error(err);
+    if (disabled) {
+      toast.error("Please Wait");
     }
-  };
 
-  console.log(reportCategory);
+    setDisabledBTN(true);
+    const loadingId = toast.loading("Reporting...");
+    const { signal } = controllerRef.current;
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post(
+          "/api/post/actions/report",
+          {
+            postId: reportValue.id,
+            reason: reportCategory,
+          },
+          { signal: signal }
+        )
+        .then((response) => {
+          if (!status.includes(response.data.status)) {
+            if (response.data.ok) {
+              toast.success(response.data.msg);
+            } else {
+              Report.close();
+              toast.error(`Failed: ${response.data.msg}`);
+            }
+          } else {
+            Report.close();
+            toast.error(`Failed: ${response.data.msg}`);
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 1000);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
@@ -86,18 +93,22 @@ function Report({ reload }: any) {
     <div className="fixed top-0 left-0 w-full h-screen overflow-hidden flex items-center justify-center animate-fadeIn duration-700 z-50 bg-slate-500/60">
       <div className="bg-white w-1/3 p-2 flex items-center flex-col rounded-xl gap-4 2xl:w-5/12 lg:w-7/12 md:w-10/12  xs:w-full xs:h-full xs:rounded-none xs:p-3">
         <div className="w-full flex items-center justify-between">
-          <div className="w-1/3"></div>
+          <div className={`w-1/3 ${disabled && "hidden"}`}></div>
 
-          <div className="uppercase text-2xl font-semibold w-1/3 flex items-center justify-center">
+          <div
+            className={`uppercase text-2xl font-semibold flex items-center justify-center ${disabled ? "w-full" : "w-1/3"}`}
+          >
             Report
           </div>
           <button
             type="button"
-            className="text-3xl w-1/3 flex items-center justify-end"
+            className={`text-3xl w-1/3 flex items-center justify-end ${disabled && "hidden"}`}
             onClick={() => {
+              controllerRef.current.abort();
               setReportCategory([]);
               Report.close();
             }}
+            disabled={disabled}
           >
             <IoClose />
           </button>
@@ -133,8 +144,8 @@ function Report({ reload }: any) {
           <div className="w-full flex items-center justify-center">
             <button
               type="submit"
-              className={`bg-blue-800 uppercase text-base text-white rounded-xl px-2 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
-              disabled={disabled}
+              className={`bg-blue-800 uppercase text-base text-white rounded-xl px-2 ${disabled || isDisabledBtn ? "cursor-not-allowed" : "cursor-pointer"}`}
+              disabled={disabled || isDisabledBtn}
             >
               SUBMIT
             </button>
