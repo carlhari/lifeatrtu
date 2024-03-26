@@ -4,30 +4,8 @@ import axios from "axios";
 import { useRequest } from "ahooks";
 import { useSession } from "next-auth/react";
 
-function Notification() {
+function Notification({ data, loading }: any) {
   const { data: session, status } = useSession();
-
-  function getNotif() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const response = await axios.post("/api/post/get/notif");
-        const data = response.data;
-        if (data.ok) {
-          return resolve(data);
-        }
-        return reject();
-      } catch (err) {
-        console.error(err);
-      }
-    });
-  }
-
-  const { data, loading } = useRequest(() => getNotif(), {
-    refreshDeps: [session],
-    refreshOnWindowFocus: true,
-  });
-
-  const resData = data as any;
 
   return (
     <div className="absolute top-2 right-24 animate-fadeIn duration-500 z-40 sm:right-16 xxs:right-14">
@@ -37,11 +15,11 @@ function Notification() {
           {loading && (
             <span className="loading loading-dots w-16 xxs:w-12"></span>
           )}
-          {!loading && resData && resData.notifs.length === 0 && "Empty"}
+          {!loading && data && data.notifs.length === 0 && "Empty"}
           {!loading &&
-            resData &&
-            resData.ok &&
-            resData.notifs.map((item: any, key: any) => (
+            data &&
+            data.ok &&
+            data.notifs.map((item: any, key: any) => (
               <div
                 key={key}
                 className="border-solid border-black border-opacity-5 w-full"
