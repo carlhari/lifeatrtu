@@ -51,6 +51,7 @@ function Report({ reload }: any) {
         .then((response) => {
           if (!status.includes(response.data.status)) {
             if (response.data.ok) {
+              Report.close();
               toast.success(response.data.msg);
             } else {
               Report.close();

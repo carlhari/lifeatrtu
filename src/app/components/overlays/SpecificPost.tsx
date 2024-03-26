@@ -144,7 +144,7 @@ function SpecificPost({
           setDisabledCancel(false);
           setDisabledBTN(false);
         });
-    }, 1000);
+    }, 500);
   };
 
   return (
