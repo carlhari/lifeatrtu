@@ -285,7 +285,6 @@ const DisplayPost: React.FC<any> = ({
 
   const EditCooldown = useRequest(getCooldownEdit, {
     refreshDeps: [session, keyword],
-    refreshOnWindowFocus: true,
     retryCount: 2,
   });
 
@@ -318,7 +317,6 @@ const DisplayPost: React.FC<any> = ({
   };
 
   const DeleteCooldown = useRequest(getCooldownDelete, {
-    refreshOnWindowFocus: true,
     refreshDeps: [session, keyword],
     retryCount: 2,
   });
@@ -415,6 +413,8 @@ const DisplayPost: React.FC<any> = ({
                                           editValue.setId(item.id);
                                           Edit.open();
                                           setKeyword(!keyword);
+                                          setMenuOpen(false);
+                                          setSelectMenu("");
                                         }}
                                         disabled={
                                           disabledEdit || EditCooldown.loading
@@ -449,6 +449,8 @@ const DisplayPost: React.FC<any> = ({
                                           setId(item.id);
                                           Delete.open();
                                           setKeyword(!keyword);
+                                          setMenuOpen(false);
+                                          setSelectMenu("");
                                         }}
                                         className={`flex items-center justify-start w-full ${disabledDelete || DeleteCooldown.loading ? "" : "hover:bg-slate-300"}  duration-700 rounded-md bg-white ${disabledDelete || DeleteCooldown.loading ? "cursor-not-allowed" : "cursor-pointer"}`}
                                         disabled={
@@ -485,6 +487,8 @@ const DisplayPost: React.FC<any> = ({
                                       onClick={() => {
                                         reportValue.setId(item.id);
                                         Report.open();
+                                        setMenuOpen(false);
+                                        setSelectMenu("");
                                       }}
                                       className="flex items-center justify-start w-full hover:bg-slate-300 duration-700 rounded-md bg-white px-2 cursor-pointer"
                                     >

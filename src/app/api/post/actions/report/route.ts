@@ -38,7 +38,30 @@ export async function POST(request: NextRequest) {
             msg: "Failed To Report",
             status: "ERROR",
           });
-      } else return NextResponse.json({ ok: false, msg: "Existing Report" });
+      } else {
+        const updateReport = await prisma.report.update({
+          where: {
+            id: existingReport.id,
+            postId: postId,
+            userId: session.user.id,
+          },
+          data: {
+            reasons: reason,
+          },
+        });
+
+        if (updateReport) {
+          return NextResponse.json({
+            ok: true,
+            msg: "Successfully Reported",
+          });
+        } else
+          return NextResponse.json({
+            ok: false,
+            msg: "Failed To Report",
+            status: "ERROR",
+          });
+      }
     } else
       return NextResponse.json({
         msg: "UNAUTHORIZED ACCESS",

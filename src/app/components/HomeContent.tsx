@@ -89,7 +89,9 @@ function HomeContent() {
   return (
     <div className="w-full h-full">
       {open && <Logout />}
-      {useDelete.value && <Delete reload={reload} />}
+      {useDelete.value && (
+        <Delete reload={reload} setKeyword={setKeyword} keyword={keyword} />
+      )}
       {useReport.value && <Report reload={reload} />}
       {useEdit.value && edit.id && data && (
         <EditPost

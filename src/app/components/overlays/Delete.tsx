@@ -9,7 +9,7 @@ import { useDeleteCountDown } from "@/utils/Timer";
 import { useSession } from "next-auth/react";
 
 let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
-function Delete({ reload }: any) {
+function Delete({ reload, setKeyword, keyword }: any) {
   const useDelete = isOpenDelete();
   const { id, clear } = valueDelete();
   const { data: session } = useSession();
@@ -56,6 +56,7 @@ function Delete({ reload }: any) {
             clear();
             reload();
             useDelete.close();
+            setKeyword(!keyword);
             toast.success(response.data.msg);
           } else {
             Delete.setStarting(0);
@@ -75,7 +76,7 @@ function Delete({ reload }: any) {
           setDisabled(false);
           setDisabledBTN(false);
         });
-    }, 1000);
+    }, 500);
   };
 
   function getPost(): Promise<any> {

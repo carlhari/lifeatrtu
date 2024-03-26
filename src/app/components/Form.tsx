@@ -212,7 +212,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
           formRef.current && formRef.current.reset();
           setStates(initialData);
         });
-    }, 1000);
+    }, 500);
   };
 
   return (

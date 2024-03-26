@@ -205,7 +205,7 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
           setDisabledBTN(false);
           formRef.current && formRef.current.reset();
         });
-    }, 1000);
+    }, 500);
   };
 
   return (

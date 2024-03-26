@@ -71,7 +71,7 @@ function Report({ reload }: any) {
           setDisabled(false);
           setDisabledBTN(false);
         });
-    }, 1000);
+    }, 500);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
