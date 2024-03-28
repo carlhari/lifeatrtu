@@ -21,37 +21,40 @@ export function formatTimeHours(time: any) {
 }
 
 export function formatTimeDays(time: number) {
-  const millisecondsPerSecond = 1000;
   const secondsPerMinute = 60;
   const minutesPerHour = 60;
   const hoursPerDay = 24;
 
-  // Convert milliseconds to seconds
-  const totalSeconds = Math.floor(time / millisecondsPerSecond);
-
-  // Calculate days, hours, minutes, and seconds
   const days = Math.floor(
-    totalSeconds / (hoursPerDay * minutesPerHour * secondsPerMinute),
+    time / (hoursPerDay * minutesPerHour * secondsPerMinute),
   );
+  const remainingSeconds =
+    time % (hoursPerDay * minutesPerHour * secondsPerMinute);
   const hours = Math.floor(
-    (totalSeconds % (hoursPerDay * minutesPerHour * secondsPerMinute)) /
-      (minutesPerHour * secondsPerMinute),
+    remainingSeconds / (minutesPerHour * secondsPerMinute),
   );
-  const minutes = Math.floor(
-    (totalSeconds % (minutesPerHour * secondsPerMinute)) / secondsPerMinute,
-  );
-  const seconds = totalSeconds % secondsPerMinute;
+  const remainingSecondsAfterHours =
+    remainingSeconds % (minutesPerHour * secondsPerMinute);
+  const minutes = Math.floor(remainingSecondsAfterHours / secondsPerMinute);
+  const seconds = remainingSecondsAfterHours % secondsPerMinute;
 
-  // Construct formatted time string
   const formattedTime = [];
 
   if (days > 0) {
-    formattedTime.push(`${days} days`);
+    formattedTime.push(`${days} day${days > 1 ? "s" : ""}`);
   }
 
-  formattedTime.push(` ${hours.toString().padStart(2, "0")} hr's`);
-  formattedTime.push(` ${minutes.toString().padStart(2, "0")} min's`);
-  formattedTime.push(` ${seconds.toString().padStart(2, "0")} sec's`);
+  if (hours > 0) {
+    formattedTime.push(`${hours} hr${hours > 1 ? "s" : ""}`);
+  }
+
+  if (minutes > 0) {
+    formattedTime.push(`${minutes} min${minutes > 1 ? "s" : ""}`);
+  }
+
+  if (seconds > 0) {
+    formattedTime.push(`${seconds} sec${seconds > 1 ? "s" : ""}`);
+  }
 
   return formattedTime.join(" ");
 }

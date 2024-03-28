@@ -8,6 +8,10 @@ export async function POST(request: NextRequest) {
     const getBanData = await prisma.blacklist.findFirst({
       where: {
         userId: userId,
+        NOT: {
+          periodTime: 0,
+          days: 0,
+        },
       },
     });
 

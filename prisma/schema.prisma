@@ -32,6 +32,7 @@ model Blacklist {
   userId     String  @db.String
   periodTime Int
   permanent  Boolean
+  days       Int
 }
 
 model Post {
