@@ -25,14 +25,15 @@ model User {
 }
 
 model Blacklist {
-  id         String  @id @default(uuid()) @map("_id")
+  id         String   @id @default(uuid()) @map("_id")
   reason     String
   email      String
-  User       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String  @db.String
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String   @db.String
   periodTime Int
   permanent  Boolean
   days       Int
+  createdAt  DateTime @default(now())
 }
 
 model Post {
