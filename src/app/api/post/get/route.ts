@@ -57,7 +57,32 @@ export async function POST(request: NextRequest) {
 
       const posts = await prisma.post.findMany({
         ...postQueryOptions,
-        where: { user: { NOT: { blacklists: { some: {} } } } },
+        where: {
+          OR: [
+            {
+              user: {
+                blacklists: {
+                  every: {
+                    periodTime: 0,
+                    permanent: false,
+                    days: 0,
+                  },
+                },
+              },
+            },
+
+            {
+              NOT: {
+                user: {
+                  blacklists: {
+                    some: {},
+                  },
+                },
+              },
+            },
+          ],
+        },
+
         orderBy,
       });
 

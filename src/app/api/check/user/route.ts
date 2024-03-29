@@ -20,6 +20,11 @@ export async function POST(request: NextRequest) {
         where: {
           userId: session.user.id,
           email: session.user.email,
+          NOT: {
+            periodTime: 0,
+            permanent: false,
+            days: 0,
+          },
         },
       });
 

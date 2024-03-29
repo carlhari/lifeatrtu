@@ -175,23 +175,25 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
           { signal: signal }
         )
         .then((response) => {
-          if (!status.includes(response.data.status)) {
-            if (
-              response.data.ok &&
-              response.data.post.title.length !== 0 &&
-              response.data.post.focus.length !== 0 &&
-              response.data.post.content.length !== 0
-            ) {
+          if (
+            response.data.post.title.length !== 0 &&
+            response.data.post.focus.length !== 0 &&
+            response.data.post.content.length !== 0
+          ) {
+            if (response.data.ok) {
               setKeyword(!keyword);
               edit.close();
               toast.success(`Success ${response.data.msg}`);
             } else {
-              Edit.setStarting(0);
-              reset();
-              toast.error(
-                `Failed[${response.data.status}]: ${response.data.msg}`
-              );
+              edit.close();
+              toast.error(`${response.data.msg}`);
             }
+          } else {
+            Edit.setStarting(0);
+            reset();
+            toast.error(
+              `Failed[${response.data.status}]: ${response.data.msg}`
+            );
           }
         })
         .catch((err) => {
