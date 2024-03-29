@@ -175,31 +175,24 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
           { signal: signal }
         )
         .then((response) => {
-          if (
-            response.data.post.title.length !== 0 &&
-            response.data.post.focus.length !== 0 &&
-            response.data.post.content.length !== 0
-          ) {
-            if (response.data.ok) {
-              setKeyword(!keyword);
-              edit.close();
-              toast.success(`Success ${response.data.msg}`);
-            } else {
-              edit.close();
-              toast.error(`${response.data.msg}`);
-            }
+          const data = response.data;
+
+          if (data.ok) {
+            setKeyword(!keyword);
+            edit.close();
+            toast.success(`Success ${data.msg}`);
           } else {
+            edit.close();
             Edit.setStarting(0);
             reset();
-            toast.error(
-              `Failed[${response.data.status}]: ${response.data.msg}`
-            );
+            toast.error(`Failed[${data.status}]: ${data.msg}`);
           }
         })
         .catch((err) => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+          console.log(err);
         })
         .finally(() => {
           toast.dismiss(loadingId);

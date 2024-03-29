@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
               },
             });
 
-            const post = await prisma.post.findUnique({
+            const post = await prisma.post.findFirst({
               where: {
                 id: addPost.id,
               },
@@ -102,24 +102,11 @@ export async function POST(request: NextRequest) {
                 },
               });
 
-              if (post.anonymous !== true) {
-                const newPost = {
-                  ...post,
-                  user: { ...post.user, name: null, email: null },
-                };
-
-                return NextResponse.json({
-                  ok: true,
-                  msg: "Post Edited",
-                  post: newPost,
-                });
-              } else {
-                return NextResponse.json({
-                  ok: false,
-                  msg: "Error Processing Post",
-                  status: "ERROR",
-                });
-              }
+              return NextResponse.json({
+                ok: true,
+                msg: "Post Edited",
+                post: post,
+              });
             } else {
               return NextResponse.json({
                 ok: false,
