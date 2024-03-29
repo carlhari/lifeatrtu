@@ -113,6 +113,12 @@ export async function POST(request: NextRequest) {
                   msg: "Post Edited",
                   post: newPost,
                 });
+              } else {
+                return NextResponse.json({
+                  ok: false,
+                  msg: "Error Processing Post",
+                  status: "ERROR",
+                });
               }
             } else {
               return NextResponse.json({
