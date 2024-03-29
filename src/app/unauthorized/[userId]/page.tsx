@@ -56,7 +56,6 @@ const page = ({ params }: { params: { userId: string } }) => {
         if (remainingTime <= 0) {
           reset(userId);
           router.push("/");
-          console.log("User unbanned");
         }
       }
     }, 1000);
@@ -64,7 +63,14 @@ const page = ({ params }: { params: { userId: string } }) => {
     return () => clearInterval(intervalId);
   }, [data]);
 
-  if ((!loading && !userId && !data) || data === undefined || data === null) {
+  if (loading)
+    return (
+      <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center">
+        <span className="loading loading-dots w-20"></span>
+      </div>
+    );
+
+  if (!loading && !data) {
     return (
       <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center z-50 gap-2 font-semibold text-xl text-center xs:flex-col">
         <div>Forbidden,</div>
@@ -81,14 +87,16 @@ const page = ({ params }: { params: { userId: string } }) => {
 
   return (
     <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center">
-      {loading && <span className="loading loading-dots w-10"></span>}
-
       {!loading && data && remaining && (
-        <div className="shadow-xl border border-black border-solid rounded-xl p-4 w-96">
-          <div className="text-red-600">You Are Banned</div>
-          <div>{data.email}</div>
-          <div>Reason: {data.reason}</div>
-          <div className="flex items-center">
+        <div className="shadow-xl border border-black border-solid rounded-xl p-4 w-[500px]">
+          <div className="text-red-600 text-2xl font-semibold">
+            You Are Banned
+          </div>
+          <div className="text-xl font-bold">{data.email}</div>
+          <div className="text-xl break-words whitespace-break-spaces">
+            Reason: {data.reason}
+          </div>
+          <div className="flex items-center text-xl">
             Banned Period:{" "}
             {!data.permanent
               ? remaining && formatTimeDays(remaining.remainingTime)

@@ -62,21 +62,7 @@ export const authOptions: NextAuthOptions = {
             userId: user.id,
             email: user.email as string,
             NOT: {
-              OR: [
-                {
-                  periodTime: {
-                    equals: 0,
-                  },
-                },
-                {
-                  days: {
-                    equals: 0,
-                  },
-                },
-                {
-                  permanent: false,
-                },
-              ],
+              AND: [{ periodTime: 0 }, { days: 0 }],
             },
           },
         });
