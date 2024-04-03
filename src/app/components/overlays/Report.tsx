@@ -49,14 +49,9 @@ function Report({ reload }: any) {
           { signal: signal }
         )
         .then((response) => {
-          if (!status.includes(response.data.status)) {
-            if (response.data.ok) {
-              Report.close();
-              toast.success(response.data.msg);
-            } else {
-              Report.close();
-              toast.error(`Failed: ${response.data.msg}`);
-            }
+          if (response.data.ok) {
+            Report.close();
+            toast.success(response.data.msg);
           } else {
             Report.close();
             toast.error(`Failed: ${response.data.msg}`);
@@ -66,6 +61,7 @@ function Report({ reload }: any) {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);

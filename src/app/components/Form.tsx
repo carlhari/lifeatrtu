@@ -176,33 +176,30 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
       axios
         .post("/api/post/add", { ...states }, { signal: signal })
         .then((response) => {
-          if (!status.includes(response.data.status)) {
-            if (
-              states.title.length !== 0 &&
-              states.focus.length !== 0 &&
-              states.content.length !== 0
-            ) {
-              if (response.data.ok) {
-                setKeyword(!keyword);
-                mutate({
-                  list: [...data.list, response.data.post],
-                });
-                clicked();
-                toast.success(response.data.msg);
-              } else {
-                toast.error(response.data.msg);
-              }
+          if (
+            states.title.length !== 0 &&
+            states.focus.length !== 0 &&
+            states.content.length !== 0
+          ) {
+            if (response.data.ok) {
+              setKeyword(!keyword);
+              mutate({
+                list: [...data.list, response.data.post],
+              });
+              clicked();
+              toast.success(response.data.msg);
             } else {
-              toast.error("Empty Field Detected.");
+              toast.error(response.data.msg);
             }
           } else {
-            toast.error(response.data.msg);
+            toast.error("Empty Field Detected.");
           }
         })
         .catch((err) => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);

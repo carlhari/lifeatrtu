@@ -52,7 +52,7 @@ function Delete({ reload, setKeyword, keyword }: any) {
       axios
         .post("/api/post/delete", { postId: postId }, { signal: signal })
         .then((response) => {
-          if (!status.includes(response.data.status) && response.data.ok) {
+          if (response.data.ok) {
             clear();
             reload();
             useDelete.close();
@@ -70,6 +70,7 @@ function Delete({ reload, setKeyword, keyword }: any) {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);

@@ -192,7 +192,7 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
-          console.log(err);
+          toast.error("Error Occurred")
         })
         .finally(() => {
           toast.dismiss(loadingId);

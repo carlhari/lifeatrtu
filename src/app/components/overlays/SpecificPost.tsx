@@ -89,46 +89,42 @@ function SpecificPost({
           { signal: signal }
         )
         .then((response) => {
-          if (!status.includes(response.data.status)) {
-            if (response.data.ok) {
-              mutate((prev: any) => {
-                return {
-                  ...prev,
-                  post: {
-                    ...prev.post,
-                    comments: [
-                      ...prev.post.comments,
-                      {
-                        content: comment,
-                        postId: postId,
-                        user: {
-                          id: session?.user.id,
-                          name: Capitalize(session?.user.name),
-                        },
+          if (response.data.ok) {
+            mutate((prev: any) => {
+              return {
+                ...prev,
+                post: {
+                  ...prev.post,
+                  comments: [
+                    ...prev.post.comments,
+                    {
+                      content: comment,
+                      postId: postId,
+                      user: {
+                        id: session?.user.id,
+                        name: Capitalize(session?.user.name),
                       },
-                    ],
-                  },
-                };
-              });
+                    },
+                  ],
+                },
+              };
+            });
 
-              setKeyword(!keyword);
-              setDisabled(false);
-              formRef.current && formRef.current.reset();
-              setComment("");
+            setKeyword(!keyword);
+            setDisabled(false);
+            formRef.current && formRef.current.reset();
+            setComment("");
 
-              const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
-              socket.emit("active_comment", {
-                userId: session?.user.id,
-                author: data.author,
-                currentName: Capitalize(session?.user.name),
-                postId: postId,
-                title: data.title,
-              });
+            const socket = io(`${process.env.NEXT_PUBLIC_LINK}`);
+            socket.emit("active_comment", {
+              userId: session?.user.id,
+              author: data.author,
+              currentName: Capitalize(session?.user.name),
+              postId: postId,
+              title: data.title,
+            });
 
-              toast.success(response.data.msg);
-            } else {
-              toast.error(`Failed [${data.status}]: ${data.msg}`);
-            }
+            toast.success(response.data.msg);
           } else {
             toast.error(`Failed [${data.status}]: ${data.msg}`);
           }
@@ -137,6 +133,7 @@ function SpecificPost({
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);
