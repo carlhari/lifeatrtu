@@ -25,7 +25,9 @@ function Notification({ data, loading }: any) {
                 className="border-solid border-black border-opacity-5 w-full"
               >
                 {item.type === "like" ? (
-                  <div className="w-full font-semibold xxs:text-sm">
+                  <div
+                    className={`w-full xxs:text-sm ${item.read ? "font-normal" : "font-semibold"}`}
+                  >
                     {item.user.name} {item.type} your post, Entitled "
                     {item.post.title}"<br></br>
                     <hr
@@ -34,7 +36,9 @@ function Notification({ data, loading }: any) {
                     ></hr>
                   </div>
                 ) : (
-                  <div className="w-full font-semibold xxs:text-sm">
+                  <div
+                    className={`w-full xxs:text-sm ${item.read ? "font-normal" : "font-semibold"}`}
+                  >
                     {item.user.name} Commented on your post, Entitled "
                     {item.post.title}"<br></br>
                     <hr
