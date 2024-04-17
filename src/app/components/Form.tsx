@@ -33,6 +33,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   const controllerRef = useRef(new AbortController());
   const [isDisabled, setDisabledCancel] = useState<boolean>(false);
   const [disabledBtn, setDisabledBTN] = useState<boolean>(false);
+  const [type, setType] = useState<string>("");
 
   const initialData = {
     title: "",
@@ -64,6 +65,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
   };
 
   const remove = () => {
+    setType("");
     setStates({ ...states, image: "" });
     if (fileRef.current) return (fileRef.current.value = "");
   };
@@ -72,7 +74,13 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     const file = e.target.files?.[0];
 
     if (file) {
-      if (file.type.startsWith("image/")) {
+      if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
+        if (file.type.startsWith("video/")) {
+          setType("vid");
+        } else {
+          setType("img");
+        }
+
         if (file.size <= 3 * 1024 * 1024) {
           try {
             const converted = await convertToBase64(file);
@@ -82,12 +90,10 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             });
           } catch (err) {
             remove();
-
             toast.error("Error: Error Occured");
           }
         } else {
           remove();
-
           toast.error("File exceeds the maximum size of 3MB");
         }
       } else {
@@ -212,6 +218,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     }, 500);
   };
 
+  console.log(states.image);
   return (
     hydrate &&
     click && (
@@ -309,10 +316,12 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
               <div className="w-full rounded-bl-xl rounded-br-xl bg-white p-2 flex items-center justify-between">
                 <div
                   className={`w-1/3 ${
-                    states.image ? "animate-fadeIn" : "animate-fadeOut"
+                    states.image || type ? "animate-fadeIn" : "animate-fadeOut"
                   }`}
                 >
-                  {states.image && "With Photo"}
+                  {states.image && type === "img"
+                    ? "With Photo"
+                    : states.image && type === "vid" && "With Video"}
                 </div>
                 <div>{states.content.length}/500</div>
 
@@ -326,19 +335,19 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
               <input
                 ref={fileRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 name="image"
                 className="hidden"
                 onChange={imageChange}
               />
 
-              {states.image ? (
+              {states.image && type ? (
                 <button
                   type="button"
                   onClick={() => remove()}
                   className={`bg-red-600 rounded-xl p-1 text-white text-lg animate-fadeIn`}
                 >
-                  Remove Photo
+                  {type === "img" ? "Remove Photo" : "Remove Video"}
                 </button>
               ) : (
                 <button

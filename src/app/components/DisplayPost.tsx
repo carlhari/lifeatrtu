@@ -555,9 +555,17 @@ const DisplayPost: React.FC<any> = ({
                               {item.content}
                             </div>
 
-                            {item.image && (
-                              <img src={item.image} alt="image content" />
-                            )}
+                            {item.image &&
+                              item.image.startsWith("data:image/") && (
+                                <img src={item.image} alt="image content" />
+                              )}
+
+                            {item.image &&
+                              item.image.startsWith("data:video/") && (
+                                <video controls>
+                                  <source src={item.image} />
+                                </video>
+                              )}
                           </div>
 
                           {/* ----------------------------------------------------------- */}
