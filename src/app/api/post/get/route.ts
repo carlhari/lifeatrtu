@@ -47,6 +47,114 @@ export async function POST(request: NextRequest) {
       });
       userPosts.forEach(nullifyUserProperties);
       return NextResponse.json(userPosts);
+    } else if (order === "facility") {
+      const posts = await prisma.post.findMany({
+        ...postQueryOptions,
+
+        where: {
+          focus: "facility",
+        },
+      });
+
+      if (!posts) {
+        return NextResponse.json({
+          msg: "Retrieving Post Data Failed",
+          status: "ERROR",
+        });
+      }
+      posts.forEach(nullifyUserProperties);
+      return NextResponse.json(posts);
+    } else if (order === "professor") {
+      const posts = await prisma.post.findMany({
+        ...postQueryOptions,
+
+        where: {
+          focus: "professor",
+        },
+      });
+
+      if (!posts) {
+        return NextResponse.json({
+          msg: "Retrieving Post Data Failed",
+          status: "ERROR",
+        });
+      }
+      posts.forEach(nullifyUserProperties);
+      return NextResponse.json(posts);
+    } else if (order === "exp") {
+      const posts = await prisma.post.findMany({
+        ...postQueryOptions,
+
+        where: {
+          focus: "experience",
+        },
+      });
+
+      if (!posts) {
+        return NextResponse.json({
+          msg: "Retrieving Post Data Failed",
+          status: "ERROR",
+        });
+      }
+      posts.forEach(nullifyUserProperties);
+      return NextResponse.json(posts);
+    } else if (order === "other") {
+      const posts = await prisma.post.findMany({
+        ...postQueryOptions,
+
+        where: {
+          focus: "others",
+        },
+      });
+
+      if (!posts) {
+        return NextResponse.json({
+          msg: "Retrieving Post Data Failed",
+          status: "ERROR",
+        });
+      }
+      posts.forEach(nullifyUserProperties);
+      return NextResponse.json(posts);
+    } else if (order === "ilike") {
+      const posts = await prisma.post.findMany({
+        ...postQueryOptions,
+        where: {
+          likes: {
+            some: {
+              userId: session.user.id,
+            },
+          },
+        },
+      });
+
+      if (!posts) {
+        return NextResponse.json({
+          msg: "Retrieving Post Data Failed",
+          status: "ERROR",
+        });
+      }
+      posts.forEach(nullifyUserProperties);
+      return NextResponse.json(posts);
+    } else if (order === "icomment") {
+      const posts = await prisma.post.findMany({
+        ...postQueryOptions,
+        where: {
+          comments: {
+            some: {
+              userId: session.user.id,
+            },
+          },
+        },
+      });
+
+      if (!posts) {
+        return NextResponse.json({
+          msg: "Retrieving Post Data Failed",
+          status: "ERROR",
+        });
+      }
+      posts.forEach(nullifyUserProperties);
+      return NextResponse.json(posts);
     } else {
       const orderBy =
         order === "asc" || order === "desc"

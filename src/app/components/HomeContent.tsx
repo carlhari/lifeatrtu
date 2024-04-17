@@ -124,9 +124,14 @@ function HomeContent() {
             <option value="desc">Recently</option>
             <option value="asc">Oldest</option>
             <option value="posts">My Posts</option>
+            <option value="ilike">Posts I Liked</option>
+            <option value="icomment">Posts I Commented On</option>
             <option value="likes">Most Liked</option>
             <option value="engages">Most Engaged</option>
-            <option value="comments">Most Commented</option>
+            <option value="facility">Facility Posts</option>
+            <option value="professor">Professor Posts</option>
+            <option value="exp">Experience Posts</option>
+            <option value="other">Others Posts</option>
           </select>
         </div>
       </div>
