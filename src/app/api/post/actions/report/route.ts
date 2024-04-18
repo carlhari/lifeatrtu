@@ -6,62 +6,58 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(request: NextRequest) {
   try {
-    const { postId, reason } = await request.json();
+    const { postId } = await request.json();
     const session = await getServerSession(authOptions);
+    let done;
 
     if (session) {
+      const reportPost = await prisma.post.update({
+        where: {
+          id: postId,
+        },
+
+        data: {
+          reported: true,
+        },
+      });
+
       const existingReport = await prisma.report.findFirst({
         where: {
-          postId: postId,
           userId: session.user.id,
+          postId: postId,
         },
       });
 
       if (!existingReport) {
-        const reportPost = await prisma.report.create({
+        const createReport = await prisma.report.create({
           data: {
             postId: postId,
             userId: session.user.id,
-            reasons: reason,
             disregard: false,
           },
         });
 
-        if (reportPost) {
-          return NextResponse.json({
-            ok: true,
-            msg: "Successfully Reported",
-          });
-        } else
-          return NextResponse.json({
-            ok: false,
-            msg: "Failed To Report",
-            status: "ERROR",
-          });
+        if (createReport) {
+          done = true;
+        }
       } else {
-        const updateReport = await prisma.report.update({
-          where: {
-            id: existingReport.id,
+        const updateReport = await prisma.report.create({
+          data: {
             postId: postId,
             userId: session.user.id,
-          },
-          data: {
-            reasons: reason,
+            disregard: false,
           },
         });
 
         if (updateReport) {
-          return NextResponse.json({
-            ok: true,
-            msg: "Successfully Reported",
-          });
-        } else
-          return NextResponse.json({
-            ok: false,
-            msg: "Failed To Report",
-            status: "ERROR",
-          });
+          done = true;
+        }
       }
+
+      if (reportPost && done) {
+        return NextResponse.json({ ok: true });
+      }
+      return NextResponse.json({ ok: false });
     } else
       return NextResponse.json({
         msg: "UNAUTHORIZED ACCESS",

@@ -1,60 +1,73 @@
 "use client";
 import { isOpenReport, valueReport } from "@/utils/Overlay/Report";
 import axios from "axios";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
-
-let reports = [
-  "Hate Speech",
-  "Spam",
-  "False Information",
-  "Suicidal or Self Injury",
-  "Harassment",
-  "Violence",
-  "Nudity",
-  "Something Else",
-];
+import Button from "../Button";
+import { useRequest } from "ahooks";
+import { useSession } from "next-auth/react";
 
 function Report({ reload }: any) {
-  const [reportCategory, setReportCategory] = useState<string[]>([]);
+  const { data: session } = useSession();
   const [disabled, setDisabled] = useState<boolean>(false);
   const [isDisabledBtn, setDisabledBTN] = useState<boolean>(false);
   const controllerRef = useRef(new AbortController());
+
   const Report = isOpenReport();
   const reportValue = valueReport();
 
-  let status = ["BUSY", "UNAUTHORIZED", "NEGATIVE", "ERROR", "FAILED"];
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
 
-  const handleSubmit = (e: ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const getTitle = async () => {
+    try {
+      const response = await axios.post("/api/post/actions/report/get", {
+        postId: reportValue.id,
+      });
 
+      const data = response.data;
+
+      if (data.ok) {
+        return data.title;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const { data, loading } = useRequest(getTitle, { refreshDeps: [session] });
+
+  const handleReport = () => {
     if (disabled) {
       toast.error("Please Wait");
     }
 
-    setDisabledBTN(true);
     const loadingId = toast.loading("Reporting...");
     const { signal } = controllerRef.current;
 
+    setDisabled(true);
+
     setTimeout(() => {
-      setDisabled(true);
+      setDisabledBTN(true);
       axios
         .post(
           "/api/post/actions/report",
-          {
-            postId: reportValue.id,
-            reason: reportCategory,
-          },
+          { postId: reportValue.id },
           { signal: signal }
         )
         .then((response) => {
-          if (response.data.ok) {
+          const data = response.data;
+          if (data.ok) {
+            toast.success("Reported Successfully");
             Report.close();
-            toast.success(response.data.msg);
           } else {
-            Report.close();
-            toast.error(`Failed: ${response.data.msg}`);
+            toast.error("Failed To Report the Post");
           }
         })
         .catch((err) => {
@@ -64,26 +77,12 @@ function Report({ reload }: any) {
           toast.error("Error Occurred");
         })
         .finally(() => {
+          reload();
           toast.dismiss(loadingId);
           setDisabled(false);
           setDisabledBTN(false);
         });
     }, 500);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target;
-    if (checked) {
-      if (reportCategory.length < 3) {
-        setReportCategory((prevCategories) => [...prevCategories, value]);
-      } else {
-        e.target.checked = false;
-      }
-    } else {
-      setReportCategory((prevCategories) =>
-        prevCategories.filter((category) => category !== value)
-      );
-    }
   };
 
   return (
@@ -101,8 +100,7 @@ function Report({ reload }: any) {
             type="button"
             className={`text-3xl w-1/3 flex items-center justify-end ${disabled && "hidden"}`}
             onClick={() => {
-              controllerRef.current.abort();
-              setReportCategory([]);
+              reportValue.clear();
               Report.close();
             }}
             disabled={disabled}
@@ -111,48 +109,36 @@ function Report({ reload }: any) {
           </button>
         </div>
 
-        <div className="w-full">
-          <div className="text-xl">Please Select a problem</div>
-          <div className="text-sm">
-            If someone is in immediate danger, get help before reporting to
-            admins. {"Don't"} Wait.
+        <div className="flex flex-col items-center justify-center gap-2">
+          <p className="text-2xl text-center">
+            Are you sure you want to{" "}
+            <strong className="uppercase text-red-600">report</strong> this post
+            ?
+          </p>
+          {loading && <span className="loading loading-dots w-10"></span>}
+          {!loading && data && <div className="text-2xl">Entitled: {data}</div>}
+
+          <div className="flex gap-6 items-center">
+            <Button
+              label={"Yes"}
+              type="button"
+              className={`${isDisabledBtn ? "cursor-not-allowed" : "cursor-pointer"} p-1 px-3 rounded-xl text-xl sm:text-lg bg-green-600 text-white hover:scale-125 duration-500`}
+              onClick={handleReport}
+              disabled={isDisabledBtn || disabled}
+            />
+
+            <Button
+              label={"No"}
+              type="button"
+              className={`${isDisabledBtn && "hidden"} p-1 px-3 rounded-xl text-xl sm:text-lg bg-red-600 text-white hover:scale-125 duration-500`}
+              onClick={() => {
+                Report.close();
+                reportValue.clear();
+              }}
+              disabled={isDisabledBtn || disabled}
+            />
           </div>
         </div>
-
-        <form
-          className="w-full flex flex-col items-start justify-center gap-2"
-          onSubmit={handleSubmit}
-        >
-          {reports.map((item, key) => (
-            <div key={key} className="w-11/12 m-auto">
-              <label className="font-semibold text-lg w-full flex items-center justify-start rounded-xl px-4 gap-1">
-                <input
-                  type="checkbox"
-                  value={item.toLowerCase()}
-                  checked={reportCategory.includes(item.toLowerCase())}
-                  onChange={handleChange}
-                  className="w-4 h-4"
-                />
-                {item}
-              </label>
-            </div>
-          ))}
-
-          <div className="w-full flex items-center justify-center">
-            <button
-              type="submit"
-              className={`bg-blue-800 uppercase text-base text-white rounded-xl px-2 ${disabled || isDisabledBtn ? "cursor-not-allowed" : "cursor-pointer"}`}
-              disabled={disabled || isDisabledBtn}
-            >
-              SUBMIT
-            </button>
-          </div>
-        </form>
-
-        <div className="text-sm text-center">
-          Our admins & moderators will investigate this feedback. Thank you.
-        </div>
-        <div className="text-base pt-6">We Care About What You Think.</div>
       </div>
     </div>
   );

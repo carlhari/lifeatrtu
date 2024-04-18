@@ -64,7 +64,8 @@ export async function POST(request: NextRequest) {
                 anonymous: anonymous,
                 image: image,
                 userId: session.user.id,
-                pending: false
+                pending: false,
+                reported: false,
               },
               include: {
                 user: true,

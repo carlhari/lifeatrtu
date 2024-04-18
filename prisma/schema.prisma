@@ -54,6 +54,8 @@ model Post {
   updatedAt     DateTime       @updatedAt
   notifications Notification[]
   pending       Boolean
+  reported      Boolean
+  reason        String?
 }
 
 model Engage {
@@ -88,7 +90,6 @@ model Report {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId    String   @db.String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reasons   String[]
   createdAt DateTime @default(now())
   disregard Boolean
 }
