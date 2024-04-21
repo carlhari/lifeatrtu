@@ -119,24 +119,24 @@ function Report({ reload }: any) {
           {!loading && data && <div className="text-2xl">Entitled: {data}</div>}
 
           <div className="flex gap-6 items-center">
-            <Button
-              label={"Yes"}
-              type="button"
+            <button
               className={`${isDisabledBtn ? "cursor-not-allowed" : "cursor-pointer"} p-1 px-3 rounded-xl text-xl sm:text-lg bg-green-600 text-white hover:scale-125 duration-500`}
-              onClick={handleReport}
+              onClick={() => handleReport()}
               disabled={isDisabledBtn || disabled}
-            />
+            >
+              Yes
+            </button>
 
-            <Button
-              label={"No"}
-              type="button"
+            <button
               className={`${isDisabledBtn && "hidden"} p-1 px-3 rounded-xl text-xl sm:text-lg bg-red-600 text-white hover:scale-125 duration-500`}
               onClick={() => {
                 Report.close();
                 reportValue.clear();
               }}
               disabled={isDisabledBtn || disabled}
-            />
+            >
+              No
+            </button>
           </div>
         </div>
       </div>

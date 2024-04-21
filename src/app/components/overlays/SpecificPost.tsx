@@ -126,7 +126,9 @@ function SpecificPost({
 
             toast.success(response.data.msg);
           } else {
-            toast.error(`Failed [${data.status}]: ${data.msg}`);
+            toast.error(
+              `Failed [${response.data.status}]: ${response.data.msg}`
+            );
           }
         })
         .catch((err) => {
@@ -227,20 +229,31 @@ function SpecificPost({
                     {data.post.content}
                   </div>
 
-                  {data.post.image && (
-                    <img
-                      src={data.post.image}
-                      alt={"Image"}
-                      style={{
-                        maxWidth: "100%",
+                  {data &&
+                    data.post &&
+                    data.post.image &&
+                    data.post.image.startsWith("data:image/") && (
+                      <img
+                        src={data.post.image}
+                        alt={"Image"}
+                        style={{
+                          maxWidth: "100%",
+                          margin: "auto",
+                          objectFit: "contain",
+                        }}
+                        className="max-h-p-290 md:max-h-p-200"
+                        onClick={() => setOpenImage(true)}
+                      />
+                    )}
 
-                        margin: "auto",
-                        objectFit: "contain",
-                      }}
-                      className="max-h-p-290 md:max-h-p-200"
-                      onClick={() => setOpenImage(true)}
-                    />
-                  )}
+                  {data &&
+                    data.post &&
+                    data.post.image &&
+                    data.post.image.startsWith("data:video/") && (
+                      <video controls className="max-h-[320px]">
+                        <source src={data.post.image} />
+                      </video>
+                    )}
                 </div>
 
                 {/* ---------------------------------------------------- */}

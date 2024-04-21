@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
             });
         } else
           return NextResponse.json({
-            msg: "Negative Post.",
+            msg: "Negative Comment.",
             status: "NEGATIVE",
           });
       } else

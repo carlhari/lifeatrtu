@@ -218,7 +218,6 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
     }, 500);
   };
 
-  console.log(states.image);
   return (
     hydrate &&
     click && (
@@ -246,7 +245,7 @@ const Form: React.FC<any> = ({ data, mutate, setKeyword, keyword }) => {
             </div>
             <div className="text-justify font-medium text-xl w-10/12 xl:w-11/12 md:w-full 2xl:text-lg md:text-base md:text-center sm:leading-tight xs:text-sm">
               Share your thoughts anonymously by clicking the anonymous icon and
-              you can add photo if you want *maximum 1 photo only*
+              you can add photo if you want *maximum 1 photo or video only*
             </div>
           </div>
           {/* ----------------------------------------------------------------------------- */}

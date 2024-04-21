@@ -113,6 +113,7 @@ export const tlWords = [
   "torjackan",
   "chongke",
   "shabu",
+  "nigga",
   "n1gger",
   "n1gg3r",
   "n1ga",

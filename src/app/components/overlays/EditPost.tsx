@@ -192,7 +192,7 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
-          toast.error("Error Occurred")
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);
@@ -234,7 +234,8 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
             </div>
             <div className="text-justify font-medium text-xl w-10/12 xl:w-11/12 md:w-full 2xl:text-lg md:text-base md:text-center sm:leading-tight xs:text-sm">
               You can share your thoughts anonymously by clicking the anonymous
-              icon and you can add photo if you want *maximum 1 photo only*
+              icon and you can add photo if you want *maximum 1 photo or video
+              only*
             </div>
           </div>
           {/* ----------------------------------------------------------------------------- */}
@@ -304,7 +305,9 @@ const EditPost: React.FC<any> = ({ setKeyword, keyword, postId }) => {
                     states.image ? "animate-fadeIn" : "animate-fadeOut"
                   }`}
                 >
-                  {states.image && "With Photo"}
+                  {states.image && states.image.startsWith("data:image/")
+                    ? "With Photo"
+                    : states.image.startsWith("data:video/") && "With Video"}
                 </div>
                 <div>{states.content.length}/500</div>
 
